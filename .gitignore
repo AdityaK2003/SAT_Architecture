@@ -45,3 +45,6 @@
 sat_files/random_sat_files/
 sat_files/sat_2002_benchmark/
 sat_files/SAT11-Competition-SelectedBenchmarks
+
+# Ignore the .gitignore
+.gitignore
