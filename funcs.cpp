@@ -1915,7 +1915,7 @@ bool Architecture::implementFormulaPrune(vector<vector<int>>& formula, int v, bo
     if(result) {
         cout << "TIME TAKEN: " << duration.count() << " seconds" << endl << endl;
     } else {
-        cout << "FAILED in " << endl << duration.count() << " seconds" << endl;
+        cout << "FAILED in " << duration.count() << " seconds" << endl;
     }
 
     return result;

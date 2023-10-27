@@ -23,3 +23,8 @@ Specifically, this work focuses on reducing the complexity of Circuit SAT repres
 Leveraging previous research experience in [SAT solving](https://github.com/AdityaK2003/SAT_Solver) (such as designing a from-scratch solver and numerous functions to test runtimes for different heuristics),  this code implements a backtracking technique to implement a SAT formula on a certain architecture. 
 
 Specifically, an architecture is designed as some SAT circuit which could have multiple lines in a single column; this restricts both variable and clause placements.
+
+
+
+### Specific Research Notes
+[link](https://docs.google.com/document/d/14Z1hpFxtM1TlqqpX4Z06geHvYqIu-eOSUZ0HzGPkjGk/edit)

@@ -152,7 +152,7 @@ unordered_set<int> preprocess(string inputFolder, string inputFile, string outpu
 int main() {
     // Parse formula
     string path = OSTROWSKI_PATH;
-    string file = OSTROWSKI_FILES[0];
+    string file = OSTROWSKI_FILES[1];
 
     // Create architecture
     //string path = SIMPLE_PATH;
@@ -161,11 +161,9 @@ int main() {
 
     // Create architecture
     Architecture a(c.vars, c.clauses);
-    // vector<int> lines = {1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}; // 16 vars
-    //vector<int> lines = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}; // 34 vars
     
 
-    vector<int> lines_param = {32, 2, 8};
+    vector<int> lines_param = {128, 0, 0};
 
     int ones = lines_param[0], twos = lines_param[1], fours = lines_param[2];
 
