@@ -8,9 +8,9 @@ def find_combinations(total):
                     combinations.append((a, b, c, d))
     return combinations
 
-def check_conditions(combination, total):
+def check_conditions(combination, total, vars):
     a, b, c, d = combination
-    condition1 = a + 2*b + 3*c + 4*d == 68
+    condition1 = a + 2*b + 3*c + 4*d == (vars*2)
     condition2 = a + b + c + d == total
 
     # Remove "third" lines
@@ -19,13 +19,23 @@ def check_conditions(combination, total):
     return condition1 and condition2 and condition3
 
 
+# TODO: Edit number of variables
+vars = 64
+
+# TODO: Edit range of widths to find combinations for, inclusive
+# width_1's max value is 2*vars
+# width_1 > width2
+width_1 = 128
+width_2 = 128
+
+
 # Print the valid combinations
-for total in range(52, 40, -2):
+for total in range(width_1, width_2-2, -2):
     # Find all combinations
     combinations = find_combinations(total)
 
     # Filter combinations that satisfy the conditions
-    valid_combinations = [comb for comb in combinations if check_conditions(comb, total)]
+    valid_combinations = [comb for comb in combinations if check_conditions(comb, total, vars)]
     valid_combinations.reverse()
 
     for comb in valid_combinations:
