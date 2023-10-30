@@ -163,7 +163,7 @@ int main() {
     Architecture a(c.vars, c.clauses);
     
 
-    vector<int> lines_param = {128, 0, 0};
+    vector<int> lines_param = {104, 0, 6};
 
     int ones = lines_param[0], twos = lines_param[1], fours = lines_param[2];
 
