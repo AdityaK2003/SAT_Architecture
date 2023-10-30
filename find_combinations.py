@@ -45,4 +45,7 @@ for total in range(width_1, width_2-2, -2):
     valid_combinations.reverse()
 
     for comb in valid_combinations:
-        print(total, comb)
+        if not remove_threes:
+            print(total, comb)
+        else:
+            print(total, f'{comb[0], comb[1], comb[3]}')
