@@ -206,13 +206,15 @@ int main() {
     Architecture a(c.vars, c.clauses);
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {112, 8, 0};
+    vector<int> lines_param = {72, 4, 12};
     // bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param);
     
 
     // Partitioning problem
     Partition p(c.vars, c.formula);
     p.createGraph();
+
+    cout << p.isPartitionedBFS() << endl;
 
 
     return 0;

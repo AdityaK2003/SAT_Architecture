@@ -212,6 +212,7 @@ public:
     }
 
     void createGraph();
+    bool isPartitionedBFS();
 
 };
 

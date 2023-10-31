@@ -28,8 +28,8 @@ vars = 64
 # TODO: Edit range of widths to find combinations for, inclusive
 # width_1's max value is 2*vars
 # width_1 > width2
-width_1 = 108
-width_2 = 96
+width_1 = 88
+width_2 = 88
 
 
 # TODO: Set remove_threes

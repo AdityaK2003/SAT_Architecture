@@ -2161,6 +2161,53 @@ void Partition::createGraph() {
 }
 
 
+/**
+ * Checks if graph is partitioned using BFS
+ * 
+ * Returns:
+ * - bool: true if graph is partitioned
+*/
+bool Partition::isPartitionedBFS() {
+    // If graph is empty return false
+    if(nodes.size() == 0) return false;
+
+    // Pick variable 1 as the start to search
+    int start = 1;
+
+    // Maintain explored set and BFS queue
+    unordered_set<int> explored;
+    explored.insert(start);
+
+    queue<int> bfs_queue;
+    bfs_queue.push(start);
+
+    // Start search
+    int curr = 0;
+    while(bfs_queue.size()) {
+        // Pop from queue
+        curr = bfs_queue.front();
+        bfs_queue.pop();
+
+        // cout << "Popped " << curr << endl;
+
+        // Explore neighbors
+        for(pair<int, Node*> neighbor : nodes[curr]->edges) {
+            // Add to queue if neighbors not explored yet
+            if(explored.find(neighbor.first) == explored.end()) {
+                bfs_queue.push(neighbor.first);
+                explored.insert(neighbor.first);
+            }
+        }
+    }
+
+    // After search is done, check if explored vars is same as total
+    bool partition = (explored.size() != vars);
+    return partition;
+}
+
+
+
+
 // Print a partition
 ostream &operator<<(ostream &os, Partition const &p) {
     os << "Vars: " << p.vars << " \tClauses: " << p.clauses << endl;
