@@ -2211,6 +2211,25 @@ unordered_set<int> Partition::partitionBFS() {
 
 
 /**
+ * Helper function to generate combinations (to remove)
+ * 
+ * 
+ * 
+*/
+void generateCombinations(set<vector<int>>& result, vector<int>& combination, int start, int d, int vars) {
+    if (d == 0) {
+        result.insert(combination);
+        return;
+    }
+
+    for (int i = start; i <= vars; ++i) {
+        combination.push_back(i);
+        generateCombinations(result, combination, i + 1, d - 1, vars);
+        combination.pop_back();
+    }
+}
+
+/**
  * Performs search at specific depth to find vars to remove to partition graph
  * 
  * Params:
@@ -2228,12 +2247,13 @@ unordered_set<int> Partition::depthLimitSearch(int d) {
     }
 
     // Create all combinations of variables to remove of this depth
-    set<unordered_set<int>> combinations;
-    for(int i = 0; i < d; ++i) {
-        unordered_set<int> s;
-        for(int v = 1; v <= vars; ++v) {
+    set<vector<int>> combinations;
+    vector<int> vec;
+    generateCombinations(combinations, vec, 1, d, vars);
 
-        }
+    for(auto v : combinations) {
+        for(int n : v) cout << n << " ";
+        cout << endl;
     }
 
     return result;

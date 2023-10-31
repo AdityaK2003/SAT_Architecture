@@ -195,7 +195,7 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 int main() {
     // Parse formula
     string path = OSTROWSKI_PATH;
-    string file = OSTROWSKI_FILES[1];
+    string file = OSTROWSKI_FILES[0];
 
     // Create architecture
     //string path = SIMPLE_PATH;
@@ -204,15 +204,16 @@ int main() {
 
     // Create architecture
     Architecture a(c.vars, c.clauses);
-    bool debug = true;
+    bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {0, 64, 0};
-    bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug);
+    vector<int> lines_param = {4, 62, 0};
+    // bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug);
     
 
     // Partitioning problem
     Partition p(c.vars, c.formula);
+    p.depthLimitSearch(8);
 
 
     return 0;
