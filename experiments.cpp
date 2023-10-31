@@ -206,7 +206,7 @@ int main() {
     Architecture a(c.vars, c.clauses);
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {48, 40, 0};
+    vector<int> lines_param = {72, 4, 12};
     // bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param);
     
 

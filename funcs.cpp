@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <math.h>
 #include <algorithm>
+#include <stack>
 #include <random>
 #include <list>
 #include <dirent.h>
@@ -2224,7 +2225,18 @@ unordered_set<int> Partition::depthLimitedSearch(int d) {
     // Base case
     if(d == 0) return result;
 
-    // Add all vars to queue
+    // Add all vars to stack
+    stack<int> dls_stack;
+    for(int v = 1; v <= vars; ++v) dls_stack.push(v);
+
+    while(dls_stack.size()) {
+        // Remove current var
+        int curr = dls_stack.top();
+        dls_stack.pop();
+
+        // Create copy of edges
+        map<int, set<int>> edges_copy = edges;
+    }
 
     return result;
 }
