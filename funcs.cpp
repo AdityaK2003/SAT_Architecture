@@ -2151,10 +2151,13 @@ void Partition::createGraph() {
 /**
  * Checks if graph is partitioned using BFS
  * 
+ * Params:
+ * - unordered_set<int> ignore: variables to ignore
+ * 
  * Returns:
- * - unordered_set<int>: sizes of the different partitions
+ * - unordered_set<int>: sizes of different partitions
 */
-unordered_set<int> Partition::partitionBFS() {
+unordered_set<int> Partition::partitionBFS(unordered_set<int> ignore) {
     unordered_set<int> partition_sizes;
 
     // If graph is empty return false
@@ -2169,8 +2172,8 @@ unordered_set<int> Partition::partitionBFS() {
     unordered_set<int> explored;
     queue<int> bfs_queue;
 
-    // Nodes explored of all previous partitions
-    int prev_nodes_explored = 0;
+    // Mark ignored nodes as explored
+    for(int v : ignore) explored.insert(v);
 
     // Try every start var
     for(int start = 1; start <= vars; ++start) {
@@ -2182,10 +2185,12 @@ unordered_set<int> Partition::partitionBFS() {
 
         // Start search
         int curr = 0;
+        int partition_size = 0;
         while(bfs_queue.size()) {
             // Pop from queue
             curr = bfs_queue.front();
             bfs_queue.pop();
+            ++partition_size;
 
             // cout << "Popped " << curr << endl;
 
@@ -2200,13 +2205,22 @@ unordered_set<int> Partition::partitionBFS() {
         }
 
         // Add partition to set
-        int curr_partition_size = explored.size() - prev_nodes_explored;
-        partition_sizes.insert(curr_partition_size);
-        
-        prev_nodes_explored = explored.size();
+        partition_sizes.insert(partition_size);
     }
 
     return partition_sizes;
+}
+
+
+/**
+ * Checks if graph is partitioned using BFS
+ * 
+ * Returns:
+ * - unordered_set<int>: sizes of the different partitions
+*/
+unordered_set<int> Partition::partitionBFS() {
+    unordered_set<int> ignore;
+    return partitionBFS(ignore);
 }
 
 
@@ -2259,8 +2273,11 @@ unordered_set<int> Partition::depthLimitSearch(int d) {
         // Check if partitioned
         unordered_set<int> partition_sizes = removeAndCheckPartition(c, edges);
 
-        // If multiple partitions, can return result
-        if(partition_sizes.size() > 1) return c;
+        // Partition size should be greater than the depth+1
+        // Since each depth also removes that node
+        if(partition_sizes.size() > d+1) {
+            return c;
+        }
     }
 
     return result;

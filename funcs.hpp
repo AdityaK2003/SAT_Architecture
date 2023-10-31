@@ -218,9 +218,10 @@ public:
 
     void createGraph();
 
-    
-
+    unordered_set<int> partitionBFS(unordered_set<int> ignore);
     unordered_set<int> partitionBFS();
+
+
     unordered_set<int> depthLimitSearch(int d);
     unordered_set<int> removeAndPartition(int limit);
 

@@ -194,12 +194,12 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 
 int main() {
     // Parse formula
-    string path = OSTROWSKI_PATH;
-    string file = OSTROWSKI_FILES[0];
+    // string path = OSTROWSKI_PATH;
+    // string file = OSTROWSKI_FILES[0];
 
     // Create architecture
-    //string path = SIMPLE_PATH;
-    //string file = "uf16_18.cnf";
+    string path = SIMPLE_PATH;
+    string file = "uf16_18.cnf";
     Circuit c(path+file);
 
     // Create architecture
@@ -213,6 +213,16 @@ int main() {
 
     // Partitioning problem
     Partition p(c.vars, c.formula);
+    p.debug = true;
+
+    unordered_set<int> ignore = {4, 15};
+    unordered_set<int> partition_sizes = p.partitionBFS(ignore);
+    for(int s : partition_sizes) cout << s << " ";
+    cout << endl;
+
+    // unordered_set<int> result = p.removeAndPartition(1);
+    // for(int v : result) cout << v << " ";
+    // cout << endl;
 
 
     return 0;
