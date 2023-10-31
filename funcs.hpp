@@ -215,5 +215,6 @@ public:
 
 };
 
+ostream &operator<<(ostream &os, Partition const &p);
 
 

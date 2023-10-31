@@ -206,8 +206,8 @@ int main() {
     Architecture a(c.vars, c.clauses);
     
     // Number of full-lines, half-lines, quarter lines
-    //vector<int> lines_param = {64, 32, 0};
-    //bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param);
+    vector<int> lines_param = {112, 8, 0};
+    // bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param);
     
 
     // Partitioning problem

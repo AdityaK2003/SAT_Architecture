@@ -2161,7 +2161,22 @@ void Partition::createGraph() {
 }
 
 
+// Print a partition
+ostream &operator<<(ostream &os, Partition const &p) {
+    os << "Vars: " << p.vars << " \tClauses: " << p.clauses << endl;
 
+    // Print nodes and their edges
+    for(pair<int, Node*> n : p.nodes) {
+        cout << n.first << ": ";
+        for(pair<int, Node*> neighbors : n.second->edges) {
+            cout << neighbors.first << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+    return os;
+}
 
 
 
