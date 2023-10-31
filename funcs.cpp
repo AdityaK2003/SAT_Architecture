@@ -2125,3 +2125,17 @@ pair<int, int> getSpansOverlap(const pair<int, int> span1, const pair<int, int> 
 
 
 
+
+/**
+ * Creates graph from a SAT formula
+*/
+void Partition::createGraph() {
+
+}
+
+
+
+
+
+
+

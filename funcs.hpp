@@ -173,3 +173,41 @@ bool placeClauses(map<int, pair<int, int>>& clause_spans, map<int, int>& row_to_
 
 bool spansOverlap(const pair<int, int> span1, const pair<int, int> span2);
 pair<int, int> getSpansOverlap(const pair<int, int> span1, const pair<int, int> span2);
+
+
+// Node in Graph representation of SAT circuit
+// Represents a variable (both positive and negative literal)
+class Node {
+public:
+    int var;
+
+    // pair<int, int> p where p.first is neighbor's variable, and p.second is the Node*
+    map<int, Node*> edges;
+
+    // Constructor
+    Node(int v) { var = v; }
+};
+
+// Class for Partition method of SAT formula clustering
+class Partition {
+public:
+    int vars;
+    vector<vector<int>> formula;
+
+    // Graph
+    map<int, Node*> nodes;
+    map<Node*, Node*> edges;
+
+
+    // Constructor
+    Partition(int v, vector<vector<int>> f) {
+        vars = v;
+        formula = f;
+    }
+
+    void createGraph();
+
+};
+
+
+

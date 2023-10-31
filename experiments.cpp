@@ -163,7 +163,7 @@ int main() {
     Architecture a(c.vars, c.clauses);
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {76, 22, 2};
+    vector<int> lines_param = {88, 0, 10};
 
     int ones = lines_param[0], twos = lines_param[1], fours = lines_param[2];
 
