@@ -2133,8 +2133,6 @@ void Partition::createGraph() {
     // Iterate through each clause to create nodes and edges
     for(vector<int> c : formula) {
         for(int i = 0; i < c.size(); ++i) {
-            nodes.insert(abs(c[i]));
-
             for(int j = 0; j < c.size(); ++j) {
                 if(i == j) continue;
 
@@ -2159,7 +2157,7 @@ unordered_set<int> Partition::partitionBFS() {
     unordered_set<int> partition_sizes;
 
     // If graph is empty return false
-    if(nodes.size() == 0) {
+    if(edges.size() == 0) {
         return partition_sizes;
     }
 
@@ -2214,14 +2212,29 @@ unordered_set<int> Partition::partitionBFS() {
 /**
  * Performs depth-limited search to find vars to remove to partition graph
  * 
+ * Params:
+ * - int d: depth to stop search at
+ * 
+ * Returns:
+ * - unordered_set<int> of variables to remove, or empty if none found
 */
+unordered_set<int> Partition::depthLimitedSearch(int d) {
+    unordered_set<int> result;
+    
+    // Base case
+    if(d == 0) return result;
+
+    // Add all vars to queue
+
+    return result;
+}
 
 /**
  * Finds a (minimal) set of variables to remove from graph to form a partition
  * Uses Iterative Deepening Search
  * 
  * Returns:
- * - unordered_set<int> 
+ * - unordered_set<int> of variables to remove
 */
 unordered_set<int> Partition::removeAndPartition() {
     // Current set of variables to remove
@@ -2235,6 +2248,19 @@ unordered_set<int> Partition::removeAndPartition() {
     return removed_vars;
 }
 
+/**
+ * Removes node from graph
+*/
+void removeNode(int var, map<int, set<int>>& edges) {
+    // Remove this var from all neighbors' edges
+    for(int n : edges[var]) {
+        edges[n].erase(var);
+    }
+
+    // Remove var
+    edges.erase(var);
+}
+
 
 
 // Print a partition
@@ -2242,9 +2268,9 @@ ostream &operator<<(ostream &os, Partition const &p) {
     os << "Vars: " << p.vars << " \tClauses: " << p.clauses << endl;
 
     // Print nodes and their edges
-    for(int n : p.nodes) {
-        cout << n << ": ";
-        for(int neighbor : p.edges.at(n)) {
+    for(pair<int, set<int>> n : p.edges) {
+        cout << n.first << ": ";
+        for(int neighbor : n.second) {
             cout << neighbor << " ";
         }
         cout << endl;

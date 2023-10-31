@@ -196,7 +196,6 @@ public:
     vector<vector<int>> formula;
 
     // Graph
-    set<int> nodes;
     map<int, set<int>> edges;
 
 
@@ -208,13 +207,17 @@ public:
 
         createGraph();
     }
-
     void createGraph();
+
+    
+
     unordered_set<int> partitionBFS();
+    unordered_set<int> depthLimitedSearch(int d);
     unordered_set<int> removeAndPartition();
 
 };
 
 ostream &operator<<(ostream &os, Partition const &p);
 
+void removeNode(int var, map<int, set<int>>& edges);
 
