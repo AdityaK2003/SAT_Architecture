@@ -2165,46 +2165,80 @@ void Partition::createGraph() {
  * Checks if graph is partitioned using BFS
  * 
  * Returns:
- * - bool: true if graph is partitioned
+ * - unordered_set<int>: sizes of the different partitions
 */
-bool Partition::isPartitionedBFS() {
-    // If graph is empty return false
-    if(nodes.size() == 0) return false;
+unordered_set<int> Partition::partitionBFS() {
+    unordered_set<int> partition_sizes;
 
-    // Pick variable 1 as the start to search
+    // If graph is empty return false
+    if(nodes.size() == 0) {
+        return partition_sizes;
+    }
+
+    // Pick start variable of search
     int start = 1;
 
     // Maintain explored set and BFS queue
     unordered_set<int> explored;
-    explored.insert(start);
-
     queue<int> bfs_queue;
-    bfs_queue.push(start);
 
-    // Start search
-    int curr = 0;
-    while(bfs_queue.size()) {
-        // Pop from queue
-        curr = bfs_queue.front();
-        bfs_queue.pop();
+    // Nodes explored of all previous partitions
+    int prev_nodes_explored = 0;
 
-        // cout << "Popped " << curr << endl;
+    // Try every start var
+    for(int start = 1; start <= vars; ++start) {
+        // If already explored, skip 
+        if(explored.find(start) != explored.end()) continue;
 
-        // Explore neighbors
-        for(pair<int, Node*> neighbor : nodes[curr]->edges) {
-            // Add to queue if neighbors not explored yet
-            if(explored.find(neighbor.first) == explored.end()) {
-                bfs_queue.push(neighbor.first);
-                explored.insert(neighbor.first);
+        explored.insert(start);
+        bfs_queue.push(start);
+
+        // Start search
+        int curr = 0;
+        while(bfs_queue.size()) {
+            // Pop from queue
+            curr = bfs_queue.front();
+            bfs_queue.pop();
+
+            // cout << "Popped " << curr << endl;
+
+            // Explore neighbors
+            for(pair<int, Node*> neighbor : nodes[curr]->edges) {
+                // Add to queue if neighbors not explored yet
+                if(explored.find(neighbor.first) == explored.end()) {
+                    bfs_queue.push(neighbor.first);
+                    explored.insert(neighbor.first);
+                }
             }
         }
+
+        // Add partition to set
+        int curr_partition_size = explored.size() - prev_nodes_explored;
+        partition_sizes.insert(curr_partition_size);
+        
+        prev_nodes_explored = explored.size();
     }
 
-    // After search is done, check if explored vars is same as total
-    bool partition = (explored.size() != vars);
-    return partition;
+    return partition_sizes;
 }
 
+
+/**
+ * Finds a (minimal) set of variables to remove from graph to form a partition
+ * Uses Iterative DFS
+ * 
+ * Returns:
+ * - unordered_set<int> 
+*/
+unordered_set<int> Partition::removeAndPartition() {
+    // Current set of variables to remove
+    unordered_set<int> removed_vars;
+
+    // Iterate through all depths
+    for(int depth = 1; depth <= vars/2; ++depth) {
+        
+    }
+}
 
 
 

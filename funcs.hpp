@@ -212,7 +212,8 @@ public:
     }
 
     void createGraph();
-    bool isPartitionedBFS();
+    unordered_set<int> partitionBFS();
+    unordered_set<int> removeAndPartition();
 
 };
 

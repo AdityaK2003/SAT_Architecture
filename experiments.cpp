@@ -206,7 +206,7 @@ int main() {
     Architecture a(c.vars, c.clauses);
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {72, 4, 12};
+    vector<int> lines_param = {48, 40, 0};
     // bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param);
     
 
@@ -214,7 +214,8 @@ int main() {
     Partition p(c.vars, c.formula);
     p.createGraph();
 
-    cout << p.isPartitionedBFS() << endl;
+    unordered_set<int> s = p.partitionBFS();
+    for(int size : s) cout << size << endl;
 
 
     return 0;
