@@ -2130,31 +2130,19 @@ pair<int, int> getSpansOverlap(const pair<int, int> span1, const pair<int, int> 
  * Creates graph from a SAT formula
 */
 void Partition::createGraph() {
-    // Iterate through each clause to create nodes
-    for(vector<int> c : formula) {
-        // Each literal in formula
-        for(int l : c) {
-            // Focus on variable
-            int v = abs(l);
-
-            // Add to nodes if not created yet
-            if(nodes.find(v) == nodes.end()) {
-                nodes[v] = new Node(v);
-            }
-        }
-    }
-
-    // Iterate through each clause to create edges
+    // Iterate through each clause to create nodes and edges
     for(vector<int> c : formula) {
         for(int i = 0; i < c.size(); ++i) {
+            nodes.insert(abs(c[i]));
+
             for(int j = 0; j < c.size(); ++j) {
                 if(i == j) continue;
 
                 // Create edge
                 int v1 = abs(c[i]), v2 = abs(c[j]);
 
-                nodes[v1]->edges[v2] = nodes[v2];
-                nodes[v2]->edges[v1] = nodes[v1];
+                edges[v1].insert(v2);
+                edges[v2].insert(v1);
             }
         }
     }
@@ -2203,11 +2191,11 @@ unordered_set<int> Partition::partitionBFS() {
             // cout << "Popped " << curr << endl;
 
             // Explore neighbors
-            for(pair<int, Node*> neighbor : nodes[curr]->edges) {
+            for(int neighbor : edges[curr]) {
                 // Add to queue if neighbors not explored yet
-                if(explored.find(neighbor.first) == explored.end()) {
-                    bfs_queue.push(neighbor.first);
-                    explored.insert(neighbor.first);
+                if(explored.find(neighbor) == explored.end()) {
+                    bfs_queue.push(neighbor);
+                    explored.insert(neighbor);
                 }
             }
         }
@@ -2224,8 +2212,13 @@ unordered_set<int> Partition::partitionBFS() {
 
 
 /**
+ * Performs depth-limited search to find vars to remove to partition graph
+ * 
+*/
+
+/**
  * Finds a (minimal) set of variables to remove from graph to form a partition
- * Uses Iterative DFS
+ * Uses Iterative Deepening Search
  * 
  * Returns:
  * - unordered_set<int> 
@@ -2236,8 +2229,10 @@ unordered_set<int> Partition::removeAndPartition() {
 
     // Iterate through all depths
     for(int depth = 1; depth <= vars/2; ++depth) {
-        
+        // Perform DFS
     }
+
+    return removed_vars;
 }
 
 
@@ -2247,10 +2242,10 @@ ostream &operator<<(ostream &os, Partition const &p) {
     os << "Vars: " << p.vars << " \tClauses: " << p.clauses << endl;
 
     // Print nodes and their edges
-    for(pair<int, Node*> n : p.nodes) {
-        cout << n.first << ": ";
-        for(pair<int, Node*> neighbors : n.second->edges) {
-            cout << neighbors.first << " ";
+    for(int n : p.nodes) {
+        cout << n << ": ";
+        for(int neighbor : p.edges.at(n)) {
+            cout << neighbor << " ";
         }
         cout << endl;
     }

@@ -177,16 +177,16 @@ pair<int, int> getSpansOverlap(const pair<int, int> span1, const pair<int, int> 
 
 // Node in Graph representation of SAT circuit
 // Represents a variable (both positive and negative literal)
-class Node {
-public:
-    int var;
+// class Node {
+// public:
+//     int var;
 
-    // pair<int, int> p where p.first is neighbor's variable, and p.second is the Node*
-    map<int, Node*> edges;
+//     // pair<int, int> p where p.first is neighbor's variable, and p.second is the Node*
+//     map<int, Node*> edges;
 
-    // Constructor
-    Node(int v) { var = v; }
-};
+//     // Constructor
+//     Node(int v) { var = v; }
+// };
 
 // Class for Partition method of SAT formula clustering
 class Partition {
@@ -196,7 +196,8 @@ public:
     vector<vector<int>> formula;
 
     // Graph
-    map<int, Node*> nodes;
+    set<int> nodes;
+    map<int, set<int>> edges;
 
 
     // Constructor
@@ -204,11 +205,8 @@ public:
         vars = v;
         formula = f;
         clauses = formula.size();
-    }
 
-    // Destructor
-    ~Partition() {
-        for(pair<int, Node*> p : nodes) delete p.second;
+        createGraph();
     }
 
     void createGraph();

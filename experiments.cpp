@@ -212,7 +212,6 @@ int main() {
 
     // Partitioning problem
     Partition p(c.vars, c.formula);
-    p.createGraph();
 
     unordered_set<int> s = p.partitionBFS();
     for(int size : s) cout << size << endl;
