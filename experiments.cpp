@@ -213,7 +213,6 @@ int main() {
 
     // Partitioning problem
     Partition p(c.vars, c.formula);
-    p.depthLimitSearch(8);
 
 
     return 0;

@@ -2251,28 +2251,46 @@ unordered_set<int> Partition::depthLimitSearch(int d) {
     vector<int> vec;
     generateCombinations(combinations, vec, 1, d, vars);
 
-    for(auto v : combinations) {
-        for(int n : v) cout << n << " ";
-        cout << endl;
+    // Check all combinations
+    for(vector<int> combination : combinations) {
+        unordered_set<int> c;
+        for(int v : combination) c.insert(v);
+
+        // Check if partitioned
+        unordered_set<int> partition_sizes = removeAndCheckPartition(c, edges);
+
+        // If multiple partitions, can return result
+        if(partition_sizes.size() > 1) return c;
     }
 
     return result;
 }
 
+
 /**
  * Finds a (minimal) set of variables to remove from graph to form a partition
  * Uses Iterative Deepening Search
  * 
+ * Params:
+ * - int limit: limit of depth to search
+ * 
  * Returns:
  * - unordered_set<int> of variables to remove
 */
-unordered_set<int> Partition::removeAndPartition() {
+unordered_set<int> Partition::removeAndPartition(int limit) {
     // Current set of variables to remove
     unordered_set<int> removed_vars;
 
     // Iterate through all depths
-    for(int depth = 1; depth <= vars/2; ++depth) {
-        // Perform DFS
+    for(int depth = 1; depth <= limit; ++depth) {
+        if(debug) cout << "Attempting depth " << depth << "..." << endl;
+
+        unordered_set<int> result = depthLimitSearch(depth);
+
+        if(result.size()) {
+            if(debug) cout << "Found solution." << endl;
+            return result;
+        }
     }
 
     return removed_vars;
@@ -2296,7 +2314,7 @@ void removeNode(int var, map<int, set<int>>& edges) {
  * 
  * Params:
  * - unordered_set<int> remove: variables to remove
- * map<int, set<int>> edges_copy: graph
+ * - map<int, set<int>> edges_copy: graph
  * 
  * Returns:
  * - unordered_set<int> partition sizes
@@ -2311,6 +2329,10 @@ unordered_set<int> removeAndCheckPartition(unordered_set<int> remove, map<int, s
     Partition p(edges);
     return p.partitionBFS();
 }
+
+
+
+
 
 // Print a partition
 ostream &operator<<(ostream &os, Partition const &p) {

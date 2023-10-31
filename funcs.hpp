@@ -195,6 +195,8 @@ public:
     int clauses;
     vector<vector<int>> formula;
 
+    bool debug;
+
     // Graph
     map<int, set<int>> edges;
 
@@ -204,6 +206,7 @@ public:
         vars = v;
         formula = f;
         clauses = formula.size();
+        debug = false;
 
         createGraph();
     }
@@ -219,7 +222,7 @@ public:
 
     unordered_set<int> partitionBFS();
     unordered_set<int> depthLimitSearch(int d);
-    unordered_set<int> removeAndPartition();
+    unordered_set<int> removeAndPartition(int limit);
 
 };
 
