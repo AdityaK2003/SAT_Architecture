@@ -162,8 +162,8 @@ int main() {
     // Create architecture
     Architecture a(c.vars, c.clauses);
     
-
-    vector<int> lines_param = {104, 0, 6};
+    // Number of full-lines, half-lines, quarter lines
+    vector<int> lines_param = {76, 22, 2};
 
     int ones = lines_param[0], twos = lines_param[1], fours = lines_param[2];
 
