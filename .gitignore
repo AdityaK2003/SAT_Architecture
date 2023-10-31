@@ -1,6 +1,9 @@
 # Executable
 experiments
 
+# Tmp txt files
+tmp*.txt
+
 # Prerequisites
 *.d
 

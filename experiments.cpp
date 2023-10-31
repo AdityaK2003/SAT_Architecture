@@ -159,7 +159,7 @@ unordered_set<int> preprocess(string inputFolder, string inputFile, string outpu
  * - lines_param: indicates number of full, half, and quarter lines in the architecture
  * 
 */
-bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula, vector<int> lines_param) {
+bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula, vector<int> lines_param, bool debug=false) {
     // Create architecture
     Architecture a(vars, clauses);
 
@@ -179,7 +179,7 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
     a.createEqualLines(lines);
 
     // Implement formula
-    // a.debug = true;
+    a.debug = debug;
     bool result = a.implementFormulaPrune(formula, vars, true);
     
     if(result) {
@@ -195,7 +195,7 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 int main() {
     // Parse formula
     string path = OSTROWSKI_PATH;
-    string file = OSTROWSKI_FILES[0];
+    string file = OSTROWSKI_FILES[1];
 
     // Create architecture
     //string path = SIMPLE_PATH;
@@ -204,17 +204,15 @@ int main() {
 
     // Create architecture
     Architecture a(c.vars, c.clauses);
+    bool debug = true;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {72, 4, 12};
-    // bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param);
+    vector<int> lines_param = {0, 64, 0};
+    bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug);
     
 
     // Partitioning problem
     Partition p(c.vars, c.formula);
-
-    unordered_set<int> s = p.partitionBFS();
-    for(int size : s) cout << size << endl;
 
 
     return 0;

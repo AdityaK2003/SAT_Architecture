@@ -2211,31 +2211,29 @@ unordered_set<int> Partition::partitionBFS() {
 
 
 /**
- * Performs depth-limited search to find vars to remove to partition graph
+ * Performs search at specific depth to find vars to remove to partition graph
  * 
  * Params:
- * - int d: depth to stop search at
+ * - int d: depth to search at
  * 
  * Returns:
  * - unordered_set<int> of variables to remove, or empty if none found
 */
-unordered_set<int> Partition::depthLimitedSearch(int d) {
+unordered_set<int> Partition::depthLimitSearch(int d) {
     unordered_set<int> result;
     
     // Base case
-    if(d == 0) return result;
+    if(d == 0) {
+        return result;
+    }
 
-    // Add all vars to stack
-    stack<int> dls_stack;
-    for(int v = 1; v <= vars; ++v) dls_stack.push(v);
+    // Create all combinations of variables to remove of this depth
+    set<unordered_set<int>> combinations;
+    for(int i = 0; i < d; ++i) {
+        unordered_set<int> s;
+        for(int v = 1; v <= vars; ++v) {
 
-    while(dls_stack.size()) {
-        // Remove current var
-        int curr = dls_stack.top();
-        dls_stack.pop();
-
-        // Create copy of edges
-        map<int, set<int>> edges_copy = edges;
+        }
     }
 
     return result;
@@ -2273,7 +2271,26 @@ void removeNode(int var, map<int, set<int>>& edges) {
     edges.erase(var);
 }
 
+/**
+ * Check for partition after removing vars
+ * 
+ * Params:
+ * - unordered_set<int> remove: variables to remove
+ * map<int, set<int>> edges_copy: graph
+ * 
+ * Returns:
+ * - unordered_set<int> partition sizes
+*/
+unordered_set<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>>& edges_copy) {
+    map<int, set<int>> edges = edges_copy;
 
+    for(int v : remove) {
+        removeNode(v, edges);
+    }
+
+    Partition p(edges);
+    return p.partitionBFS();
+}
 
 // Print a partition
 ostream &operator<<(ostream &os, Partition const &p) {

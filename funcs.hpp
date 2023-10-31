@@ -207,17 +207,23 @@ public:
 
         createGraph();
     }
+    // Constructor
+    Partition(map<int, set<int>> g) {
+        vars = g.size();
+        edges = g;
+    }
+
     void createGraph();
 
     
 
     unordered_set<int> partitionBFS();
-    unordered_set<int> depthLimitedSearch(int d);
+    unordered_set<int> depthLimitSearch(int d);
     unordered_set<int> removeAndPartition();
 
 };
 
-ostream &operator<<(ostream &os, Partition const &p);
-
 void removeNode(int var, map<int, set<int>>& edges);
+unordered_set<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>>& edges_copy);
 
+ostream &operator<<(ostream &os, Partition const &p);
