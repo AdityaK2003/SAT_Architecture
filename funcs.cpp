@@ -2130,7 +2130,34 @@ pair<int, int> getSpansOverlap(const pair<int, int> span1, const pair<int, int> 
  * Creates graph from a SAT formula
 */
 void Partition::createGraph() {
+    // Iterate through each clause to create nodes
+    for(vector<int> c : formula) {
+        // Each literal in formula
+        for(int l : c) {
+            // Focus on variable
+            int v = abs(l);
 
+            // Add to nodes if not created yet
+            if(nodes.find(v) == nodes.end()) {
+                nodes[v] = new Node(v);
+            }
+        }
+    }
+
+    // Iterate through each clause to create edges
+    for(vector<int> c : formula) {
+        for(int i = 0; i < c.size(); ++i) {
+            for(int j = 0; j < c.size(); ++j) {
+                if(i == j) continue;
+
+                // Create edge
+                int v1 = abs(c[i]), v2 = abs(c[j]);
+
+                nodes[v1]->edges[v2] = nodes[v2];
+                nodes[v2]->edges[v1] = nodes[v1];
+            }
+        }
+    }
 }
 
 

@@ -149,21 +149,19 @@ unordered_set<int> preprocess(string inputFolder, string inputFile, string outpu
 }
 
 
-int main() {
-    // Parse formula
-    string path = OSTROWSKI_PATH;
-    string file = OSTROWSKI_FILES[1];
-
+/**
+ * Helper function to fit a formula onto an Architecture
+ * 
+ * Params:
+ * - vars: number of variables in formula
+ * - clauses: number of clauses in the formula
+ * - formula: the SAT formula
+ * - lines_param: indicates number of full, half, and quarter lines in the architecture
+ * 
+*/
+bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula, vector<int> lines_param) {
     // Create architecture
-    //string path = SIMPLE_PATH;
-    //string file = "uf16_18.cnf";
-    Circuit c(path+file);
-
-    // Create architecture
-    Architecture a(c.vars, c.clauses);
-    
-    // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {88, 0, 10};
+    Architecture a(vars, clauses);
 
     int ones = lines_param[0], twos = lines_param[1], fours = lines_param[2];
 
@@ -182,13 +180,39 @@ int main() {
 
     // Implement formula
     // a.debug = true;
-    bool result = a.implementFormulaPrune(c.formula, c.vars, true);
+    bool result = a.implementFormulaPrune(formula, vars, true);
     
     if(result) {
         // cout << a << endl;
     } else {
         cout << "RETURNED FALSE" << endl;
     }
+
+    return result;
+}
+
+
+int main() {
+    // Parse formula
+    string path = OSTROWSKI_PATH;
+    string file = OSTROWSKI_FILES[0];
+
+    // Create architecture
+    //string path = SIMPLE_PATH;
+    //string file = "uf16_18.cnf";
+    Circuit c(path+file);
+
+    // Create architecture
+    Architecture a(c.vars, c.clauses);
+    
+    // Number of full-lines, half-lines, quarter lines
+    //vector<int> lines_param = {64, 32, 0};
+    //bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param);
+    
+
+    // Partitioning problem
+    Partition p(c.vars, c.formula);
+    p.createGraph();
 
 
     return 0;

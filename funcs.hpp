@@ -192,17 +192,23 @@ public:
 class Partition {
 public:
     int vars;
+    int clauses;
     vector<vector<int>> formula;
 
     // Graph
     map<int, Node*> nodes;
-    map<Node*, Node*> edges;
 
 
     // Constructor
     Partition(int v, vector<vector<int>> f) {
         vars = v;
         formula = f;
+        clauses = formula.size();
+    }
+
+    // Destructor
+    ~Partition() {
+        for(pair<int, Node*> p : nodes) delete p.second;
     }
 
     void createGraph();
