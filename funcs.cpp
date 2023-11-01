@@ -2266,6 +2266,10 @@ unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_dep
     // Maintain the best combination and its score so far
     int best_score = INT_MAX;
 
+    // Maintain average score
+    int total_score = 0;
+    int score_count = 0;
+
     // Iterate through all depths
     for(int depth = start_depth; depth <= end_depth; ++depth) {
         if(debug) cout << "Attempting depth " << depth << "..." << endl;
@@ -2299,6 +2303,10 @@ unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_dep
                     best_score = score;
                     removed_vars = c;
                 }
+
+                // Add to count
+                total_score += score;
+                ++score_count;
             }
             else {
                 // No heuristic - just return first partition found
@@ -2315,7 +2323,16 @@ unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_dep
         for(int v : removed_vars) cout << v << " ";
         cout << endl;
         cout << "Score: " << best_score << endl;
+        cout << "Average Score: " << total_score/score_count << endl;
     }
+
+    // If "best score" is similar to average score, return empty set - error
+    if(abs((total_score/score_count) - best_score) < 1) {
+        cout << "ERROR: Average and best scores are same." << endl;
+        unordered_set<int> result;
+        return result;
+    }
+
 
     return removed_vars;
 }
@@ -2343,12 +2360,12 @@ void removeNode(int var, map<int, set<int>>& edges) {
  * Returns:
  * - unordered_set<int> partition sizes
 */
-unordered_set<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>>& edges_copy) {
-    map<int, set<int>> edges = edges_copy;
+unordered_set<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>>& edges) {
+    // map<int, set<int>> edges = edges_copy;
 
-    for(int v : remove) {
-        removeNode(v, edges);
-    }
+    // for(int v : remove) {
+    //     removeNode(v, edges);
+    // }
 
     Partition p(edges);
     return p.partitionBFS(remove);

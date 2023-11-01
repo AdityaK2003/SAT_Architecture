@@ -198,8 +198,8 @@ int main() {
     string file = OSTROWSKI_FILES[0];
 
     // Create architecture
-    path = SIMPLE_PATH;
-    file = "uf16_18.cnf";
+    // path = SIMPLE_PATH;
+    // file = "uf16_18.cnf";
     Circuit c(path+file);
 
     // Create architecture
@@ -207,7 +207,7 @@ int main() {
     bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {72, 0, 14};
+    vector<int> lines_param = {68, 2, 14};
     // bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug);
     
 
@@ -215,7 +215,7 @@ int main() {
     Partition p(c.vars, c.formula);
     p.debug = true;
 
-    unordered_set<int> result = p.removeAndPartitionIDS(1, 2, "half");
+    unordered_set<int> result = p.removeAndPartitionIDS(3, 3, "half");
 
 
     return 0;
