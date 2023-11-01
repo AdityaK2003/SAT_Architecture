@@ -222,8 +222,7 @@ public:
     unordered_set<int> partitionBFS();
 
 
-    unordered_set<int> depthLimitSearch(int d);
-    unordered_set<int> removeAndPartition(int limit);
+    unordered_set<int> removeAndPartitionIDS(int start_depth, int end_depth, string heur="half");
 
 };
 

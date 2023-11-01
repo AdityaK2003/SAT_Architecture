@@ -2243,45 +2243,6 @@ void generateCombinations(set<vector<int>>& result, vector<int>& combination, in
     }
 }
 
-/**
- * Performs search at specific depth to find vars to remove to partition graph
- * 
- * Params:
- * - int d: depth to search at
- * 
- * Returns:
- * - unordered_set<int> of variables to remove, or empty if none found
-*/
-unordered_set<int> Partition::depthLimitSearch(int d) {
-    unordered_set<int> result;
-    
-    // Base case
-    if(d == 0) {
-        return result;
-    }
-
-    // Create all combinations of variables to remove of this depth
-    set<vector<int>> combinations;
-    vector<int> vec;
-    generateCombinations(combinations, vec, 1, d, vars);
-
-    // Check all combinations
-    for(vector<int> combination : combinations) {
-        unordered_set<int> c;
-        for(int v : combination) c.insert(v);
-
-        // Check if partitioned
-        unordered_set<int> partition_sizes = removeAndCheckPartition(c, edges);
-
-        // Partition size should be greater than the depth+1
-        // Since each depth also removes that node
-        if(partition_sizes.size() > d+1) {
-            return c;
-        }
-    }
-
-    return result;
-}
 
 
 /**
@@ -2289,25 +2250,71 @@ unordered_set<int> Partition::depthLimitSearch(int d) {
  * Uses Iterative Deepening Search
  * 
  * Params:
- * - int limit: limit of depth to search
+ * - int start_limit: starting depth of search
+ * - int end_limit: ending depth of search
+ * - string heur: used for DLS
+ *    - "half": find most optimal partition that splits into equal halves
+ *    - other: returns first partition
  * 
  * Returns:
  * - unordered_set<int> of variables to remove
 */
-unordered_set<int> Partition::removeAndPartition(int limit) {
+unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_depth, string heur) {
     // Current set of variables to remove
     unordered_set<int> removed_vars;
 
+    // Maintain the best combination and its score so far
+    int best_score = INT_MAX;
+
     // Iterate through all depths
-    for(int depth = 1; depth <= limit; ++depth) {
+    for(int depth = start_depth; depth <= end_depth; ++depth) {
         if(debug) cout << "Attempting depth " << depth << "..." << endl;
 
-        unordered_set<int> result = depthLimitSearch(depth);
+        // Create all combinations of variables to remove of this depth
+        set<vector<int>> combinations;
+        vector<int> vec;
+        generateCombinations(combinations, vec, 1, depth, vars);
 
-        if(result.size()) {
-            if(debug) cout << "Found solution." << endl;
-            return result;
+        // Check all combinations
+        for(vector<int> combination : combinations) {
+            unordered_set<int> c;
+            for(int v : combination) c.insert(v);
+
+            // Check if partitioned
+            unordered_set<int> partition_sizes = removeAndCheckPartition(c, edges);
+
+            // Check heuristic
+            if(heur == "half") {
+                // Score the partition by comparing it to half of the number of remaining variables
+                // int half = (vars - combination.size()) / 2;
+                int half = vars/2;
+
+                int score = 0;
+                for(int s : partition_sizes) {
+                    score += (s - half)*(s - half);
+                }
+
+                // Update if new optimal score found
+                if(score < best_score) {
+                    best_score = score;
+                    removed_vars = c;
+                }
+            }
+            else {
+                // No heuristic - just return first partition found
+                if(partition_sizes.size() > 1) {
+                    return c;
+                }
+            }
+            
         }
+    }
+
+    if(debug) {
+        cout << "Best vars to remove: ";
+        for(int v : removed_vars) cout << v << " ";
+        cout << endl;
+        cout << "Score: " << best_score << endl;
     }
 
     return removed_vars;
@@ -2344,7 +2351,7 @@ unordered_set<int> removeAndCheckPartition(unordered_set<int> remove, map<int, s
     }
 
     Partition p(edges);
-    return p.partitionBFS();
+    return p.partitionBFS(remove);
 }
 
 
