@@ -216,8 +216,8 @@ int main() {
     string file = OSTROWSKI_FILES[0];
 
     // Create architecture
-    path = SIMPLE_PATH;
-    file = "uf16_18.cnf";
+    // path = SIMPLE_PATH;
+    // file = "uf16_18.cnf";
     Circuit c(path+file);
 
     // Create architecture
@@ -225,9 +225,9 @@ int main() {
     bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {4, 14, 0};
+    vector<int> lines_param = {40, 10, 2};
 
-    vector<string> METHODS = {"default", "prune", "lits_only"};
+    vector<string> METHODS = {"default", "prune"/*, "lits_only"*/};
     for(string method : METHODS) {
         bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method);
         cout << endl;

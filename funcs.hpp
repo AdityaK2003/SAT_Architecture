@@ -159,7 +159,7 @@ public:
     bool backtrack(int curr_ind, map<int, pair<int, int>> spans);
     bool implementFormula(vector<vector<int>>& formula, int v, bool descending=false);
 
-    bool backtrackPrune(int curr_ind, map<int, pair<int, int>> spans, map<int, pair<int, int>>& lit_spans);
+    bool backtrackPrune(int curr_ind, map<int, pair<int, int>> spans, map<int, set<pair<int, int>>>& lit_banned_lines);
     bool implementFormulaPrune(vector<vector<int>>& formula, int v, bool descending=false);
 
     bool backtrackLitsOnly(int curr_ind, map<int, pair<int, int>>& lit_spans);
