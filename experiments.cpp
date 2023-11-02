@@ -215,9 +215,11 @@ int main() {
     Architecture a(c.vars, c.clauses);
     bool debug = false;
     
+    string method = "prune";
+    
     // Number of full-lines, half-lines, quarter lines
     vector<int> lines_param = {64, 0, 16};
-    bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug);
+    bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method);
     
 
     // Partitioning problem
