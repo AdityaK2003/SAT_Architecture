@@ -157,9 +157,9 @@ unordered_set<int> preprocess(string inputFolder, string inputFile, string outpu
  * - clauses: number of clauses in the formula
  * - formula: the SAT formula
  * - lines_param: indicates number of full, half, and quarter lines in the architecture
- * 
+ * - method: "prune", "lits_only", default = regular
 */
-bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula, vector<int> lines_param, bool debug=false) {
+bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula, vector<int> lines_param, bool debug, string method) {
     // Create architecture
     Architecture a(vars, clauses);
 
@@ -180,7 +180,16 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 
     // Implement formula
     a.debug = debug;
-    bool result = a.implementFormulaPrune(formula, vars, true);
+    bool result = false;
+    if(method == "prune") {
+        a.implementFormulaPrune(formula, vars, true);
+    } else if(method == "lits_only") {
+        a.implementFormulaLitsOnly(formula, vars, true);
+    } else {
+        a.implementFormula(formula, vars, true);
+    }
+    
+    a.implementFormulaPrune(formula, vars, true);
     
     if(result) {
         // cout << a << endl;
@@ -207,15 +216,15 @@ int main() {
     bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {68, 2, 14};
-    // bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug);
+    vector<int> lines_param = {64, 0, 16};
+    bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug);
     
 
     // Partitioning problem
-    Partition p(c.vars, c.formula);
-    p.debug = true;
+    // Partition p(c.vars, c.formula);
+    // p.debug = true;
 
-    unordered_set<int> result = p.removeAndPartitionIDS(3, 3, "half");
+    // unordered_set<int> result = p.removeAndPartitionIDS(3, 3, "half");
 
 
     return 0;

@@ -1632,8 +1632,11 @@ bool Architecture::implementFormula(vector<vector<int>>& formula, int v, bool de
 
 
 
+
+
+
 /**
- * Helper function for implementFormula() that implements backtrack search
+ * Helper function for implementFormulaPrune() that implements backtrack search
  * Includes pruning - keeps track of literal spans, and updates for each 
  * neighbor of an assigned literal
  * 
@@ -1802,7 +1805,7 @@ bool Architecture::backtrackPrune(int curr_ind,  map<int, pair<int, int>> spans,
 
 
 /**
- * Implements a SAT formula onto an Architecture
+ * Implements a SAT formula onto an Architecture (clause_spans and lit_spans used)
  * More efficient - considers equal lines to be the same
  * Efficiency - x^n where x is the number of TYPES of lines (upper half, lower half, full)
  * 
@@ -1922,6 +1925,272 @@ bool Architecture::implementFormulaPrune(vector<vector<int>>& formula, int v, bo
     return result;
 }
 
+
+/**
+ * Helper function for implementFormulaLitsOnly() that implements backtrack search
+ * Includes pruning - keeps track of literal spans, and updates for each 
+ * neighbor of an assigned literal
+ * 
+ * Params:
+ * - curr_ind: the current index of var_order that we are on
+ * - lit_spans: variable spans
+ * 
+ * Returns:
+ * - bool: true if the implement was successful
+ *   - if true, clause_spans data member is updated
+*/
+bool Architecture::backtrackLitsOnly(int curr_ind, map<int, pair<int, int>>& lit_spans) {
+    if(debug) {
+        cout << currTimestamp() << "Backtrack (w/prune) for index " << curr_ind;
+        if(var_order.size() > curr_ind)  cout << " (var = " << var_order[curr_ind] << ") ";
+        cout << ": " << endl;
+    }
+    ++recursions_made;
+
+    // Base case - finished search (check clause placements)
+    if(curr_ind >= var_order.size()) {
+        clause_spans = createClauseSpansFromLitSpans(lit_spans, sat_formula);
+
+        if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Backtrack finished, checking clause placement" << endl;
+
+        // Check for contradictions
+        if(clause_spans.size() == 0 || areSpanContradictions(clause_spans)) {
+            if(debug) cout << currTimestamp() <<  "\t(" << curr_ind << ") Clause placement unsuccessful (contradictions)" << endl;
+            return false;
+        }
+
+        // No contradiction found - create assignments
+        map<int, int> tmp_assignments;
+        bool result = placeClauses(clause_spans, tmp_assignments);
+        if(result) {
+            if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Clause placement successful" << endl;
+            row_to_clause = tmp_assignments;
+            return true;
+        } else {
+            if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Clause placement not successful" << endl;
+            return false;
+        }
+    }
+
+    // Get current variable
+    int curr_var = var_order[curr_ind];
+
+    // Iterate through line sets in provided order
+    for(pair<int, int> curr_pair : lines_map_order) {
+        if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Attempting lines with span (" << curr_pair.first << ", " << curr_pair.second << ")" << endl;
+
+        // If all lines for this line set already placed, skip to next set
+        int assigned = lines_map_assigned[curr_pair];
+        if(assigned >= lines_map[curr_pair].size()) {
+            if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Lines set already fully assigned" << endl;
+            continue;
+        }
+
+        // If this var can't belong in this span, skip
+        pair<int, int> span1 = lit_spans[curr_var], span2 = lit_spans[curr_var*-1];
+        if(curr_pair.first != 0 || curr_pair.second != clauses - 1) {
+            bool overlap = spansOverlap(span1, curr_pair) && spansOverlap(span2, curr_pair);
+            if(!overlap) {
+                if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") No overlap.\tSpan 1: " << span1.first << ", " << span1.second << " \tSpan 2: " << span2.first << ", " << span2.second << " \tLine Span: " << curr_pair.first << ", " << curr_pair.second << endl;
+                continue;
+            }
+        }
+
+        // Select the two lines
+        Line* line1 = lines_map[curr_pair][assigned];
+        Line* line2 = lines_map[curr_pair][assigned+1];
+
+        if(debug) {
+            cout << currTimestamp() << "\t(" << curr_ind << ") Line 1 is assignment " << assigned << " out of " << lines_map[curr_pair].size()-1 << endl;
+            cout << currTimestamp() << "\t(" << curr_ind << ") Line 2 is assignment " << assigned+1 << " out of " << lines_map[curr_pair].size()-1 << endl;
+        }
+
+        // Create copy of lit_spans, and update spans of all neighboring literals
+        map<int, pair<int ,int>> lit_spans_copy = lit_spans;
+        // Only update spans if this is not a full line
+        if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Updating literal spans for " << curr_var << endl;
+        if(curr_pair.first != 0 || curr_pair.second != clauses - 1) {
+            bool skip_line = false;
+            for(int neighbor_lit : lit_neighbors[curr_var]) {
+                pair<int, int> new_span = getSpansOverlap(lit_spans_copy[neighbor_lit], curr_pair);
+                if(new_span.first == -1 && new_span.second == -1) {
+                    if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") No span overlap for neighbor" << endl;
+                    skip_line = true;
+                    break;
+                }
+                
+                lit_spans_copy[neighbor_lit] = new_span;
+            }
+            if(skip_line) continue;
+            if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Updating literal spans for " << -1*curr_var << endl;
+            for(int neighbor_lit : lit_neighbors[curr_var*-1]) {
+                pair<int, int> new_span = getSpansOverlap(lit_spans_copy[neighbor_lit], curr_pair);
+                if(new_span.first == -1 && new_span.second == -1) {
+                    if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") No span overlap for neighbor" << endl;
+                    skip_line = true;
+                    break;
+                }
+                
+                lit_spans_copy[neighbor_lit] = new_span;
+            }
+            if(skip_line) continue;
+        }
+
+        // Place lits in line
+        line1->lit = curr_var;
+        line2->lit = curr_var * -1;
+
+        // Mark both lines as assigned
+        lines_map_assigned[curr_pair] += 2;
+
+        // Mark var as assigned
+        vars_assigned.insert(curr_var);
+
+        // Recurse
+        if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Recurse: " << endl;
+        bool result = backtrackLitsOnly(curr_ind+1, lit_spans_copy);
+        if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Recurse done" << endl;
+
+        if(result) {
+            if(debug) cout << currTimestamp() << "(" << curr_ind << ") Return true" << endl;
+            return true;
+        }
+
+        // Unassign var
+        vars_assigned.erase(curr_var);
+
+        // Remove literals from line 
+        line1->lit = 0;
+        line2->lit = 0;
+
+        // Mark both lines as unassigned
+        lines_map_assigned[curr_pair] -= 2;
+    }
+    
+    
+    if(debug) cout << currTimestamp() << "(" << curr_ind << ") Return false" << endl;
+    return false;
+}
+
+/**
+ * Implements a SAT formula onto an Architecture (using only lit_spans)
+ * More efficient - considers equal lines to be the same
+ * Efficiency - x^n where x is the number of TYPES of lines (upper half, lower half, full)
+ * 
+ * Params:
+ * - vector<vector<int>> formula: the SAT formula
+ * - v: number of variables
+ * - descending: if false, checks shortest lines first with least used vars
+ * 
+ * Returns:
+ * - bool: true if implement was successful
+*/
+bool Architecture::implementFormulaLitsOnly(vector<vector<int>>& formula, int v, bool descending) {
+    // Set start time
+    start = chrono::high_resolution_clock::now();
+
+    // Set formula
+    sat_formula = formula;
+
+    // Clear other helper vars
+    var_order.clear();
+    lines_map.clear();
+    lines_map_order.clear();
+    lit_clauses.clear();
+    lines_map_assigned.clear();
+    vars_assigned.clear();
+    lit_neighbors.clear();
+    recursions_made = 0;
+    
+    // Assert that number of variables matches
+    if(v != vars) {
+        cout << "Implement FAILED: number of variables does not match" << endl;
+        return false;
+    }
+
+    // Assert that number of clauses match 
+    if(formula.size() != clauses) {
+        cout << "Implement FAILED: number of clauses does not match" << endl;
+        return false;
+    }
+
+    // Order vars for backtrack search in reverse order
+    list<int> var_order_list = orderVars(formula, descending);
+
+    // Create order of lines (keep in order of lengths)
+    vector<Line*> line_order = line_ids;
+
+    // Maintain sets of lines based on each span (span is only distinguishing characteristic of each Line)
+    for(Line* l : line_order) {
+        lines_map[make_pair(l->start_row, l->end_row)].push_back(l);
+    }
+
+    // Make sure each set has even number of lines
+    for(auto p : lines_map) {
+        int len = p.second.size();
+        if(len % 2 == 1) {
+            cout << "FAIL: each line set must have even number of lines" << endl;
+            return false;
+        }
+    }
+
+    // Maintain how many lines in each set have been assigned
+    for(auto p : lines_map) {
+        lines_map_assigned[p.first] = 0;
+    }
+
+    // Order the sets of lines in order to assign
+   lines_map_order = orderLinesMap(lines_map_assigned, descending);
+
+    // Map from literals to the clauses they are in 
+    for(int c = 0; c < clauses; ++c) {
+        for(int l : formula[c]) {
+            lit_clauses[l].insert(c+1);
+        }
+    }
+
+    // Set var order
+    for(int v : var_order_list) var_order.push_back(v);
+
+    // Generate initial clause spans
+    // map<int, pair<int, int>> spans;
+    // for(int c = 1; c <= clauses; ++c) {
+    //     spans[c] = make_pair(0, clauses-1);
+    // }
+
+    // Maintain literal spans - dictated by where neighbors are placed
+    map<int, pair<int, int>> lit_spans;
+    for(int v = 1; v <= vars; ++v) {
+        lit_spans[v] = make_pair(0, clauses-1);
+        lit_spans[-1*v] = make_pair(0, clauses-1);
+    }
+
+    // Find neighbors for each literal
+    for(pair<int, set<int>> p : lit_clauses) {
+        int lit = p.first;
+        for(int clause_num : p.second) {
+            for(int neighbor : formula[clause_num-1]) {
+                if(neighbor != lit) lit_neighbors[lit].insert(neighbor);
+            }
+        }
+    }
+
+    // Start backtrack search
+    bool result = backtrackLitsOnly(0, lit_spans);
+
+    // Set end time
+    end = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration = end - start;
+
+    cout << endl << "Recursions Made: " << recursions_made << endl;
+    if(result) {
+        cout << "TIME TAKEN: " << duration.count() << " seconds" << endl << endl;
+    } else {
+        cout << "FAILED in " << duration.count() << " seconds" << endl;
+    }
+
+    return result;
+}
 
 
 
@@ -2124,6 +2393,39 @@ pair<int, int> getSpansOverlap(const pair<int, int> span1, const pair<int, int> 
 }
 
 
+
+/**
+ * Creates clause spans from lit spans
+ * 
+ * Params:
+ * - map<int, pair<int, int>>: lit spans
+ * - vector<vector<int>>: the SAT formula
+ * 
+ * Returns:
+ * - map<int, pair<int, int>>: clause spans
+*/
+map<int, pair<int, int>> createClauseSpansFromLitSpans(map<int, pair<int, int>>& lit_spans, vector<vector<int>>& formula) {
+    // Create default clause spans
+    map<int, pair<int, int>> clause_spans;
+    for(int c = 1; c <= formula.size(); ++c) {
+        clause_spans[c] = make_pair(0, formula.size() - 1);
+    }
+
+    // Take span overlaps for each literal in clause
+    for(int c = 0; c < formula.size(); ++c) {
+        for(int l : formula[c]) {
+            clause_spans[c+1] = getSpansOverlap(clause_spans[c+1], lit_spans[l]);
+
+            // If there is an error
+            if(clause_spans[c+1].first == -1) {
+                map<int, pair<int, int>> error;
+                return error;
+            }
+        }
+    }
+
+    return clause_spans;
+}
 
 
 
