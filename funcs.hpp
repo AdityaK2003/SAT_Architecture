@@ -162,12 +162,12 @@ public:
     bool backtrackPrune(int curr_ind, map<int, pair<int, int>> spans, map<int, set<pair<int, int>>>& lit_banned_lines);
     bool implementFormulaPrune(vector<vector<int>>& formula, int v, bool descending=false);
 
-    bool backtrackLitsOnly(int curr_ind, map<int, pair<int, int>>& lit_spans);
+    bool backtrackLitsOnly(int curr_ind,  map<int, set<pair<int, int>>>& lit_banned_lines);
     bool implementFormulaLitsOnly(vector<vector<int>>& formula, int v, bool descending=false);
 
     string currTimestamp();
 
-
+    map<int, pair<int, int>> createClauseSpans();
     bool validateImplement();
 };
 
@@ -179,8 +179,6 @@ bool placeClauses(map<int, pair<int, int>>& clause_spans, map<int, int>& row_to_
 
 bool spansOverlap(const pair<int, int> span1, const pair<int, int> span2);
 pair<int, int> getSpansOverlap(const pair<int, int> span1, const pair<int, int> span2);
-
-map<int, pair<int, int>> createClauseSpansFromLitSpans(map<int, pair<int, int>>& lit_spans, vector<vector<int>>& formula);
 
 
 // Node in Graph representation of SAT circuit

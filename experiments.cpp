@@ -225,9 +225,9 @@ int main() {
     bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {40, 10, 2};
+    vector<int> lines_param = {44, 12, 0};
 
-    vector<string> METHODS = {"default", "prune"/*, "lits_only"*/};
+    vector<string> METHODS = {"default", "prune", "lits_only"};
     for(string method : METHODS) {
         bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method);
         cout << endl;

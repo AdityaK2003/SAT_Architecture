@@ -1643,7 +1643,7 @@ bool Architecture::implementFormula(vector<vector<int>>& formula, int v, bool de
  * Params:
  * - curr_ind: the current index of var_order that we are on
  * - spans: the clause spans
- * - lit_spans: variable spans
+ * - lit_banned_lines: banned lines for a literal
  * 
  * Returns:
  * - bool: true if the implement was successful
@@ -1929,13 +1929,13 @@ bool Architecture::implementFormulaPrune(vector<vector<int>>& formula, int v, bo
  * 
  * Params:
  * - curr_ind: the current index of var_order that we are on
- * - lit_spans: variable spans
+ * - lit_banned_lines: banned lines for a literal
  * 
  * Returns:
  * - bool: true if the implement was successful
  *   - if true, clause_spans data member is updated
 */
-bool Architecture::backtrackLitsOnly(int curr_ind, map<int, pair<int, int>>& lit_spans) {
+bool Architecture::backtrackLitsOnly(int curr_ind, map<int, set<pair<int, int>>>& lit_banned_lines) {
     if(debug) {
         cout << currTimestamp() << "Backtrack (w/lits only) for index " << curr_ind;
         if(var_order.size() > curr_ind)  cout << " (var = " << var_order[curr_ind] << ") ";
@@ -1945,7 +1945,7 @@ bool Architecture::backtrackLitsOnly(int curr_ind, map<int, pair<int, int>>& lit
 
     // Base case - finished search (check clause placements)
     if(curr_ind >= var_order.size()) {
-        clause_spans = createClauseSpansFromLitSpans(lit_spans, sat_formula);
+        clause_spans = createClauseSpans();
 
         if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Backtrack finished, checking clause placement" << endl;
 
@@ -1983,12 +1983,18 @@ bool Architecture::backtrackLitsOnly(int curr_ind, map<int, pair<int, int>>& lit
         }
 
         // If this var can't belong in this span, skip
-        pair<int, int> span1 = lit_spans[curr_var], span2 = lit_spans[curr_var*-1];
         if(curr_pair.first != 0 || curr_pair.second != clauses - 1) {
-            bool overlap = spansOverlap(span1, curr_pair) && spansOverlap(span2, curr_pair);
-            if(!overlap) {
-                if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") No overlap.\tSpan 1: " << span1.first << ", " << span1.second << " \tSpan 2: " << span2.first << ", " << span2.second << " \tLine Span: " << curr_pair.first << ", " << curr_pair.second << endl;
-                continue;
+            if(lit_banned_lines[curr_var].find(curr_pair) != lit_banned_lines[curr_var].end()) {
+                if(debug) {
+                    cout << currTimestamp() << "\t(" << curr_ind << ") banned line for literal " << curr_var << endl;
+                    continue; 
+                }
+            }
+            if(lit_banned_lines[-1*curr_var].find(curr_pair) != lit_banned_lines[-1*curr_var].end()) {
+                if(debug) {
+                    cout << currTimestamp() << "\t(" << curr_ind << ") banned line for literal " << -1*curr_var << endl;
+                    continue; 
+                }
             }
         }
 
@@ -2001,39 +2007,29 @@ bool Architecture::backtrackLitsOnly(int curr_ind, map<int, pair<int, int>>& lit
             cout << currTimestamp() << "\t(" << curr_ind << ") Line 2 is assignment " << assigned+1 << " out of " << lines_map[curr_pair].size()-1 << endl;
         }
 
-        // Create copy of lit_spans, and update spans of all neighboring literals
-        map<int, pair<int ,int>> lit_spans_copy = lit_spans;
-        // Only update spans if this is not a full line
-        if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Updating literal spans for " << curr_var << endl;
+        // Update banned lines for neighbors of curr_var
+        map<int, set<pair<int, int>>> lit_banned_lines_copy;
+        if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Updating banned lines for neighbors for " << curr_var << endl;
         if(curr_pair.first != 0 || curr_pair.second != clauses - 1) {
-            bool skip_line = false;
-            for(int neighbor_lit : lit_neighbors[curr_var]) {
-                pair<int, int> new_span = getSpansOverlap(lit_spans_copy[neighbor_lit], curr_pair);
-                if(new_span.first == -1 && new_span.second == -1) {
-                    if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") No span overlap for neighbor" << endl;
-                    skip_line = true;
-                    break;
-                }
-                
-                lit_spans_copy[neighbor_lit] = new_span;
-            }
-            if(skip_line) continue;
-            if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Updating literal spans for " << -1*curr_var << endl;
-            for(int neighbor_lit : lit_neighbors[curr_var*-1]) {
-                pair<int, int> new_span = getSpansOverlap(lit_spans_copy[neighbor_lit], curr_pair);
-                if(new_span.first == -1 && new_span.second == -1) {
-                    if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") No span overlap for neighbor" << endl;
-                    skip_line = true;
-                    break;
-                }
-                
-                lit_spans_copy[neighbor_lit] = new_span;
-            }
-            if(skip_line) continue;
+            // Create set of all neighbors
+            unordered_set<int> all_neighbors;
+            for(int neighbor_lit : lit_neighbors[curr_var]) all_neighbors.insert(neighbor_lit);
+            for(int neighbor_lit : lit_neighbors[curr_var*-1]) all_neighbors.insert(neighbor_lit);
 
-            // Update the current var's spans
-            lit_spans_copy[curr_var] = getSpansOverlap(lit_spans_copy[curr_var], curr_pair);
-            lit_spans_copy[-1*curr_var] = getSpansOverlap(lit_spans_copy[-1*curr_var], curr_pair);
+            
+            // Generate set of banned liens
+            set<pair<int, int>> banned_lines;
+            for(pair<int, int> line_pairs : lines_map_order) {
+                bool b = spansOverlap(curr_pair, line_pairs);
+                if(!b) banned_lines.insert(line_pairs);
+            }
+            
+            for(int neighbor_lit : all_neighbors) {
+                // Add banned lines
+                for(pair<int, int> banned_line : banned_lines) {
+                    lit_banned_lines_copy[neighbor_lit].insert(banned_line);
+                }
+            }
         }
 
         // Place lits in line
@@ -2048,7 +2044,7 @@ bool Architecture::backtrackLitsOnly(int curr_ind, map<int, pair<int, int>>& lit
 
         // Recurse
         if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Recurse: " << endl;
-        bool result = backtrackLitsOnly(curr_ind+1, lit_spans_copy);
+        bool result = backtrackLitsOnly(curr_ind+1, lit_banned_lines_copy);
         if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Recurse done" << endl;
 
         if(result) {
@@ -2152,18 +2148,9 @@ bool Architecture::implementFormulaLitsOnly(vector<vector<int>>& formula, int v,
     // Set var order
     for(int v : var_order_list) var_order.push_back(v);
 
-    // Generate initial clause spans
-    // map<int, pair<int, int>> spans;
-    // for(int c = 1; c <= clauses; ++c) {
-    //     spans[c] = make_pair(0, clauses-1);
-    // }
 
-    // Maintain literal spans - dictated by where neighbors are placed
-    map<int, pair<int, int>> lit_spans;
-    for(int v = 1; v <= vars; ++v) {
-        lit_spans[v] = make_pair(0, clauses-1);
-        lit_spans[-1*v] = make_pair(0, clauses-1);
-    }
+    // Maintain literal banned lines
+    map<int, set<pair<int, int>>> lit_banned_lines;
 
     // Find neighbors for each literal
     for(pair<int, set<int>> p : lit_clauses) {
@@ -2176,7 +2163,7 @@ bool Architecture::implementFormulaLitsOnly(vector<vector<int>>& formula, int v,
     }
 
     // Start backtrack search
-    bool result = backtrackLitsOnly(0, lit_spans);
+    bool result = backtrackLitsOnly(0, lit_banned_lines);
 
     // Set end time
     end = chrono::high_resolution_clock::now();
@@ -2427,25 +2414,27 @@ pair<int, int> getSpansOverlap(const pair<int, int> span1, const pair<int, int> 
 
 
 /**
- * Creates clause spans from lit spans
- * 
- * Params:
- * - map<int, pair<int, int>>: lit spans
- * - vector<vector<int>>: the SAT formula
+ * Creates clause spans from literal placements on lines, and the SAT formula
  * 
  * Returns:
  * - map<int, pair<int, int>>: clause spans
 */
-map<int, pair<int, int>> createClauseSpansFromLitSpans(map<int, pair<int, int>>& lit_spans, vector<vector<int>>& formula) {
+map<int, pair<int, int>> Architecture::createClauseSpans() {
     // Create default clause spans
     map<int, pair<int, int>> clause_spans;
-    for(int c = 1; c <= formula.size(); ++c) {
-        clause_spans[c] = make_pair(0, formula.size() - 1);
+    for(int c = 1; c <= sat_formula.size(); ++c) {
+        clause_spans[c] = make_pair(0, sat_formula.size() - 1);
+    }
+
+    // Create lit spans from lines
+    map<int, pair<int, int>> lit_spans;
+    for(Line* line : line_ids) {
+        lit_spans[line->lit] = make_pair(line->start_row, line->end_row);
     }
 
     // Take span overlaps for each literal in clause
-    for(int c = 0; c < formula.size(); ++c) {
-        for(int l : formula[c]) {
+    for(int c = 0; c < sat_formula.size(); ++c) {
+        for(int l : sat_formula[c]) {
             clause_spans[c+1] = getSpansOverlap(clause_spans[c+1], lit_spans[l]);
 
             // If there is an error
