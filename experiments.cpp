@@ -178,24 +178,25 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
     
     a.createEqualLines(lines);
 
+    cout << "METHOD: " << method;
+
     // Implement formula
     a.debug = debug;
     bool result = false;
     if(method == "prune") {
-        a.implementFormulaPrune(formula, vars, true);
+        result = a.implementFormulaPrune(formula, vars, true);
     } else if(method == "lits_only") {
-        a.implementFormulaLitsOnly(formula, vars, true);
+        result = a.implementFormulaLitsOnly(formula, vars, true);
     } else {
-        a.implementFormula(formula, vars, true);
+        result = a.implementFormula(formula, vars, true);
     }
     
-    a.implementFormulaPrune(formula, vars, true);
-    
     if(result) {
-        // cout << a << endl;
+        // cout << "returned true" << endl;
     } else {
         cout << "RETURNED FALSE" << endl;
     }
+    cout << endl;
 
     return result;
 }
@@ -215,12 +216,13 @@ int main() {
     Architecture a(c.vars, c.clauses);
     bool debug = false;
     
-    string method = "prune";
-    
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {64, 0, 16};
-    bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method);
-    
+    vector<int> lines_param = {68, 0, 0};
+
+    vector<string> METHODS = {"default", "prune", "lits_only"};
+    for(string method : METHODS) {
+        bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method);
+    }
 
     // Partitioning problem
     // Partition p(c.vars, c.formula);

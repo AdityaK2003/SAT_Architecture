@@ -1622,7 +1622,7 @@ bool Architecture::implementFormula(vector<vector<int>>& formula, int v, bool de
 
     cout << endl << "Recursions Made: " << recursions_made << endl;
     if(result) {
-        cout << "TIME TAKEN: " << duration.count() << " seconds" << endl << endl;
+        cout << "TIME TAKEN: " << duration.count() << " seconds" << endl;
     } else {
         cout << "FAILED in " << endl << duration.count() << " seconds" << endl;
     }
@@ -1917,7 +1917,7 @@ bool Architecture::implementFormulaPrune(vector<vector<int>>& formula, int v, bo
 
     cout << endl << "Recursions Made: " << recursions_made << endl;
     if(result) {
-        cout << "TIME TAKEN: " << duration.count() << " seconds" << endl << endl;
+        cout << "TIME TAKEN: " << duration.count() << " seconds" << endl;
     } else {
         cout << "FAILED in " << duration.count() << " seconds" << endl;
     }
@@ -2184,7 +2184,7 @@ bool Architecture::implementFormulaLitsOnly(vector<vector<int>>& formula, int v,
 
     cout << endl << "Recursions Made: " << recursions_made << endl;
     if(result) {
-        cout << "TIME TAKEN: " << duration.count() << " seconds" << endl << endl;
+        cout << "TIME TAKEN: " << duration.count() << " seconds" << endl;
     } else {
         cout << "FAILED in " << duration.count() << " seconds" << endl;
     }
