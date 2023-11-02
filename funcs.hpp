@@ -166,6 +166,9 @@ public:
     bool implementFormulaLitsOnly(vector<vector<int>>& formula, int v, bool descending=false);
 
     string currTimestamp();
+
+
+    bool validateImplement();
 };
 
 ostream &operator<<(ostream &os, Architecture const &arc);

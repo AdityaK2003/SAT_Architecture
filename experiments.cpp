@@ -178,7 +178,7 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
     
     a.createEqualLines(lines);
 
-    cout << "METHOD: " << method;
+    cout << "METHOD: " << method << endl;;
 
     // Implement formula
     a.debug = debug;
@@ -193,6 +193,14 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
     
     if(result) {
         // cout << "returned true" << endl;
+
+        // Double check results
+        bool double_check = a.validateImplement();
+        if(double_check) {
+            cout << "validation: correct!" << endl;
+        } else {
+            cout << "VALIDATION: FAILED" << endl;
+        }
     } else {
         cout << "RETURNED FALSE" << endl;
     }
@@ -208,8 +216,8 @@ int main() {
     string file = OSTROWSKI_FILES[0];
 
     // Create architecture
-    // path = SIMPLE_PATH;
-    // file = "uf16_18.cnf";
+    path = SIMPLE_PATH;
+    file = "uf16_18.cnf";
     Circuit c(path+file);
 
     // Create architecture
@@ -217,11 +225,12 @@ int main() {
     bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {68, 0, 0};
+    vector<int> lines_param = {4, 14, 0};
 
     vector<string> METHODS = {"default", "prune", "lits_only"};
     for(string method : METHODS) {
         bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method);
+        cout << endl;
     }
 
     // Partitioning problem

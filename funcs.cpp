@@ -2206,6 +2206,38 @@ string Architecture::currTimestamp() {
 }
 
 
+/**
+ * Validates architecture after a backtrack
+ * 
+ * Returns:
+ * - bool: if the implement is valid
+*/
+bool Architecture::validateImplement() {
+    // Iterate through each clause
+    for(int row = 0; row < clauses; ++row) {
+        int c = row_to_clause[row];
+
+        unordered_set<int> clause_lits;
+        for(int l : sat_formula[c-1]) clause_lits.insert(l);
+
+        // Ensure that all clause lits are available at that row
+        for(Line* line : line_ids) {
+            if(line->start_row <= row && row <= line->end_row) {
+                clause_lits.erase(line->lit);
+            }
+        }
+
+        // If any clause literals remain, architecture fails
+        if(!clause_lits.empty()) {
+            return false;
+        }
+
+    }
+
+    return true;
+}
+
+
 // Prints an architecture
 ostream &operator<<(ostream &os, Architecture const &arc) {
     os << endl << endl;
@@ -2243,7 +2275,7 @@ ostream &operator<<(ostream &os, Architecture const &arc) {
         os << endl;   
     }
 
-    os << endl << " ---------------- ARCHITECTURE START ---------------- " << endl;
+    os << " ---------------- ARCHITECTURE END ---------------- " << endl;
 
     return os;
 }
