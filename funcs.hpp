@@ -237,3 +237,6 @@ void removeNode(int var, map<int, set<int>>& edges);
 unordered_set<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>>& edges_copy);
 
 ostream &operator<<(ostream &os, Partition const &p);
+
+
+
