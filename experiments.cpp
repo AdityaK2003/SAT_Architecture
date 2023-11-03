@@ -158,8 +158,9 @@ unordered_set<int> preprocess(string inputFolder, string inputFile, string outpu
  * - formula: the SAT formula
  * - lines_param: indicates number of full, half, and quarter lines in the architecture
  * - method: "prune", "lits_only", default = regular
+ * - bool: "descending" in implement
 */
-bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula, vector<int> lines_param, bool debug, string method) {
+bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula, vector<int> lines_param, bool debug, string method, bool descending) {
     // Create architecture
     Architecture a(vars, clauses);
 
@@ -178,17 +179,22 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
     
     a.createEqualLines(lines);
 
-    cout << "METHOD: " << method << endl;;
+    cout << "METHOD: " << method << endl;
+    if(descending) {
+        cout << "descending: true" << endl;
+    } else {
+        cout << "descending: false" << endl;
+    }
 
     // Implement formula
     a.debug = debug;
     bool result = false;
     if(method == "prune") {
-        result = a.implementFormulaPrune(formula, vars, true);
+        result = a.implementFormulaPrune(formula, vars, descending);
     } else if(method == "lits_only") {
-        result = a.implementFormulaLitsOnly(formula, vars, true);
+        result = a.implementFormulaLitsOnly(formula, vars, descending);
     } else {
-        result = a.implementFormula(formula, vars, true);
+        result = a.implementFormula(formula, vars, descending);
     }
     
     if(result) {
@@ -223,13 +229,17 @@ int main() {
     // Create architecture
     Architecture a(c.vars, c.clauses);
     bool debug = false;
+    bool descending = true;
     
     // Number of full-lines, half-lines, quarter lines
     vector<int> lines_param = {44, 12, 0};
 
     vector<string> METHODS = {"default", "prune", "lits_only"};
     for(string method : METHODS) {
-        bool result = fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method);
+        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, descending);
+        cout << endl;
+
+        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, !descending);
         cout << endl;
     }
 
