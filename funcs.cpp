@@ -1686,28 +1686,24 @@ bool Architecture::backtrackPrune(int curr_ind,  map<int, pair<int, int>> spans,
 
     // Iterate through line sets in provided order
     for(pair<int, int> curr_pair : lines_map_order) {
-        if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Attempting lines with span (" << curr_pair.first << ", " << curr_pair.second << ")" << endl;
+        //if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Attempting lines with span (" << curr_pair.first << ", " << curr_pair.second << ")" << endl;
 
         // If all lines for this line set already placed, skip to next set
         int assigned = lines_map_assigned[curr_pair];
         if(assigned >= lines_map[curr_pair].size()) {
-            if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Lines set already fully assigned" << endl;
+            //if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") Lines set already fully assigned" << endl;
             continue;
         }
 
         // If this var can't belong in this span, skip
         if(curr_pair.first != 0 || curr_pair.second != clauses - 1) {
             if(lit_banned_lines[curr_var].find(curr_pair) != lit_banned_lines[curr_var].end()) {
-                if(debug) {
-                    cout << currTimestamp() << "\t(" << curr_ind << ") banned line for literal " << curr_var << endl;
-                    continue; 
-                }
+                if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") banned line for literal " << curr_var << endl;
+                continue; 
             }
             if(lit_banned_lines[-1*curr_var].find(curr_pair) != lit_banned_lines[-1*curr_var].end()) {
-                if(debug) {
-                    cout << currTimestamp() << "\t(" << curr_ind << ") banned line for literal " << -1*curr_var << endl;
-                    continue; 
-                }
+                if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") banned line for literal " << -1*curr_var << endl;
+                continue; 
             }
         }
         
@@ -1797,8 +1793,8 @@ bool Architecture::backtrackPrune(int curr_ind,  map<int, pair<int, int>> spans,
         lines_map_assigned[curr_pair] -= 2;
     }
     
-    
     if(debug) cout << currTimestamp() << "(" << curr_ind << ") Return false" << endl;
+    
     return false;
 }
 
@@ -1985,16 +1981,12 @@ bool Architecture::backtrackLitsOnly(int curr_ind, map<int, set<pair<int, int>>>
         // If this var can't belong in this span, skip
         if(curr_pair.first != 0 || curr_pair.second != clauses - 1) {
             if(lit_banned_lines[curr_var].find(curr_pair) != lit_banned_lines[curr_var].end()) {
-                if(debug) {
-                    cout << currTimestamp() << "\t(" << curr_ind << ") banned line for literal " << curr_var << endl;
-                    continue; 
-                }
+                if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") banned line for literal " << curr_var << endl;
+                continue; 
             }
             if(lit_banned_lines[-1*curr_var].find(curr_pair) != lit_banned_lines[-1*curr_var].end()) {
-                if(debug) {
-                    cout << currTimestamp() << "\t(" << curr_ind << ") banned line for literal " << -1*curr_var << endl;
-                    continue; 
-                }
+                if(debug) cout << currTimestamp() << "\t(" << curr_ind << ") banned line for literal " << -1*curr_var << endl;
+                continue; 
             }
         }
 
