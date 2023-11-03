@@ -232,11 +232,11 @@ int main() {
     bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {40, 14, 0};
+    vector<int> lines_param = {68, 0, 0};
 
     vector<string> METHODS = {"default", "prune", "lits_only"};
     for(string method : METHODS) {
-        // if(method == "lits_only") continue;
+        if(method == "lits_only") continue;
 
         // Variables in descending order of occurrence, full lines first
         fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
