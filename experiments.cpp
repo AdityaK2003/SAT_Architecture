@@ -179,7 +179,7 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
     
     a.createEqualLines(lines);
 
-    cout << "METHOD: " << method << endl;
+    cout << "METHOD: " << method << "\t\t";
     if(descending) {
         cout << "descending: true" << endl;
     } else {
@@ -229,17 +229,20 @@ int main() {
     // Create architecture
     Architecture a(c.vars, c.clauses);
     bool debug = false;
-    bool descending = true;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {44, 12, 0};
+    vector<int> lines_param = {16, 26, 0};
 
     vector<string> METHODS = {"default", "prune", "lits_only"};
     for(string method : METHODS) {
-        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, descending);
+        if(method == "default" || method == "lits_only") continue;
+
+        // Variables in descending order of occurrence, full lines first
+        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
         cout << endl;
 
-        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, !descending);
+        // Variables in increasing order of occurrence, half lines first
+        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, false);
         cout << endl;
     }
 

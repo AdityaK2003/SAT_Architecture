@@ -2200,9 +2200,11 @@ string Architecture::currTimestamp() {
  * - bool: if the implement is valid
 */
 bool Architecture::validateImplement() {
+    if(debug) cout << "Validating implement..." << endl;
     // Iterate through each clause
     for(int row = 0; row < clauses; ++row) {
         int c = row_to_clause[row];
+        if(debug) cout << "Checking row " << row << " = clause " << c << endl;
 
         unordered_set<int> clause_lits;
         for(int l : sat_formula[c-1]) clause_lits.insert(l);
@@ -2216,6 +2218,7 @@ bool Architecture::validateImplement() {
 
         // If any clause literals remain, architecture fails
         if(!clause_lits.empty()) {
+            if(debug) cout << "\tCheck failed!" << endl;
             return false;
         }
 
