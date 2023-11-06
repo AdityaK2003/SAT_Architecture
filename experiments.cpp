@@ -232,7 +232,7 @@ int main() {
     bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {28, 20, 0};
+    vector<int> lines_param = {24, 18, 2};
 
     vector<string> METHODS = {"default", "prune", "lits_only"};
     for(string method : METHODS) {
@@ -252,6 +252,8 @@ int main() {
     // p.debug = true;
 
     // unordered_set<int> result = p.removeAndPartitionIDS(3, 3, "half");
+
+    // Find a way to use partitioning problem as preprocess to order vars for backtrack
 
 
     return 0;
