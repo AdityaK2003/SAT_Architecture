@@ -249,14 +249,21 @@ int main() {
 
     // Partitioning problem
     Partition p(c.vars, c.formula);
-    p.debug = true;
-    string heur = "until_partition";
+    p.debug = false;
+    string heur = "half";
     int start_depth = 1;
     int end_depth = 7;
 
-    unordered_set<int> result = p.removeAndPartitionIDS(start_depth, end_depth, heur);
+    // unordered_set<int> result = p.removeAndPartitionIDS(start_depth, end_depth, heur);
+    map<int, vector<int>> result = p.removeAndPartitionGreedy(34);
 
-    // Find a way to use partitioning problem as preprocess to order vars for backtrack
+    // Print out # of vars removed and partition sizes
+    for(pair<int, vector<int>> p : result) {
+        cout << p.first << ": ";
+        for(int v : p.second) cout << v << " ";
+        cout << endl;
+    }
+    
 
 
     return 0;

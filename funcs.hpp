@@ -225,16 +225,16 @@ public:
 
     void createGraph();
 
-    unordered_set<int> partitionBFS(unordered_set<int> ignore);
-    unordered_set<int> partitionBFS();
+    vector<int> partitionBFS(unordered_set<int> ignore);
+    vector<int> partitionBFS();
 
 
     unordered_set<int> removeAndPartitionIDS(int start_depth, int end_depth, string heur="half");
-
+    map<int, vector<int>> removeAndPartitionGreedy(int num_remove);
 };
 
 void removeNode(int var, map<int, set<int>>& edges);
-unordered_set<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>>& edges_copy);
+vector<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>>& edges_copy);
 
 ostream &operator<<(ostream &os, Partition const &p);
 

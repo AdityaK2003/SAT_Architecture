@@ -2473,10 +2473,10 @@ void Partition::createGraph() {
  * - unordered_set<int> ignore: variables to ignore
  * 
  * Returns:
- * - unordered_set<int>: sizes of different partitions
+ * - vector<int>: sizes of different partitions
 */
-unordered_set<int> Partition::partitionBFS(unordered_set<int> ignore) {
-    unordered_set<int> partition_sizes;
+vector<int> Partition::partitionBFS(unordered_set<int> ignore) {
+    vector<int> partition_sizes;
 
     // If graph is empty return false
     if(edges.size() == 0) {
@@ -2523,7 +2523,7 @@ unordered_set<int> Partition::partitionBFS(unordered_set<int> ignore) {
         }
 
         // Add partition to set
-        partition_sizes.insert(partition_size);
+        partition_sizes.push_back(partition_size);
     }
 
     return partition_sizes;
@@ -2534,9 +2534,9 @@ unordered_set<int> Partition::partitionBFS(unordered_set<int> ignore) {
  * Checks if graph is partitioned using BFS
  * 
  * Returns:
- * - unordered_set<int>: sizes of the different partitions
+ * - vector<int>: sizes of the different partitions
 */
-unordered_set<int> Partition::partitionBFS() {
+vector<int> Partition::partitionBFS() {
     unordered_set<int> ignore;
     return partitionBFS(ignore);
 }
@@ -2591,7 +2591,7 @@ unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_dep
     int best_score = INT_MAX;
 
     // Maintain best partition siezs
-    unordered_set<int> best_partition_sizes;
+    vector<int> best_partition_sizes;
 
     // Maintain average score
     int total_score = 0;
@@ -2617,7 +2617,7 @@ unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_dep
             for(int v : combination) c.insert(v);
 
             // Check if partitioned
-            unordered_set<int> partition_sizes = removeAndCheckPartition(c, edges);
+            vector<int> partition_sizes = removeAndCheckPartition(c, edges);
 
             // cout << "Curr Combination: ";
             // for(int curr_num : c) cout << curr_num << " ";
@@ -2690,6 +2690,57 @@ unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_dep
 
 
 /**
+ * Removes variables (by highest degree in graph) until graph is partitioned
+ * 
+ * 
+ * Params:
+ * - num_remove: number of vars to remove
+ * 
+ * Returns:
+ * - map<int, vector<int>>: map from # of vars removed to partition sizes
+ * 
+*/
+map<int, vector<int>> Partition::removeAndPartitionGreedy(int num_remove) {
+    // Maintain set of vars to remove
+    unordered_set<int> remove;
+
+    // Map to return
+    map<int, vector<int>> result;
+
+    // Loop indefinitely
+    for(int i = 1; i <= num_remove; ++i) {
+        // Find the var with most edges
+        int curr_var = 0, count = INT_MIN;
+        for(pair<int, set<int>> p : edges) {
+            if((int)p.second.size() > count) {
+                count = p.second.size();
+                curr_var = p.first;
+            }
+        }
+
+        // Remove var
+        removeNode(curr_var, edges);
+        remove.insert(curr_var);
+
+        // Calculate partitions
+        vector<int> partition_sizes = partitionBFS(remove);
+
+        result[i] = partition_sizes;
+
+        if(debug) {
+            cout << "Vars Removed: ";
+            for(int v : remove) cout << v << " ";
+            cout << endl << "Partition Sizes: ";
+            for(int ps : partition_sizes) cout << ps << " ";
+            cout << endl << endl;
+        }
+    }
+
+    return result;
+}
+
+
+/**
  * Removes node from graph
 */
 void removeNode(int var, map<int, set<int>>& edges) {
@@ -2710,9 +2761,9 @@ void removeNode(int var, map<int, set<int>>& edges) {
  * - map<int, set<int>> edges_copy: graph
  * 
  * Returns:
- * - unordered_set<int> partition sizes
+ * - vector<int> partition sizes
 */
-unordered_set<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>>& edges) {
+vector<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>>& edges) {
     // map<int, set<int>> edges = edges_copy;
 
     // for(int v : remove) {
