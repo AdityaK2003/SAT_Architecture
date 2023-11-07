@@ -222,8 +222,8 @@ int main() {
     string file = OSTROWSKI_FILES[0];
 
     // Create architecture
-    // path = SIMPLE_PATH;
-    // file = "uf16_18.cnf";
+    path = SIMPLE_PATH;
+    file = "uf16_18.cnf";
 
     Circuit c(path+file);
 
@@ -239,19 +239,22 @@ int main() {
         if(method == "lits_only") continue;
 
         // Variables in descending order of occurrence, full lines first
-        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
-        cout << endl;
+        // fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
+        // cout << endl;
 
-        // Variables in increasing order of occurrence, half lines first
-        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, false);
-        cout << endl;
+        // // Variables in increasing order of occurrence, half lines first
+        // fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, false);
+        // cout << endl;
     }
 
     // Partitioning problem
-    // Partition p(c.vars, c.formula);
-    // p.debug = true;
+    Partition p(c.vars, c.formula);
+    p.debug = true;
 
-    // unordered_set<int> result = p.removeAndPartitionIDS(3, 3, "half");
+    int start_depth = 1;
+    int end_depth = 3;
+
+    unordered_set<int> result = p.removeAndPartitionIDS(start_depth, end_depth, "half");
 
     // Find a way to use partitioning problem as preprocess to order vars for backtrack
 

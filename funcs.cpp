@@ -1794,7 +1794,7 @@ bool Architecture::backtrackPrune(int curr_ind,  map<int, pair<int, int>> spans,
     }
     
     if(debug) cout << currTimestamp() << "(" << curr_ind << ") Return false" << endl;
-    
+
     return false;
 }
 
@@ -2545,7 +2545,12 @@ unordered_set<int> Partition::partitionBFS() {
 /**
  * Helper function to generate combinations (to remove)
  * 
- * 
+ * Params:
+ * - result: resulting combinations
+ * - combination: current combination
+ * - start: index
+ * - d: length of combination
+ * - vars: total number of vars
  * 
 */
 void generateCombinations(set<vector<int>>& result, vector<int>& combination, int start, int d, int vars) {
@@ -2654,6 +2659,7 @@ unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_dep
 
     return removed_vars;
 }
+
 
 /**
  * Removes node from graph
