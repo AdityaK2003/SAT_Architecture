@@ -249,7 +249,7 @@ int main() {
 
     // Partitioning problem
     Partition p(c.vars, c.formula);
-    p.debug = false;
+    p.debug = true;
     
     string heur = "half";
     int start_depth = 1;
