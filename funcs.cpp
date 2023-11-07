@@ -2577,6 +2577,7 @@ void generateCombinations(set<vector<int>>& result, vector<int>& combination, in
  * - int end_limit: ending depth of search
  * - string heur: used for DLS
  *    - "half": find most optimal partition that splits into equal halves
+ *    - "until_partition": ignores "start_depth" and "end_depth", and keeps iterating until a partition (of size 2 or more) is found
  *    - other: returns first partition
  * 
  * Returns:
@@ -2589,9 +2590,17 @@ unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_dep
     // Maintain the best combination and its score so far
     int best_score = INT_MAX;
 
+    // Maintain best partition siezs
+    unordered_set<int> best_partition_sizes;
+
     // Maintain average score
     int total_score = 0;
     int score_count = 0;
+
+    if(heur == "until_partition") {
+        start_depth = 1;
+        end_depth = INT_MAX;
+    }
 
     // Iterate through all depths
     for(int depth = start_depth; depth <= end_depth; ++depth) {
@@ -2610,6 +2619,12 @@ unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_dep
             // Check if partitioned
             unordered_set<int> partition_sizes = removeAndCheckPartition(c, edges);
 
+            // cout << "Curr Combination: ";
+            // for(int curr_num : c) cout << curr_num << " ";
+            // cout << endl << "Partition Sizes: ";
+            // for(int ps : partition_sizes) cout << ps << " ";
+            // cout << endl << endl;
+
             // Check heuristic
             if(heur == "half") {
                 // Score the partition by comparing it to half of the number of remaining variables
@@ -2625,14 +2640,30 @@ unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_dep
                 if(score < best_score) {
                     best_score = score;
                     removed_vars = c;
+                    best_partition_sizes = partition_sizes;
                 }
 
                 // Add to count
                 total_score += score;
                 ++score_count;
             }
+            // Until first partition
+            else if(heur == "until_partition") {
+                if(partition_sizes.size() > 1) {
+                    if(debug) {
+                        cout << "Best vars to remove: ";
+                        for(int v : c) cout << v << " ";
+                        cout << endl;
+                        cout << "Resulting Partition Sizes: ";
+                        for(int ps : partition_sizes) cout << ps << " ";
+                        cout << endl << endl;
+                    }
+
+                    return c;
+                }
+            }
+            // No heuristic - just return first partition found
             else {
-                // No heuristic - just return first partition found
                 if(partition_sizes.size() > 1) {
                     return c;
                 }
@@ -2646,14 +2677,11 @@ unordered_set<int> Partition::removeAndPartitionIDS(int start_depth, int end_dep
         for(int v : removed_vars) cout << v << " ";
         cout << endl;
         cout << "Score: " << best_score << endl;
-        cout << "Average Score: " << total_score/score_count << endl;
-    }
+        cout << "Resulting Partition Sizes: ";
+        for(int ps : best_partition_sizes) cout << ps << " ";
+        cout << endl << endl;
 
-    // If "best score" is similar to average score, return empty set - error
-    if(abs((total_score/score_count) - best_score) < 1) {
-        cout << "ERROR: Average and best scores are same." << endl;
-        unordered_set<int> result;
-        return result;
+        cout << "Average Score: " << total_score/score_count << endl;
     }
 
 

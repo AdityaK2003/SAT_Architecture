@@ -222,8 +222,8 @@ int main() {
     string file = OSTROWSKI_FILES[0];
 
     // Create architecture
-    path = SIMPLE_PATH;
-    file = "uf16_18.cnf";
+    // path = SIMPLE_PATH;
+    // file = "uf16_18.cnf";
 
     Circuit c(path+file);
 
@@ -250,11 +250,11 @@ int main() {
     // Partitioning problem
     Partition p(c.vars, c.formula);
     p.debug = true;
-
+    string heur = "until_partition";
     int start_depth = 1;
-    int end_depth = 3;
+    int end_depth = 7;
 
-    unordered_set<int> result = p.removeAndPartitionIDS(start_depth, end_depth, "half");
+    unordered_set<int> result = p.removeAndPartitionIDS(start_depth, end_depth, heur);
 
     // Find a way to use partitioning problem as preprocess to order vars for backtrack
 
