@@ -222,8 +222,8 @@ int main() {
     string file = OSTROWSKI_FILES[0];
 
     // Create architecture
-    // path = SIMPLE_PATH;
-    // file = "uf16_18.cnf";
+    path = SIMPLE_PATH;
+    file = "uf16_18.cnf";
 
     Circuit c(path+file);
 
@@ -254,18 +254,13 @@ int main() {
     string heur = "half";
     int start_depth = 1;
     int end_depth = 7;
-    unordered_set<int> result = p.removeAndPartitionIDS(start_depth, end_depth, heur);
+    // unordered_set<int> result = p.removeAndPartitionIDS(start_depth, end_depth, heur);
     
     
     // int depth = c.vars;
     // map<int, vector<int>> result = p.removeAndPartitionGreedy(depth);
-
-    // // Print out # of vars removed and partition sizes
-    // for(pair<int, vector<int>> p : result) {
-    //     cout << p.first << ": ";
-    //     for(int v : p.second) cout << v << " ";
-    //     cout << endl;
-    // }
+    
+    p.kernighanLinAlg();
     
 
 

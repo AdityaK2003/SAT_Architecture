@@ -2775,6 +2775,120 @@ vector<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>
 }
 
 
+/**
+ * Helper function to determine cost of a partition on the graph
+ * Cost - number of edges crossing the partition
+ * 
+ * Params:
+ * - vector<set<int>>: partitioned vars
+ * 
+ * Returns:
+ * - int: cost (number of overlapping edges
+*/
+int Partition::calculatePartitionCost(vector<set<int>> const partitions) {
+    int cost = 0;
+
+    for(int a : partitions[0]) {
+        for(int b : partitions[1]) {
+            if(edges[a].count(b)) ++cost;
+        }
+    }
+
+    return cost;
+}
+
+
+/**
+ * Helper function to swap vars in partition
+ * 
+ * Params:
+ * - vector<set<int>>: partitioned vars
+ * - int a: a var in the first partition (to be swapped to second)
+ * - int b: a var in second partition (to be swapped to first)
+ * 
+*/
+void Partition::swapBetweenPartitions(vector<set<int>>& partitions, int a, int b) {
+    partitions[0].erase(a);
+    partitions[1].erase(b);
+    partitions[0].insert(b);
+    partitions[1].insert(a);
+}
+
+
+/**
+ * Uses Kernighan-Lin algorithm to find a partition of equal size of the graph which 
+ * minimizes the amount of edges that cross the partitions
+ * 
+ * 
+ * Returns:
+ * - vector<set<int>> - a vector of size 2, representing vars of each partition
+*/
+vector<set<int>> Partition::kernighanLinAlg() {
+    // Arbitrarily create two partitions of equal size
+    vector<set<int>> partitions(2);
+    for(int v = 1; v <= vars/2; ++v) partitions[0].insert(v);
+    for(int v = (vars/2)+1; v <= vars; ++v) partitions[1].insert(v);
+
+    // Create set of vars that can be explored
+    unordered_set<int> remaining;
+    for(int v = 1; v <= vars; ++v) remaining.insert(v);
+
+    // Maintain a overall minimum cost, and best partition
+    vector<set<int>> best_partitions = partitions;
+    int minimum_cost = INT_MAX;
+
+    // Iterate until no (or 1) vars remaining
+    while(remaining.size() > 1) {
+        // Calculate curr cost of partition
+        int curr_cost = calculatePartitionCost(partitions);
+
+        // Maintain best cost, and candidates A and B to swap
+        int best_cost = INT_MAX;
+        int best_a = 0, best_b = 0;
+
+        // Iterate through each var in sets A and B
+        for(int a : partitions[0]) {
+            // Ensure that this var hasn't been chosen yet
+            if(!remaining.count(a)) continue;
+
+            for(int b : partitions[1]) {
+                // Ensure that this var hasn't been chosen yet
+                if(!remaining.count(b)) continue;
+
+                // Temporarily swap a and b
+                swapBetweenPartitions(partitions, a, b);
+
+                // Check cost
+                int new_cost = calculatePartitionCost(partitions);
+
+                // Swap back a and b
+                swapBetweenPartitions(partitions, b, a);
+
+                // Update cost if needed
+                if(new_cost <= best_cost) {
+                    best_cost = new_cost;
+                    best_a = a;
+                    best_b = b;
+                }
+            }
+        }
+
+        // If best cost is same as or worse than curr cost, exit loop (no improvement)
+        if(best_cost >= curr_cost) break;
+
+        // Make the best swap
+        swapBetweenPartitions(partitions, best_a, best_b);
+
+        // Update best partitions if needed
+        if(best_cost < minimum_cost) {
+            minimum_cost = best_cost;
+            best_partitions = partitions;
+        }
+
+    }
+
+    return best_partitions;
+}
 
 
 

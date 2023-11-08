@@ -231,6 +231,10 @@ public:
 
     unordered_set<int> removeAndPartitionIDS(int start_depth, int end_depth, string heur="half");
     map<int, vector<int>> removeAndPartitionGreedy(int num_remove);
+
+    int calculatePartitionCost(vector<set<int>> const partitions);
+    void swapBetweenPartitions(vector<set<int>>& partitions, int a, int b);
+    vector<set<int>> kernighanLinAlg();
 };
 
 void removeNode(int var, map<int, set<int>>& edges);
