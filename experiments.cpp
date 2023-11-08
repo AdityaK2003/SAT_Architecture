@@ -219,7 +219,7 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 int main() {
     // Parse formula
     string path = OSTROWSKI_PATH;
-    string file = OSTROWSKI_FILES[0];
+    string file = OSTROWSKI_FILES[1];
 
     // Create architecture
     // path = SIMPLE_PATH;
@@ -237,19 +237,20 @@ int main() {
     vector<string> METHODS = {"default", "prune", "lits_only"};
     for(string method : METHODS) {
         if(method == "lits_only") continue;
+        if(method == "prune") continue;
 
         // Variables in descending order of occurrence, full lines first
-        // fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
-        // cout << endl;
+        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
+        cout << endl;
 
-        // // Variables in increasing order of occurrence, half lines first
-        // fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, false);
-        // cout << endl;
+        // Variables in increasing order of occurrence, half lines first
+        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, false);
+        cout << endl;
     }
 
     // Partitioning problem
     Partition p(c.vars, c.formula);
-    p.debug = true;
+    //p.debug = true;
     
     string heur = "half";
     int start_depth = 1;
@@ -260,7 +261,7 @@ int main() {
     // int depth = c.vars;
     // map<int, vector<int>> result = p.removeAndPartitionGreedy(depth);
     
-    vector<set<int>> partitions = p.kernighanLinAlg();
+    // vector<set<int>> partitions = p.kernighanLinAlg();
     
 
 
