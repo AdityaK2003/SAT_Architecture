@@ -260,7 +260,7 @@ int main() {
     // int depth = c.vars;
     // map<int, vector<int>> result = p.removeAndPartitionGreedy(depth);
     
-    p.kernighanLinAlg();
+    vector<set<int>> partitions = p.kernighanLinAlg();
     
 
 

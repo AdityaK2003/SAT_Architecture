@@ -2788,11 +2788,22 @@ vector<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>
 int Partition::calculatePartitionCost(vector<set<int>> const partitions) {
     int cost = 0;
 
+    // Count number of edges which cross the partition
     for(int a : partitions[0]) {
         for(int b : partitions[1]) {
             if(edges[a].count(b)) ++cost;
         }
     }
+
+    // Count number of nodes with an edge that crosses the partition
+    // for(int a : partitions[0]) {
+    //     for(int neighbor : edges[a]) {
+    //         if(partitions[1].count(neighbor)) {
+    //             cost += 2;
+    //             break;
+    //         }
+    //     }
+    // }
 
     return cost;
 }
@@ -2844,7 +2855,7 @@ vector<set<int>> Partition::kernighanLinAlg() {
 
         if(debug) {
             cout << "Current Partitions: " << endl << partitions;
-            cout << "Crossing Edges: " << curr_cost << endl << endl;
+            cout << "Cost: " << curr_cost << endl << endl;
         }
 
         // Maintain best cost, and candidates A and B to swap
@@ -2884,8 +2895,8 @@ vector<set<int>> Partition::kernighanLinAlg() {
         }
 
         if(debug) {
-            cout << "Best Swap: " << best_a << " and " << best_b << endl;
-            cout << "Swapped Crossing Edges: " << best_cost << endl << endl;
+            cout << "\tBest Swap: " << best_a << " and " << best_b << endl;
+            cout << "\tSwapped Cost: " << best_cost << endl << endl;
         }
 
 
@@ -2911,7 +2922,7 @@ vector<set<int>> Partition::kernighanLinAlg() {
     }
 
     cout << "Best Partitions: " << endl << best_partitions;
-    cout << "Crossing Edges: " << minimum_cost << endl << endl;
+    cout << "Best Cost: " << minimum_cost << endl << endl;
 
     return best_partitions;
 }
