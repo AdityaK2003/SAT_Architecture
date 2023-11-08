@@ -240,6 +240,7 @@ public:
 void removeNode(int var, map<int, set<int>>& edges);
 vector<int> removeAndCheckPartition(unordered_set<int> remove, map<int, set<int>>& edges_copy);
 
+ostream &operator<<(ostream &os, vector<set<int>> const &partitions);
 ostream &operator<<(ostream &os, Partition const &p);
 
 

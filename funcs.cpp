@@ -2842,18 +2842,28 @@ vector<set<int>> Partition::kernighanLinAlg() {
         // Calculate curr cost of partition
         int curr_cost = calculatePartitionCost(partitions);
 
+        if(debug) {
+            cout << "Current Partitions: " << endl << partitions;
+            cout << "Crossing Edges: " << curr_cost << endl << endl;
+        }
+
         // Maintain best cost, and candidates A and B to swap
         int best_cost = INT_MAX;
         int best_a = 0, best_b = 0;
 
         // Iterate through each var in sets A and B
-        for(int a : partitions[0]) {
+        set<int> A = partitions[0], B = partitions[1];
+        for(int a : A) {
             // Ensure that this var hasn't been chosen yet
-            if(!remaining.count(a)) continue;
+            if(remaining.find(a) == remaining.end()) {
+                continue;
+            }
 
-            for(int b : partitions[1]) {
+            for(int b : B) {
                 // Ensure that this var hasn't been chosen yet
-                if(!remaining.count(b)) continue;
+                if(remaining.find(b) == remaining.end()) {
+                    continue;
+                }
 
                 // Temporarily swap a and b
                 swapBetweenPartitions(partitions, a, b);
@@ -2873,11 +2883,24 @@ vector<set<int>> Partition::kernighanLinAlg() {
             }
         }
 
+        if(debug) {
+            cout << "Best Swap: " << best_a << " and " << best_b << endl;
+            cout << "Swapped Crossing Edges: " << best_cost << endl << endl;
+        }
+
+
         // If best cost is same as or worse than curr cost, exit loop (no improvement)
-        if(best_cost >= curr_cost) break;
+        if(best_cost >= curr_cost) {
+            if(debug) cout << "Swap doesn't improve score. Breaking..." << endl << endl;
+            break;
+        }
 
         // Make the best swap
         swapBetweenPartitions(partitions, best_a, best_b);
+
+        // Mark best_a and best_b as used
+        remaining.erase(best_a);
+        remaining.erase(best_b);
 
         // Update best partitions if needed
         if(best_cost < minimum_cost) {
@@ -2887,10 +2910,23 @@ vector<set<int>> Partition::kernighanLinAlg() {
 
     }
 
+    cout << "Best Partitions: " << endl << best_partitions;
+    cout << "Crossing Edges: " << minimum_cost << endl << endl;
+
     return best_partitions;
 }
 
 
+// Print partitions
+ostream &operator<<(ostream &os, vector<set<int>> const &partitions) {
+    os << "A: ";
+    for(int a : partitions[0]) os << a << " ";
+    os << endl << "B: ";
+    for(int b : partitions[1]) os << b << " ";
+    os << endl;
+
+    return os;
+}
 
 // Print a partition
 ostream &operator<<(ostream &os, Partition const &p) {

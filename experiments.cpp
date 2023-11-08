@@ -222,8 +222,8 @@ int main() {
     string file = OSTROWSKI_FILES[0];
 
     // Create architecture
-    path = SIMPLE_PATH;
-    file = "uf16_18.cnf";
+    // path = SIMPLE_PATH;
+    // file = "uf16_18.cnf";
 
     Circuit c(path+file);
 
