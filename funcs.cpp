@@ -2928,7 +2928,7 @@ vector<set<int>> Partition::kernighanLinAlg() {
 }
 
 
-// Print partitions
+// Print partitions (2 sets in a vector)
 ostream &operator<<(ostream &os, vector<set<int>> const &partitions) {
     os << "A: ";
     for(int a : partitions[0]) os << a << " ";
@@ -2939,7 +2939,7 @@ ostream &operator<<(ostream &os, vector<set<int>> const &partitions) {
     return os;
 }
 
-// Print a partition
+// Print a Partition class
 ostream &operator<<(ostream &os, Partition const &p) {
     os << "Vars: " << p.vars << " \tClauses: " << p.clauses << endl;
 

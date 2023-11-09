@@ -232,7 +232,7 @@ int main() {
     bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {24, 18, 2};
+    vector<int> lines_param = {84, 6, 8};
 
     vector<string> METHODS = {"default", "prune", "lits_only"};
     for(string method : METHODS) {
