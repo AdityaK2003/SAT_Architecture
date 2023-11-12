@@ -2857,7 +2857,7 @@ void Partition::swapBetweenPartitions(vector<set<int>>& partitions, int a, int b
  * - int b: a var to be swapped
  * 
 */
-void Partition::swapBetweenPartitions(set<int>& s1, set<int>& s2, int a, int b) {
+void Partition::swapBetweenSets(set<int>& s1, set<int>& s2, int a, int b) {
     // a in s1, b in s2
     if(s1.count(a) && s2.count(b)) {
         s1.erase(a);
@@ -3004,11 +3004,94 @@ vector<set<int>> Partition::nodeKLAlg1(int d, set<int>& removed) {
     int minimum_cost = INT_MAX;
 
     // Iterate until not enough vars remaining
-    while(remaining.size() > 1) {
+    while(remaining.size() > 0) {
         // Calculate current cost of partition
         int curr_cost = calculatePartitionCost(partitions, removed);
+
+        if(debug) {
+            cout << "Current Partitions: " << endl << partitions;
+            cout << "Removed: ";
+            for(int r : removed) cout << r << " ";
+            cout << endl << "Cost: " << curr_cost << endl << endl;
+        }
+
+        // Maintain best cost, and candidates x and r to swap 
+        // x is either in A or B, and r is in removed
+        int best_cost = INT_MAX;
+        int best_x = 0, best_r = 0;
+
+        // Iterate through each var that is not in removed (essentially, all vars in A and B)
+        for(int x = 1; x <= vars; ++x) {
+            if(removed.count(x)) continue;
+
+            // Ensure variable hasn't been used yet 
+            if(!remaining.count(x)) continue;
+
+            // Iterate through each var in removed
+            set<int> removed_copy = removed;
+            for(int r : removed_copy) {
+                // Temporarily swap x and r, remembering which set x came from
+                bool x_in_A = false;
+                if(partitions[0].count(x)) {
+                    swapBetweenSets(partitions[0], removed, x, r);
+                    x_in_A = true;
+                } else {
+                    swapBetweenSets(partitions[1], removed, x, r);
+                }
+
+                // Check cost
+                int new_cost = calculatePartitionCost(partitions, removed);
+
+                // Swap back x and r 
+                if(x_in_A) {
+                    swapBetweenSets(partitions[0], removed, r, x);
+                } else {
+                    swapBetweenSets(partitions[1], removed, r, x);
+                }
+
+                // Update cost if needed
+                if(new_cost <= best_cost) {
+                    best_cost = new_cost;
+                    best_x = x;
+                    best_r = r;
+                }
+
+            }
+        }
+
+        if(debug) {
+            cout << "\tBest Swap: " << best_x << " and " << best_r << endl;
+            cout << "\tSwapped Cost: " << best_cost << endl << endl;
+        }
+
+        // If best cost same as or worse than curr cost, exit
+        if(best_cost >= curr_cost) {
+            if(debug) cout << "Swap doesn't improve score. Breaking..." << endl << endl;
+            break;
+        }
+
+        // Make the best swap 
+        if(partitions[0].count(best_x)) {
+            swapBetweenSets(partitions[0], removed, best_x, best_r);
+        } else {
+            swapBetweenSets(partitions[1], removed, best_x, best_r);
+        }
+
+        // Mark best_x as used 
+        remaining.erase(best_x);
+
+        // Update best partitions if needed 
+        if(best_cost < minimum_cost) {
+            minimum_cost = best_cost;
+            best_partitions = partitions;
+        }
+
     }
 
+    cout << "Best Partitions: " << endl << best_partitions;
+    cout << "Remove: ";
+    for(int r : removed) cout << r << " ";
+    cout << endl << "Best Cost: " << minimum_cost << endl << endl;
 
     return partitions;
 }

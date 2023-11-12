@@ -237,7 +237,7 @@ public:
     vector<set<int>> kernighanLinAlg();
 
     int calculatePartitionCost(vector<set<int>> const partitions, set<int> const removed);
-    void swapBetweenPartitions(set<int>& s1, set<int>& s2, int a, int b);
+    void swapBetweenSets(set<int>& s1, set<int>& s2, int a, int b);
     vector<set<int>> nodeKLAlg1(int d, set<int>& removed);
 };
 
