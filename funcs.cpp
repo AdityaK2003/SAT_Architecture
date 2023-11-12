@@ -2928,6 +2928,33 @@ vector<set<int>> Partition::kernighanLinAlg() {
 }
 
 
+/**
+ * Modified KL-algorithm to find partition of equal size plus some variables removed to
+ * minimize amount of edges that cross the partitions
+ * 
+ * Params:
+ * - int d: denotes number of vars to remove
+ * - set<int> remove: used to return by reference the vars to remove
+ * 
+ * Returns:
+ * - vector<set<int>> - a vector of size 2, representing vars of each partition
+*/
+vector<set<int>> Partition::nodeKLAlg1(int d, set<int>& remove) {
+    // Arbitrarily create partitions and set vars to be removed
+    vector<set<int>> partitions(2);
+    for(int v = 1; v <= (vars-d)/2; ++v) partitions[0].insert(v);
+    for(int v = ((vars-d)/2)+1; v <= (vars-d); ++v) partitions[1].insert(v);
+    for(int v = vars-d+1; v <= vars; ++v) remove.insert(v);
+
+    cout << partitions << endl;
+    for(int v : remove) cout << v << " ";
+    cout << endl;
+
+
+    return partitions;
+}
+
+
 // Print partitions (2 sets in a vector)
 ostream &operator<<(ostream &os, vector<set<int>> const &partitions) {
     os << "A: ";
