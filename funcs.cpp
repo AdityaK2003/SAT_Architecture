@@ -2795,15 +2795,37 @@ int Partition::calculatePartitionCost(vector<set<int>> const partitions) {
         }
     }
 
-    // Count number of nodes with an edge that crosses the partition
-    // for(int a : partitions[0]) {
-    //     for(int neighbor : edges[a]) {
-    //         if(partitions[1].count(neighbor)) {
-    //             cost += 2;
-    //             break;
-    //         }
-    //     }
-    // }
+
+    return cost;
+}
+
+
+/**
+ * Helper function to determine cost of a partition on the graph, with removed nodes
+ * Cost - number of edges crossing the partition
+ * 
+ * Params:
+ * - vector<set<int>>: partitioned vars
+ * - set<int>: removed vars
+ * 
+ * Returns:
+ * - int: cost (number of overlapping edges
+*/
+int Partition::calculatePartitionCost(vector<set<int>> const partitions, set<int> const removed) {
+    int cost = 0;
+
+    // Count number of edges which cross the partition
+    for(int a : partitions[0]) {
+        // Skip edges that contain a removed var
+        if(removed.count(a)) continue;
+        for(int b : partitions[1]) {
+            if(removed.count(b)) continue;
+
+            // Edge crossing partition found
+            if(edges[a].count(b)) ++cost;
+        }
+    }
+
 
     return cost;
 }
@@ -2823,6 +2845,33 @@ void Partition::swapBetweenPartitions(vector<set<int>>& partitions, int a, int b
     partitions[1].erase(b);
     partitions[0].insert(b);
     partitions[1].insert(a);
+}
+
+/**
+ * Helper function to swap vars in any two sets
+ * 
+ * Params:
+ * - set<int> s1: set 1
+ * - set<int> s2: set 2
+ * - int a: a var to be swapped
+ * - int b: a var to be swapped
+ * 
+*/
+void Partition::swapBetweenPartitions(set<int>& s1, set<int>& s2, int a, int b) {
+    // a in s1, b in s2
+    if(s1.count(a) && s2.count(b)) {
+        s1.erase(a);
+        s2.erase(b);
+        s1.insert(b);
+        s2.insert(a);
+    }
+    // a in s2, b in s1
+    else if(s1.count(b) && s2.count(a)) {
+        s1.erase(b);
+        s2.erase(a);
+        s1.insert(a);
+        s2.insert(b);
+    }
 }
 
 
@@ -2934,21 +2983,31 @@ vector<set<int>> Partition::kernighanLinAlg() {
  * 
  * Params:
  * - int d: denotes number of vars to remove
- * - set<int> remove: used to return by reference the vars to remove
+ * - set<int> removed: used to return by reference the vars to remove
  * 
  * Returns:
  * - vector<set<int>> - a vector of size 2, representing vars of each partition
 */
-vector<set<int>> Partition::nodeKLAlg1(int d, set<int>& remove) {
+vector<set<int>> Partition::nodeKLAlg1(int d, set<int>& removed) {
     // Arbitrarily create partitions and set vars to be removed
     vector<set<int>> partitions(2);
     for(int v = 1; v <= (vars-d)/2; ++v) partitions[0].insert(v);
     for(int v = ((vars-d)/2)+1; v <= (vars-d); ++v) partitions[1].insert(v);
-    for(int v = vars-d+1; v <= vars; ++v) remove.insert(v);
+    for(int v = vars-d+1; v <= vars; ++v) removed.insert(v);
 
-    cout << partitions << endl;
-    for(int v : remove) cout << v << " ";
-    cout << endl;
+    // Create set of variables that can be explored
+    unordered_set<int> remaining;
+    for(int v = 1; v <= vars; ++v) remaining.insert(v);
+
+    // Maintain an overall minimum cost, and best partition
+    vector<set<int>> best_partitions = partitions;
+    int minimum_cost = INT_MAX;
+
+    // Iterate until not enough vars remaining
+    while(remaining.size() > 1) {
+        // Calculate current cost of partition
+        int curr_cost = calculatePartitionCost(partitions, removed);
+    }
 
 
     return partitions;
