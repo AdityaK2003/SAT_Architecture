@@ -219,7 +219,7 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 int main() {
     // Parse formula
     string path = OSTROWSKI_PATH;
-    string file = OSTROWSKI_FILES[1];
+    string file = OSTROWSKI_FILES[2];
 
     // Create architecture
     // path = SIMPLE_PATH;
@@ -232,7 +232,7 @@ int main() {
     bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {44, 42, 0};
+    vector<int> lines_param = {118, 38, 0};
 
     vector<string> METHODS = {"default", "prune", "lits_only"};
     for(string method : METHODS) {

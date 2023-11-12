@@ -23,13 +23,13 @@ def check_conditions(combination, total, vars, remove_threes):
 
 
 # TODO: Edit number of variables
-vars = 64
+vars = 97
 
 # TODO: Edit range of widths to find combinations for, inclusive
 # width_1's max value is 2*vars
 # width_1 > width2
-width_1 = 88
-width_2 = 88
+width_1 = 158
+width_2 = 150
 
 
 # TODO: Set remove_threes
