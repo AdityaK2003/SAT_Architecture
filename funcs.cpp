@@ -18,6 +18,8 @@
 #include <dirent.h>
 #include <chrono>
 #include <iomanip>
+#include <ctime>
+#include <cstdlib>
 
 #include "old_funcs.hpp"
 #include "funcs.hpp"
@@ -2879,15 +2881,28 @@ void Partition::swapBetweenSets(set<int>& s1, set<int>& s2, int a, int b) {
  * Uses Kernighan-Lin algorithm to find a partition of equal size of the graph which 
  * minimizes the amount of edges that cross the partitions
  * 
+ * Params:
+ * - bool shuffle_vars: randomly creates initial assignment
  * 
  * Returns:
  * - vector<set<int>> - a vector of size 2, representing vars of each partition
 */
-vector<set<int>> Partition::kernighanLinAlg() {
+vector<set<int>> Partition::kernighanLinAlg(bool shuffle_vars) {
+    // Create initial orderings
+    vector<int> orderings;
+    for(int v = 1; v <= vars/2; ++v) orderings.push_back(v);
+
+    // Shuffle if needed 
+    if(shuffle_vars) {
+        random_device rd;
+        mt19937 g(rd());
+        shuffle(orderings.begin(), orderings.end(), g);
+    }
+    
     // Arbitrarily create two partitions of equal size
     vector<set<int>> partitions(2);
-    for(int v = 1; v <= vars/2; ++v) partitions[0].insert(v);
-    for(int v = (vars/2)+1; v <= vars; ++v) partitions[1].insert(v);
+    for(int v = 1; v <= vars/2; ++v) partitions[0].insert(orderings[v-1]);
+    for(int v = (vars/2)+1; v <= vars; ++v) partitions[1].insert(orderings[v-1]);
 
     // Create set of vars that can be explored
     unordered_set<int> remaining;
@@ -2984,16 +2999,28 @@ vector<set<int>> Partition::kernighanLinAlg() {
  * Params:
  * - int d: denotes number of vars to remove
  * - set<int> removed: used to return by reference the vars to remove
+ * - bool shuffle_vars: uses random initial arrangement
  * 
  * Returns:
  * - vector<set<int>> - a vector of size 2, representing vars of each partition
 */
-vector<set<int>> Partition::nodeKLAlg1(int d, set<int>& removed) {
+vector<set<int>> Partition::nodeKLAlg1(int d, set<int>& removed, bool shuffle_vars) {
+    // Create orderings of variables
+    vector<int> orderings;
+    for(int v = 1; v <= vars; ++v) orderings.push_back(v);
+
+    // Shuffle if needed
+    if(shuffle_vars) {
+        random_device rd;
+        mt19937 g(rd());
+        shuffle(orderings.begin(), orderings.end(), g);
+    }
+    
     // Arbitrarily create partitions and set vars to be removed
     vector<set<int>> partitions(2);
-    for(int v = 1; v <= (vars-d)/2; ++v) partitions[0].insert(v);
-    for(int v = ((vars-d)/2)+1; v <= (vars-d); ++v) partitions[1].insert(v);
-    for(int v = vars-d+1; v <= vars; ++v) removed.insert(v);
+    for(int v = 1; v <= (vars-d)/2; ++v) partitions[0].insert(orderings[v-1]);
+    for(int v = ((vars-d)/2)+1; v <= (vars-d); ++v) partitions[1].insert(orderings[v-1]);
+    for(int v = vars-d+1; v <= vars; ++v) removed.insert(orderings[v-1]);
 
     // Create set of variables that can be explored
     unordered_set<int> remaining;

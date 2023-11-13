@@ -12,6 +12,8 @@
 #include <sys/types.h>
 #include <list>
 #include <chrono>
+#include <ctime>
+#include <cstdlib>
 
 #include "old_funcs.hpp"
 #include "funcs.hpp"
@@ -232,7 +234,7 @@ int main() {
     bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {130, 4, 14};
+    vector<int> lines_param = {126, 2, 16};
 
     vector<string> METHODS = {"default", "prune", "lits_only"};
     for(string method : METHODS) {
@@ -240,7 +242,7 @@ int main() {
         if(method == "prune") continue;
 
         // // Variables in descending order of occurrence, full lines first
-        //fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
+        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
         cout << endl;
 
         // Variables in increasing order of occurrence, half lines first
