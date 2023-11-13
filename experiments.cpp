@@ -221,7 +221,7 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 int main() {
     // Parse formula
     string path = OSTROWSKI_PATH;
-    string file = OSTROWSKI_FILES[2];
+    string file = OSTROWSKI_FILES[0];
 
     // Create architecture
     // path = SIMPLE_PATH;
@@ -234,7 +234,7 @@ int main() {
     bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {126, 2, 16};
+    vector<int> lines_param = {86, 54, 0};
 
     vector<string> METHODS = {"default", "prune", "lits_only"};
     for(string method : METHODS) {
@@ -242,12 +242,12 @@ int main() {
         if(method == "prune") continue;
 
         // // Variables in descending order of occurrence, full lines first
-        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
-        cout << endl;
+        // fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
+        // cout << endl;
 
-        // Variables in increasing order of occurrence, half lines first
-        fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, false);
-        cout << endl;
+        // // Variables in increasing order of occurrence, half lines first
+        // fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, false);
+        // cout << endl;
     }
 
     // Partitioning problem
@@ -263,13 +263,15 @@ int main() {
     // int depth = c.vars;
     // map<int, vector<int>> result = p.removeAndPartitionGreedy(depth);
     
-    // vector<set<int>> partitions = p.kernighanLinAlg();
+    // vector<set<int>> partitions = p.kernighanLinAlg(true);
     
-    // for(int d = 1; d <= 149; ++d) {
-    //     cout << "Removing " << d << " variables: " << endl;
-    //     set<int> remove;
-    //     vector<set<int>> partitions = p.nodeKLAlg1(d, remove);
-    // }
+    for(int d = 10; d <= 10; ++d) {
+        for(int trial = 1; trial <= 1; ++trial) {
+            cout << "Removing " << d << " variables, trial = " << trial << endl;
+            set<int> remove;
+            vector<set<int>> partitions = p.nodeKLAlg1(d, remove, true);
+        }
+    }
 
 
     return 0;

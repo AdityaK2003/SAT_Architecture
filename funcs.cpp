@@ -2890,7 +2890,7 @@ void Partition::swapBetweenSets(set<int>& s1, set<int>& s2, int a, int b) {
 vector<set<int>> Partition::kernighanLinAlg(bool shuffle_vars) {
     // Create initial orderings
     vector<int> orderings;
-    for(int v = 1; v <= vars/2; ++v) orderings.push_back(v);
+    for(int v = 1; v <= vars; ++v) orderings.push_back(v);
 
     // Shuffle if needed 
     if(shuffle_vars) {
@@ -3094,7 +3094,6 @@ vector<set<int>> Partition::nodeKLAlg1(int d, set<int>& removed, bool shuffle_va
         // If best cost same as or worse than curr cost, exit
         if(best_cost >= curr_cost) {
             if(debug) cout << "Swap doesn't improve score. Breaking..." << endl << endl;
-            curr_cost = best_cost;
             break;
         }
 
