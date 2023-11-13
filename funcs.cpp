@@ -3001,7 +3001,7 @@ vector<set<int>> Partition::nodeKLAlg1(int d, set<int>& removed) {
 
     // Maintain an overall minimum cost, and best partition
     vector<set<int>> best_partitions = partitions;
-    int minimum_cost = INT_MAX;
+    int minimum_cost = calculatePartitionCost(partitions, removed);
 
     // Iterate until not enough vars remaining
     while(remaining.size() > 0) {
@@ -3067,6 +3067,7 @@ vector<set<int>> Partition::nodeKLAlg1(int d, set<int>& removed) {
         // If best cost same as or worse than curr cost, exit
         if(best_cost >= curr_cost) {
             if(debug) cout << "Swap doesn't improve score. Breaking..." << endl << endl;
+            curr_cost = best_cost;
             break;
         }
 
@@ -3088,10 +3089,11 @@ vector<set<int>> Partition::nodeKLAlg1(int d, set<int>& removed) {
 
     }
 
-    cout << "Best Partitions: " << endl << best_partitions;
-    cout << "Remove: ";
-    for(int r : removed) cout << r << " ";
-    cout << endl << "Best Cost: " << minimum_cost << endl << endl;
+    // cout << "Best Partitions: " << endl << best_partitions;
+    // cout << "Remove: ";
+    // for(int r : removed) cout << r << " ";
+    // cout << endl;
+    cout << "Best Cost: " << minimum_cost << endl << endl;
 
     return partitions;
 }
