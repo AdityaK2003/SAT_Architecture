@@ -224,8 +224,8 @@ int main() {
     string file = OSTROWSKI_FILES[0];
 
     // Create architecture
-    // path = SIMPLE_PATH;
-    // file = "uf16_18.cnf";
+    path = SIMPLE_PATH;
+    file = "uf16_18.cnf";
 
     Circuit c(path+file);
 
@@ -265,13 +265,17 @@ int main() {
     
     // vector<set<int>> partitions = p.kernighanLinAlg(true);
     
-    for(int d = 10; d <= 10; ++d) {
-        for(int trial = 1; trial <= 1; ++trial) {
-            cout << "Removing " << d << " variables, trial = " << trial << endl;
-            set<int> remove;
-            vector<set<int>> partitions = p.nodeKLAlg1(d, remove, true);
-        }
-    }
+    // for(int d = 10; d <= 10; ++d) {
+    //     for(int trial = 1; trial <= 1; ++trial) {
+    //         cout << "Removing " << d << " variables, trial = " << trial << endl;
+    //         set<int> remove;
+    //         vector<set<int>> partitions = p.nodeKLAlg1(d, remove, true);
+    //     }
+    // }
+
+    unordered_set<int> neighbors = p.neighborsBFS(15, 3);
+    for(int v : neighbors) cout << v << " ";
+    cout << endl;
 
 
     return 0;

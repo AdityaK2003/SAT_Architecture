@@ -2560,12 +2560,45 @@ vector<int> Partition::partitionBFS() {
  * - unordered_set<int>: the variables that fit the criteria (the nodes)
 */
 unordered_set<int> Partition::neighborsBFS(int start, int depth) {
-    if(depth == 0) {
-        unordered_set<int> result = {start};
-        return result;
+    unordered_set<int> result = {start};
+    
+    if(depth == 0) return result;
+
+    // Maintain depth of each node that has been explored
+    unordered_map<int, int> found_depths;
+    found_depths[start] = 0;
+
+    // BFS Queue
+    queue<int> bfs_queue;
+    bfs_queue.push(start);
+
+    // BFS loop
+    while(bfs_queue.size()) {
+        // Get current var
+        int curr = bfs_queue.front();
+        bfs_queue.pop();
+
+        // Add to result
+        result.insert(curr);
+
+        // If already at max depth, continue (don't add neighbors to queue)
+        if(found_depths[curr] == depth) continue;
+
+        // Explore neighbors
+        for(int neighbor : edges[curr]) {
+            // If not found yet
+            if(found_depths.find(neighbor) == found_depths.end()) {
+                // Mark its depth
+                found_depths[neighbor] = found_depths[curr] + 1;
+
+                // Add to queue
+                bfs_queue.push(neighbor);
+            }
+        }
     }
 
-    
+    // Return the result
+    return result;
 }
 
 
