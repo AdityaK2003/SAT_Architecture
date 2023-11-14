@@ -2545,6 +2545,32 @@ vector<int> Partition::partitionBFS() {
 
 
 /**
+ * Counts number of neighbors recursively, returning all of these variables in a set
+ * 
+ * If depth = 0, returns itself
+ * If depth = 1, returns itself and all its neighbors
+ * If depth = 2, returns itself, all its neighbors, and neighbors' neighbors
+ * And so on
+ * 
+ * Params:
+ * - int start: the starting variable
+ * - int depth: depth of the search
+ * 
+ * Returns:
+ * - unordered_set<int>: the variables that fit the criteria (the nodes)
+*/
+unordered_set<int> Partition::neighborsBFS(int start, int depth) {
+    if(depth == 0) {
+        unordered_set<int> result = {start};
+        return result;
+    }
+
+    
+}
+
+
+
+/**
  * Helper function to generate combinations (to remove)
  * 
  * Params:
