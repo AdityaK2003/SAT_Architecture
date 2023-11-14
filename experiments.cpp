@@ -224,8 +224,8 @@ int main() {
     string file = OSTROWSKI_FILES[0];
 
     // Create architecture
-    path = SIMPLE_PATH;
-    file = "uf16_18.cnf";
+    // path = SIMPLE_PATH;
+    // file = "uf16_18.cnf";
 
     Circuit c(path+file);
 
@@ -273,9 +273,11 @@ int main() {
     //     }
     // }
 
-    unordered_set<int> neighbors = p.neighborsBFS(15, 3);
-    for(int v : neighbors) cout << v << " ";
-    cout << endl;
+    int depth = 4;
+    for(int start = 1; start <= c.vars; ++start) {
+        int count = p.neighborsClauseCount(start, depth);
+        cout << count << endl;
+    }
 
 
     return 0;

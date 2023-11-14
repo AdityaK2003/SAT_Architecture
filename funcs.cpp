@@ -2602,6 +2602,42 @@ unordered_set<int> Partition::neighborsBFS(int start, int depth) {
 }
 
 
+/**
+ * Counts number of clauses that neighbors appear in
+ * 
+ * If depth = 0, returns all clauses that 'start' appears in
+ * If depth = 1, returns all clauses that 'start' or start's neighbors appears in
+ * If depth = 2, returns all clauses that start, start's neighbors, or start's neighbors' neighbors appears in
+ * And so on
+ * 
+ * Params:
+ * - int start: the starting variable
+ * - int depth: depth of search
+ * 
+ * Returns:
+ * - int: the number of clauses according to the above criteria
+*/
+int Partition::neighborsClauseCount(int start, int depth) {
+    // Run a BFS to get all variables to focus on
+    unordered_set<int> neighbors = neighborsBFS(start, depth);
+
+    // Count all clauses that have at least one neighbor
+    int count = 0;
+    for(vector<int> clause : formula) {
+        bool found = false;
+        for(int lit : clause) {
+            if(neighbors.count(abs(lit))) {
+                found = true;
+                break;
+            }
+        }
+
+        if(found) ++count;
+    }
+
+    return count;
+}
+
 
 /**
  * Helper function to generate combinations (to remove)

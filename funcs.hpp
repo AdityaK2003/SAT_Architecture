@@ -229,6 +229,7 @@ public:
     vector<int> partitionBFS();
 
     unordered_set<int> neighborsBFS(int start, int depth);
+    int neighborsClauseCount(int start, int depth);
 
 
     unordered_set<int> removeAndPartitionIDS(int start_depth, int end_depth, string heur="half");
