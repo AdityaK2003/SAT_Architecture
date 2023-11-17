@@ -3220,13 +3220,48 @@ vector<set<int>> Partition::nodeKLAlg1(int d, set<int>& removed, bool shuffle_va
 }
 
 
-// Print partitions (2 sets in a vector)
+/**
+ * Creates a clause partitioning (of equal size)
+ * 
+ * Params:
+ * - int num_partitions: number of partitions to divide clauses into
+ * - bool shuffle_order: if true, randomizes the order before partitioning
+ * 
+ * Returns:
+ * - vector<set<int>>: the clause partition
+*/
+vector<set<int>> Partition::createClausePartition(int num_partitions, bool shuffle_order) {
+    // Create list of all clauses
+    vector<int> clause_order;
+    for(int c = 0; c < clauses; ++c) clause_order.push_back(c);
+
+    // Shuffle if needed
+    if(shuffle_order) {
+        random_device rd;
+        mt19937 g(rd());
+        shuffle(clause_order.begin(), clause_order.end(), g);
+    }
+
+    // Use round-robin to add to partitions
+    vector<set<int>> partitions(num_partitions);
+    for(int i = 0; i < clause_order.size(); ++i) {
+        int partition_i = i % num_partitions;
+        partitions[partition_i].insert(clause_order[i]);
+    }
+
+    // cout << partitions << endl;
+    return partitions;
+}
+
+
+// Print partitions
 ostream &operator<<(ostream &os, vector<set<int>> const &partitions) {
-    os << "A: ";
-    for(int a : partitions[0]) os << a << " ";
-    os << endl << "B: ";
-    for(int b : partitions[1]) os << b << " ";
-    os << endl;
+    for(int i = 0; i < partitions.size(); ++i) {
+        char c = 'A' + i;
+        os << c << ": " << endl;
+        for(int a : partitions[i]) os << a << " ";
+        os << endl;
+    }
 
     return os;
 }

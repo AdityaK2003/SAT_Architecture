@@ -221,7 +221,7 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 int main() {
     // Parse formula
     string path = OSTROWSKI_PATH;
-    string file = OSTROWSKI_FILES[8];
+    string file = OSTROWSKI_FILES[0];
 
     // path = MOSOI_PATH;
     // file = MOSOI_FILES[0];
@@ -277,11 +277,13 @@ int main() {
     //     }
     // }
 
-    int depth = 8;
-    for(int start = 1; start <= c.vars; ++start) {
-        int count = p.neighborsClauseCount(start, depth);
-        cout << count << endl;
-    }
+    // int depth = 8;
+    // for(int start = 1; start <= c.vars; ++start) {
+    //     int count = p.neighborsClauseCount(start, depth);
+    //     cout << count << endl;
+    // }
+
+    p.createClausePartition(5, false);
 
 
     return 0;

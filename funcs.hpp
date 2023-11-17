@@ -242,6 +242,9 @@ public:
     int calculatePartitionCost(vector<set<int>> const partitions, set<int> const removed);
     void swapBetweenSets(set<int>& s1, set<int>& s2, int a, int b);
     vector<set<int>> nodeKLAlg1(int d, set<int>& removed, bool shuffle_vars=false);
+
+
+    vector<set<int>> createClausePartition(int num_partitions, bool shuffle_order);
 };
 
 void removeNode(int var, map<int, set<int>>& edges);
