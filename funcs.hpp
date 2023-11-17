@@ -245,6 +245,7 @@ public:
 
 
     vector<set<int>> createClausePartition(int num_partitions, bool shuffle_order);
+    int clausePartitionCost(vector<set<int>> partitions);
 };
 
 void removeNode(int var, map<int, set<int>>& edges);

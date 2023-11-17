@@ -3253,6 +3253,48 @@ vector<set<int>> Partition::createClausePartition(int num_partitions, bool shuff
     return partitions;
 }
 
+/**
+ * Calculates cost of a clause partition.
+ * Counts the number of variables that are in more than one partition
+ * 
+ * Params:
+ * - vector<set<int>> partitions: the clause partitions
+ * 
+ * Returns:
+ * - int: the cost (number of vars in 2+ partitions)
+*/
+int Partition::clausePartitionCost(vector<set<int>> partitions) {
+    int cost = 0;
+
+    // Keep track of found vars and their corresponding partitions
+    // found[var][p] is number of times variable "var" is in partition "p"
+    unordered_map<int, map<int, int>> found;
+
+    // Iterate through all partitions
+    for(int p = 0; p < partitions.size(); ++p) {
+        // Iterate through each clause in this partition
+        for(int c : partitions[p]) {
+            // Iterate through all variables in this clause
+            for(int lit : formula[c]) {
+                // Mark variable as found
+                found[abs(lit)][p]++;
+            }
+        }
+    
+    }
+
+    // Count all vars that are in multiple partitions
+    for(int v = 1; v <= vars; ++v) {
+        cout << "Var: " << v << endl;
+        for(pair<int, int> p : found[v]) cout <<  p.second << " ";
+        cout << endl;
+
+        if(found[v].size() > 1) ++cost;
+    }
+
+    return cost;
+}
+
 
 // Print partitions
 ostream &operator<<(ostream &os, vector<set<int>> const &partitions) {

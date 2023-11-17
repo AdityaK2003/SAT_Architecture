@@ -283,8 +283,9 @@ int main() {
     //     cout << count << endl;
     // }
 
-    p.createClausePartition(5, false);
-
+    vector<set<int>> partitions = p.createClausePartition(1, true);
+    int cost = p.clausePartitionCost(partitions);
+    cout << "\ncost: " << cost << endl;
 
     return 0;
 }
