@@ -221,13 +221,17 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 int main() {
     // Parse formula
     string path = OSTROWSKI_PATH;
-    string file = OSTROWSKI_FILES[2];
+    string file = OSTROWSKI_FILES[8];
+
+    // path = MOSOI_PATH;
+    // file = MOSOI_FILES[0];
 
     // Create architecture
     // path = SIMPLE_PATH;
     // file = "uf16_18.cnf";
 
     Circuit c(path+file);
+    // cout << "Vars: " << c.vars << "\tClauses: " << c.clauses << endl;
 
     // Create architecture
     Architecture a(c.vars, c.clauses);
@@ -273,7 +277,7 @@ int main() {
     //     }
     // }
 
-    int depth = 0;
+    int depth = 8;
     for(int start = 1; start <= c.vars; ++start) {
         int count = p.neighborsClauseCount(start, depth);
         cout << count << endl;
