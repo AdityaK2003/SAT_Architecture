@@ -27,6 +27,7 @@ string SIMPLE_PATH = "sat_files/simple_files/";
 string VLSAT2_PATH = "sat_files/nonrandom_sat_files/VLSAT2/";
 string VLSAT2_SIMPLIFIED_PATH = "sat_files/nonrandom_sat_files/VLSAT2_simplified/";
 string VLSAT1_PATH = "sat_files/nonrandom_sat_files/VLSAT1/";
+string SAT2017_PATH = "sat_files/SAT2017_Soowang/";
 
 // Filenames
 
@@ -80,6 +81,70 @@ vector<string> VLSAT2_SIMPLIFIED_FILES = {
     "vlsat2_1155_simplified.cnf",
     "vlsat2_1183_simplified.cnf",
     "vlsat2_1209_simplified.cnf"
+};
+// Sorted by number of vars, ascending
+// Size: 60
+unordered_map<int, string> SAT2017_FILES = {
+    {0, "g2-modgen-n200-m90860q08c40-3230.cnf"},
+    {1, "g2-modgen-n200-m90860q08c40-13698.cnf"},
+    {2, "g2-modgen-n200-m90860q08c40-29667.cnf"},
+    {3, "g2-modgen-n200-m90860q08c40-6967.cnf"},
+    {4, "g2-modgen-n200-m90860q08c40-16823.cnf"},
+    {5, "g2-hwmcc15deep-6s399b02-k02.cnf"},
+    {6, "g2-hwmcc15deep-6s399b03-k02.cnf"},
+    {7, "g2-hwmcc15deep-6s179-k17.cnf"},
+    {8, "g2-Sz512151281.smt2-cvc4.cnf"},
+    {9, "g2-hwmcc15deep-6s33-k33.cnf"},
+    {10, "g2-hwmcc15deep-6s33-k34.cnf"},
+    {11, "g2-gss-28-s100.cnf"},
+    {12, "g2-gss-30-s100.cnf"},
+    {13, "g2-gss-32-s100.cnf"},
+    {14, "g2-gss-34-s100.cnf"},
+    {15, "g2-gss-36-s100.cnf"},
+    {16, "g2-gss-38-s100.cnf"},
+    {17, "g2-gss-40-s100 .cnf"},
+    {18, "g2-hwmcc15deep-6s161-k17.cnf"},
+    {19, "g2-hwmcc15deep-6s516r-k17.cnf"},
+    {20, "g2-hwmcc15deep-6s516r-k18.cnf"},
+    {21, "g2-hwmcc15deep-intel066-k10.cnf"},
+    {22, "g2-slp-synthesis-aes-top24.cnf"},
+    {23, "g2-hwmcc15deep-6s161-k18.cnf"},
+    {24, "g2-hwmcc15deep-6s105-k35.cnf"},
+    {25, "g2-slp-synthesis-aes-top25.cnf"},
+    {26, "g2-slp-synthesis-aes-top26.cnf"},
+    {27, "g2-hwmcc15deep-beemcmbrdg7f2-k32.cnf"},
+    {28, "g2-slp-synthesis-aes-top28.cnf"},
+    {29, "g2-slp-synthesis-aes-top29.cnf"},
+    {30, "g2-mizh-md5-47-5.cnf"},
+    {31, "g2-mizh-md5-47-3.cnf"},
+    {32, "g2-mizh-md5-48-2.cnf"},
+    {33, "g2-mizh-md5-48-5.cnf"},
+    {34, "g2-slp-synthesis-aes-top30.cnf"},
+    {35, "g2-hwmcc15deep-beemloyd3b1-k31.cnf"},
+    {36, "g2-hwmcc15deep-6s340rb63-k16.cnf"},
+    {37, "g2-hwmcc15deep-intel065-k11.cnf"},
+    {38, "g2-hwmcc15deep-bobpcihm-k30.cnf"},
+    {39, "g2-hwmcc15deep-beembkry8b1-k45.cnf"},
+    {40, "g2-hwmcc15deep-bobpcihm-k31.cnf"},
+    {41, "g2-hwmcc15deep-bobpcihm-k32.cnf"},
+    {42, "g2-hwmcc15deep-6s366r-k72.cnf"},
+    {43, "g2-hwmcc15deep-bobpcihm-k33.cnf"},
+    {44, "g2-hwmcc15deep-6s188-k44.cnf"},
+    {45, "g2-hwmcc15deep-bob12s02-k16.cnf"},
+    {46, "g2-hwmcc15deep-6s188-k46.cnf"},
+    {47, "g2-hwmcc15deep-bob12s02-k17.cnf"},
+    {48, "g2-hwmcc15deep-6s44-k38.cnf"},
+    {49, "g2-hwmcc15deep-6s44-k40.cnf"},
+    {50, "g2-hwmcc15deep-6s340rb63-k22.cnf"},
+    {51, "g2-hwmcc15deep-6s341r-k16.cnf"},
+    {52, "g2-ak128diagodiagoisc.cnf"},
+    {53, "g2-ak128astepbg2asisc.cnf"},
+    {54, "g2-hwmcc15deep-intel032-k84.cnf"},
+    {55, "g2-ak128paralparalisc.cnf"},
+    {56, "g2-ak128modbtbg1asisc.cnf"},
+    {57, "g2-hwmcc15deep-beemhanoi4b1-k32.cnf"},
+    {58, "g2-ak128astepmodbtisc.cnf"},
+    {59, "g2-ak128astepbg2msisc.cnf"}
 };
 
 
@@ -223,15 +288,15 @@ int main() {
     string path = OSTROWSKI_PATH;
     string file = OSTROWSKI_FILES[0];
 
-    // path = MOSOI_PATH;
-    // file = MOSOI_FILES[0];
+    path = SAT2017_PATH;
+    file = SAT2017_FILES[0];
 
     // Create architecture
     // path = SIMPLE_PATH;
     // file = "uf16_18.cnf";
 
     Circuit c(path+file);
-    // cout << "Vars: " << c.vars << "\tClauses: " << c.clauses << endl;
+    cout << "Vars: " << c.vars << "\tClauses: " << c.clauses << endl;
 
     // Create architecture
     Architecture a(c.vars, c.clauses);
@@ -283,9 +348,9 @@ int main() {
     //     cout << count << endl;
     // }
 
-    vector<set<int>> partitions = p.createClausePartition(1, true);
-    int cost = p.clausePartitionCost(partitions);
-    cout << "\ncost: " << cost << endl;
+    // vector<set<int>> partitions = p.createClausePartition(1, true);
+    // int cost = p.clausePartitionCost(partitions);
+    // cout << "\ncost: " << cost << endl;
 
     return 0;
 }
