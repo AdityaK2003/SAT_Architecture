@@ -285,11 +285,11 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 
 int main() {
     // Parse formula
-    string path = OSTROWSKI_PATH;
-    string file = OSTROWSKI_FILES[0];
+    // string path = OSTROWSKI_PATH;
+    // string file = OSTROWSKI_FILES[0];
 
-    // string path = SAT2017_PATH;
-    // string file = SAT2017_FILES[0];
+    string path = SAT2017_PATH;
+    string file = SAT2017_FILES[0];
 
     // Create architecture
     // path = SIMPLE_PATH;
@@ -298,6 +298,7 @@ int main() {
     Circuit c(path+file);
     cout << "Vars: " << c.vars << "\tClauses: " << c.clauses << endl;
 
+    /*
     // Create architecture
     // Architecture a(c.vars, c.clauses);
     // bool debug = false;
@@ -317,17 +318,17 @@ int main() {
     //     // // Variables in increasing order of occurrence, half lines first
     //     // fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, false);
     //     // cout << endl;
-    // }
+    // }*/
 
     // Partitioning problem
     // Partition p(c.vars, c.formula);
     // p.debug = true;
 
-
     // Clause Partitioning
     ClausePartition clause_part(c.vars, c.formula);
-    clause_part.createSubarrays(16, "random");
-    clause_part.checkGroupings(0b0011);
+    // clause_part.debug = true;
+    clause_part.createSubarrays(1024);
+    clause_part.checkGroupings(0b11111);
    
     return 0;
 }

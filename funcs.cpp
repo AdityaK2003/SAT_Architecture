@@ -3385,6 +3385,9 @@ void ClausePartition::checkGroupings(int mask) {
     // groups_activated[i] is the set of all vars that activate i groups
     unordered_map<int, set<int>> groups_activated;
 
+    // Maintain the largest group size of any var
+    int most_groups = 0;
+
     // Iterate through each variable
     for(int v = 1; v <= vars; ++v) {
         // Maintain all groups that this var is in 
@@ -3408,11 +3411,15 @@ void ClausePartition::checkGroupings(int mask) {
         // Save the number of groups
         int num_groups = curr_var_groups.size();
         groups_activated[num_groups].insert(v);
+
+        most_groups = max(num_groups, most_groups);
     }
 
     // Print out info
-    for(pair<int, set<int>> p : groups_activated) {
-        cout << p.second.size() << " vars activate " << p.first << " groups" << endl;
+    for(int g = 1; g <= most_groups; ++g) {
+        if(groups_activated.count(g)) {
+            cout << g << " groups: " << groups_activated[g].size() << " vars" << endl;
+        }
     }
     cout << endl;
 }
