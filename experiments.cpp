@@ -288,8 +288,8 @@ int main() {
     string path = OSTROWSKI_PATH;
     string file = OSTROWSKI_FILES[0];
 
-    path = SAT2017_PATH;
-    file = SAT2017_FILES[0];
+    // string path = SAT2017_PATH;
+    // string file = SAT2017_FILES[0];
 
     // Create architecture
     // path = SIMPLE_PATH;
@@ -299,58 +299,34 @@ int main() {
     cout << "Vars: " << c.vars << "\tClauses: " << c.clauses << endl;
 
     // Create architecture
-    Architecture a(c.vars, c.clauses);
-    bool debug = false;
+    // Architecture a(c.vars, c.clauses);
+    // bool debug = false;
     
     // Number of full-lines, half-lines, quarter lines
-    vector<int> lines_param = {86, 54, 0};
+    // vector<int> lines_param = {86, 54, 0};
 
-    vector<string> METHODS = {"default", "prune", "lits_only"};
-    for(string method : METHODS) {
-        if(method == "lits_only") continue;
-        if(method == "prune") continue;
+    // vector<string> METHODS = {"default", "prune", "lits_only"};
+    // for(string method : METHODS) {
+    //     if(method == "lits_only") continue;
+    //     if(method == "prune") continue;
 
-        // // Variables in descending order of occurrence, full lines first
-        // fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
-        // cout << endl;
+    //     // // Variables in descending order of occurrence, full lines first
+    //     // fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, true);
+    //     // cout << endl;
 
-        // // Variables in increasing order of occurrence, half lines first
-        // fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, false);
-        // cout << endl;
-    }
+    //     // // Variables in increasing order of occurrence, half lines first
+    //     // fitFormulaToArchitecture(c.vars, c.clauses, c.formula, lines_param, debug, method, false);
+    //     // cout << endl;
+    // }
 
     // Partitioning problem
-    Partition p(c.vars, c.formula);
+    // Partition p(c.vars, c.formula);
     // p.debug = true;
-    
-    string heur = "half";
-    int start_depth = 1;
-    int end_depth = 7;
-    // unordered_set<int> result = p.removeAndPartitionIDS(start_depth, end_depth, heur);
-    
-    
-    // int depth = c.vars;
-    // map<int, vector<int>> result = p.removeAndPartitionGreedy(depth);
-    
-    // vector<set<int>> partitions = p.kernighanLinAlg(true);
-    
-    // for(int d = 10; d <= 10; ++d) {
-    //     for(int trial = 1; trial <= 1; ++trial) {
-    //         cout << "Removing " << d << " variables, trial = " << trial << endl;
-    //         set<int> remove;
-    //         vector<set<int>> partitions = p.nodeKLAlg1(d, remove, true);
-    //     }
-    // }
 
-    // int depth = 8;
-    // for(int start = 1; start <= c.vars; ++start) {
-    //     int count = p.neighborsClauseCount(start, depth);
-    //     cout << count << endl;
-    // }
 
-    // vector<set<int>> partitions = p.createClausePartition(1, true);
-    // int cost = p.clausePartitionCost(partitions);
-    // cout << "\ncost: " << cost << endl;
-
+    // Clause Partitioning
+    ClausePartition clause_part(c.vars, c.formula);
+    clause_part.createSubarrays(10);
+   
     return 0;
 }

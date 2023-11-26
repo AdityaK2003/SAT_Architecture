@@ -3326,5 +3326,49 @@ ostream &operator<<(ostream &os, Partition const &p) {
 }
 
 
+/**
+ * Creates subarrays from an initialized ClausePartition class
+ * 
+ * Params:
+ * - int num: total number of subarrays (ex: 1024)
+ * - string heur: {"round-robin", "random"}
+ *   - round-robin: first clause in first subarray, second in second, ...
+ *   - random: like round-robin, but clauses are shuffled beforehand
+*/
+void ClausePartition::createSubarrays(int num, string heur) {
+    unordered_set<string> possible_heurs = {"round-robin", "random"};
+    if(!possible_heurs.count(heur)) {
+        cout << "ERROR: can't support provided heur " << heur << endl;
+    }
+
+    // Round robin or random heuristic
+    if(heur == "round-robin" || heur == "random") {
+        // Initialize the subarrays vector
+        for(int i = 0; i < num; ++i) {
+            set<int> s;
+            subarrays.push_back(s);
+        }
+
+        // Create order of clauses
+        vector<int> clause_order;
+        for(int c = 1; c <= clauses; ++c) clause_order.push_back(c);
+
+        // Shuffle clause_order if needed
+        if(heur == "random") {
+            random_device rd;
+            mt19937 g(rd());
+            shuffle(clause_order.begin(), clause_order.end(), g);
+        }
+
+        int curr_subarray = 0;
+        // Iterate through each clause
+        for(int c : clause_order) {
+            subarrays[curr_subarray].insert(c);
+            cout << "clause " << c << " in subarray " << curr_subarray << endl;
+
+            curr_subarray = (curr_subarray+1) % num;
+        }
+    }
+}
 
 

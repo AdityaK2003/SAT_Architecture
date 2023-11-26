@@ -255,4 +255,27 @@ ostream &operator<<(ostream &os, vector<set<int>> const &partitions);
 ostream &operator<<(ostream &os, Partition const &p);
 
 
+// Class for partitioning clauses (inspired from Soowang's power reduction in his thesis)
+class ClausePartition {
+public:
+    int vars;
+    int clauses;
+    vector<vector<int>> formula;
+
+    bool debug;
+
+    vector<set<int>> subarrays;
+
+
+    // Constructor
+    ClausePartition(int v, vector<vector<int>> f) {
+        vars = v;
+        formula = f;
+        clauses = formula.size();
+        debug = false;
+    }
+
+    void createSubarrays(int num, string heur = "round-robin");
+
+};
 
