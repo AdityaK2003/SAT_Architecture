@@ -258,13 +258,15 @@ ostream &operator<<(ostream &os, Partition const &p);
 // Class for partitioning clauses (inspired from Soowang's power reduction in his thesis)
 class ClausePartition {
 public:
+    bool debug;
+
     int vars;
     int clauses;
     vector<vector<int>> formula;
+    map<int, set<int>> var_clauses;
 
-    bool debug;
-
-    vector<set<int>> subarrays;
+    vector<set<int>> subarrays; // subarrays[i] is set of all clauses in subarray num i
+    unordered_map<int, int> clause_subarrays; // clause_subarrays[i] is the subarray num for clause i
 
 
     // Constructor
@@ -273,9 +275,18 @@ public:
         formula = f;
         clauses = formula.size();
         debug = false;
+
+        // Which clauses each var is in
+        for(int c = 0; c < formula.size(); ++c) {
+            for(int lit : formula[c]) {
+                int var = abs(lit);
+                var_clauses[var].insert(c+1);
+            }
+        }
     }
 
     void createSubarrays(int num, string heur = "round-robin");
+    void checkGroupings(int mask);
 
 };
 

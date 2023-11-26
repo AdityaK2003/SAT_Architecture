@@ -3364,7 +3364,7 @@ void ClausePartition::createSubarrays(int num, string heur) {
         // Iterate through each clause
         for(int c : clause_order) {
             subarrays[curr_subarray].insert(c);
-            cout << "clause " << c << " in subarray " << curr_subarray << endl;
+            clause_subarrays[c] = curr_subarray;
 
             curr_subarray = (curr_subarray+1) % num;
         }
@@ -3372,3 +3372,47 @@ void ClausePartition::createSubarrays(int num, string heur) {
 }
 
 
+/**
+ * Checks effectiveness of groupings given a mask for the subarrays.
+ * Prints out how many variables only activate one group, how many activate two, ...
+ * 
+ * Params:
+ * - int mask: the mask used to put subarrays into groups 
+ *      (ex: 31 = 0b0000011111 means least significant 5 bits are flexible)
+*/
+void ClausePartition::checkGroupings(int mask) {
+    // Maintain map from each var to how many groups they activate
+    // groups_activated[i] is the set of all vars that activate i groups
+    unordered_map<int, set<int>> groups_activated;
+
+    // Iterate through each variable
+    for(int v = 1; v <= vars; ++v) {
+        // Maintain all groups that this var is in 
+        unordered_set<int> curr_var_groups;
+
+        // Iterate through each clause number that it is in
+        for(int c : var_clauses[v]) {
+            // From clause number, generate the subarray_num
+            int subarray_num = clause_subarrays[c];
+
+            // Apply mask on the clause_num to zero out the flexible bits 
+            int group = (subarray_num & (~mask));
+
+            if(debug) {
+                cout << "Clause " << c << " is in subarray num " << subarray_num << " = group " << group << endl;
+            }
+            
+            curr_var_groups.insert(group);
+        }
+
+        // Save the number of groups
+        int num_groups = curr_var_groups.size();
+        groups_activated[num_groups].insert(v);
+    }
+
+    // Print out info
+    for(pair<int, set<int>> p : groups_activated) {
+        cout << p.second.size() << " vars activate " << p.first << " groups" << endl;
+    }
+    cout << endl;
+}

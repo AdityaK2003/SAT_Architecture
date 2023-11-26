@@ -326,7 +326,8 @@ int main() {
 
     // Clause Partitioning
     ClausePartition clause_part(c.vars, c.formula);
-    clause_part.createSubarrays(10);
+    clause_part.createSubarrays(16, "random");
+    clause_part.checkGroupings(0b0011);
    
     return 0;
 }
