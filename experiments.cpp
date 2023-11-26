@@ -284,18 +284,20 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 
 
 int main() {
+    cout << endl;
     // Parse formula
     // string path = OSTROWSKI_PATH;
     // string file = OSTROWSKI_FILES[0];
 
     string path = SAT2017_PATH;
-    string file = SAT2017_FILES[0];
+    string file = SAT2017_FILES[59];
 
     // Create architecture
     // path = SIMPLE_PATH;
     // file = "uf16_18.cnf";
 
     Circuit c(path+file);
+    cout << "File: " << file << endl;
     cout << "Vars: " << c.vars << "\tClauses: " << c.clauses << endl;
 
     /*
