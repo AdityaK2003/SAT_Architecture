@@ -3380,7 +3380,7 @@ void ClausePartition::createSubarrays(int num, string heur) {
  * - int mask: the mask used to put subarrays into groups 
  *      (ex: 31 = 0b0000011111 means least significant 5 bits are flexible)
 */
-void ClausePartition::checkGroupings(int mask) {
+unordered_map<int, set<int>> ClausePartition::checkGroupings(int mask) {
     // Maintain map from each var to how many groups they activate
     // groups_activated[i] is the set of all vars that activate i groups
     unordered_map<int, set<int>> groups_activated;
@@ -3401,9 +3401,9 @@ void ClausePartition::checkGroupings(int mask) {
             // Apply mask on the clause_num to zero out the flexible bits 
             int group = (subarray_num & (~mask));
 
-            if(debug) {
-                cout << "Clause " << c << " is in subarray num " << subarray_num << " = group " << group << endl;
-            }
+            // if(debug) {
+            //     cout << "Clause " << c << " is in subarray num " << subarray_num << " = group " << group << endl;
+            // }
             
             curr_var_groups.insert(group);
         }
@@ -3416,10 +3416,15 @@ void ClausePartition::checkGroupings(int mask) {
     }
 
     // Print out info
-    for(int g = 1; g <= most_groups; ++g) {
-        if(groups_activated.count(g)) {
-            cout << g << " groups: " << groups_activated[g].size() << " vars" << endl;
+    if(debug) {
+        for(int g = 1; g <= most_groups; ++g) {
+            if(groups_activated.count(g)) {
+                cout << g << " groups: " << groups_activated[g].size() << " vars" << endl;
+            }
         }
+        cout << endl;
     }
-    cout << endl;
+
+    // return the statistics
+    return groups_activated;
 }

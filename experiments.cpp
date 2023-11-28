@@ -298,8 +298,8 @@ int main() {
 
     Circuit c(path+file);
     cout << "File: " << file << endl;
-    cout << "Vars: " << c.vars << "\tClauses: " << c.clauses << endl;
-
+    cout << "Vars: " << c.vars << "\tClauses: " << c.clauses << endl << endl;
+    
     /*
     // Create architecture
     // Architecture a(c.vars, c.clauses);
@@ -328,9 +328,28 @@ int main() {
 
     // Clause Partitioning
     ClausePartition clause_part(c.vars, c.formula);
+    string heur = "round-robin";
+    heur = "random";
+
     // clause_part.debug = true;
-    clause_part.createSubarrays(1024);
-    clause_part.checkGroupings(0b11111);
+    int trials = 10;
+    if(heur == "round-robin") trials = 1;
+    unordered_map<int, float> totals;
+    for(int t = 0; t < trials; ++t) {
+        clause_part.createSubarrays(1024, heur);
+        unordered_map<int, set<int>> groups_activated;
+        groups_activated = clause_part.checkGroupings(0b11111);
+
+        for(pair<int, set<int>> p : groups_activated) {
+            totals[p.first] += p.second.size();
+        }
+    }
+
+    for(int g = 1; g <= 32; ++g) {
+        totals[g] /= (trials * 1.0);
+        // cout << g << " groups: " << totals[g] << " vars" << endl;
+        cout << totals[g] << endl;
+    }
    
     return 0;
 }

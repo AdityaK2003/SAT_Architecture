@@ -286,7 +286,7 @@ public:
     }
 
     void createSubarrays(int num, string heur = "round-robin");
-    void checkGroupings(int mask);
+    unordered_map<int, set<int>> checkGroupings(int mask);
 
 };
 
