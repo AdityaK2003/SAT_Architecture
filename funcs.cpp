@@ -3639,4 +3639,44 @@ bool DivideFormula::removeKLiterals(unordered_set<int> remove, bool recurse, boo
 }
 
 
+/**
+ * Helper function that given vars to remove, generates all combinations of literals
+ * Ex: Input = {1, 2}, Output = {{-1, -2}, {-1, 2}, {1, -2}, {1, 2}}
+ * 
+ * Params:
+ * - unordered_set<int> remove_vars: the vars to remove
+ * 
+ * Returns:
+ * - vector<unordered_set<int>>: vector of literal combos
+*/
+vector<unordered_set<int>> generateLitsCombos(unordered_set<int> remove_vars) {
+    // Convert remove vars to vector
+    vector<int> remove_v;
+    for(int rv : remove_vars) remove_v.push_back(rv);
+
+    vector<unordered_set<int>> solution;
+    unordered_set<int> curr;
+    generateLitsCombosHelper(solution, remove_v, curr, 0);
+    return solution;
+}
+void generateLitsCombosHelper(vector<unordered_set<int>>& answer, vector<int> remove_vars, unordered_set<int> curr, int i) {
+    if(curr.size() == remove_vars.size()) {
+        answer.push_back(curr);
+        return;
+    }
+
+    unordered_set<int> curr_2 = curr;
+    curr.insert(remove_vars[i]);
+    curr_2.insert(-1*remove_vars[i]);
+
+    // Recurse
+    generateLitsCombosHelper(answer, remove_vars, curr, i+1);
+    generateLitsCombosHelper(answer, remove_vars, curr_2, i+1);
+}
+
+
+
+
+
+
 

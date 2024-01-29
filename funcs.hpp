@@ -318,4 +318,6 @@ public:
 };
 
 
+vector<unordered_set<int>> generateLitsCombos(unordered_set<int> remove_vars);
+void generateLitsCombosHelper(vector<unordered_set<int>>& answer, vector<int> remove_vars, unordered_set<int> curr, int i);
 

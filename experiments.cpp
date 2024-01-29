@@ -290,11 +290,11 @@ int main() {
     // string file = OSTROWSKI_FILES[0];
 
     string path = SAT2017_PATH;
-    string file = SAT2017_FILES[9];
+    string file = SAT2017_FILES[0];
 
     // Create architecture
-    path = SIMPLE_PATH;
-    file = "uf16_18.cnf";
+    // path = SIMPLE_PATH;
+    // file = "uf16_18.cnf";
 
     Circuit c(path+file);
     cout << "File: " << file << endl;
@@ -355,16 +355,8 @@ int main() {
     printGroupsResults(results, num_groups); */
 
     // Divide and Conquer
-    DivideFormula divide(c.vars, c.formula);
-
-    unordered_set<int> remove = {9};
-    bool renumber = true;
-    divide.removeKLiterals(remove, true, renumber);
-
-    for(auto c : divide.formula_2) {
-        for(auto n : c) cout << n << " ";
-        cout << endl;
-    }
+    unordered_set<int> vars = {1, 2};
+    vector<unordered_set<int>> lit_combos = generateLitsCombos(vars);
 
 
 
