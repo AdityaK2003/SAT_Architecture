@@ -3592,7 +3592,7 @@ bool DivideFormula::removeKLiterals(unordered_set<int> remove, bool recurse, boo
             }
             if(new_clause.empty()) {
                 // If empty clause, that means it is unsatisfiable with this assignment
-                cout << "ERROR: Clause " << c+1 << " is now not satisfied." << endl;
+                // cout << "ERROR: Clause " << c+1 << " is now not satisfied." << endl;
                 return false;
             }
 
@@ -3600,7 +3600,7 @@ bool DivideFormula::removeKLiterals(unordered_set<int> remove, bool recurse, boo
             if(new_clause.size() == 1) {
                 // Make sure there's no contradiction
                 if(unit_clause_vars.count(-1*new_clause[0])) {
-                    cout << "ERROR: Contradiction with variable " << abs(new_clause[0]) << " for unit clauses." << endl;
+                    // cout << "ERROR: Contradiction with variable " << abs(new_clause[0]) << " for unit clauses." << endl;
                     return false;
                 }
                 // Add
@@ -3675,8 +3675,112 @@ void generateLitsCombosHelper(vector<unordered_set<int>>& answer, vector<int> re
 }
 
 
+/**
+ * Given a formula and a number k, returns the k most frequently appearing variables, in order
+ * 
+ * Params:
+ * - int vars: the number of variables
+ * - vector<vector<int>> formula: the SAT formula
+ * - int k: the number of vars to return
+ * 
+ * Returns:
+ * - vector<int>: vars in order by occurrences
+*/
+vector<int> kMostOccurring(int vars, vector<vector<int>>& formula, int k) {
+    // Frequency map
+    unordered_map<int, int> var_freqs;
+    for(auto c : formula) {
+        for(auto l : c) {
+            ++var_freqs[abs(l)];
+        }
+    }
 
+    // Use priority queue for order
+    priority_queue<pair<int, int>> pq;
+    for(pair<int, int> p : var_freqs) {
+        // <occurrences, variable>
+        pq.push(make_pair(p.second, p.first));
+    }
 
+    vector<int> solution;
 
+    // Loop k times
+    for(int i = 0; i < k; ++i) {
+        pair<int, int> p = pq.top();
+        pq.pop();
+        solution.push_back(p.second);
 
+        // cout << "var " << p.second << ": " << p.first << endl;
+    }
+    return solution;
+}
+
+/**
+ * Runs divide and conquer experiment
+ * 
+ * Params:
+ * - Circuit c: includes information about the SAT formula
+ * - unordered_set<int> remove_vars: the variables to remove (tries all literal combos)
+*/
+void runDivideExperiment(Circuit c, unordered_set<int> remove_vars) {
+    vector<unordered_set<int>> lit_combos = generateLitsCombos(remove_vars);
+
+    // Keep track of stats
+    int successes = 0;
+    int total_vars = 0;
+    int total_clauses = 0;
+
+    // Iterate through each combination
+    for(unordered_set<int> remove_lits : lit_combos) {
+        DivideFormula divide(c.vars, c.formula);
+        bool success = divide.removeKLiterals(remove_lits, true, true);
+
+        cout << "Removed Lits: ";
+        for(int l : remove_lits) cout << l << " ";
+        cout << endl;
+        if(success) {
+            cout << "\tVars Remaining: " << divide.vars_2 << endl;
+            cout << "\tClauses Remaining: " << divide.clauses_2 << endl;
+
+            ++successes;
+            total_vars += divide.vars_2;
+            total_clauses += divide.clauses_2;
+
+        } else {
+            cout << "\tFAILED" << endl;
+        }
+    }
+
+    int avg_vars = (total_vars * 1.0 / successes);
+    int avg_clauses = (total_clauses * 1.0 / successes);
+
+    cout << endl << "Successes: " << successes << endl;
+    cout << "Avg Vars Remaining: " << avg_vars << endl;
+    cout << "\tPercent: " << avg_vars * 100.0 / c.vars << "%" << endl;
+    cout << "Avg Clauses Remaining: " << avg_clauses << endl;
+    cout << "\tPercent: " << avg_clauses * 100.0 / c.clauses << "%" << endl;
+}
+
+/**
+ * Returns k random variables given a number of variables
+ * 
+ * Params:
+ * - int vars: number of variables
+ * - int k: size of set to return
+ * 
+ * Returns:
+ * - unordered_set<int>: the k random variables
+*/
+unordered_set<int> kRandomVariables(int vars, int k) {
+    unordered_set<int> result;
+
+    while(result.size() != k) {
+        // Pick random variable
+        int r = (rand() % vars) + 1;
+
+        result.insert(r);
+    }
+    
+    return result;
+}
 

@@ -320,4 +320,7 @@ public:
 
 vector<unordered_set<int>> generateLitsCombos(unordered_set<int> remove_vars);
 void generateLitsCombosHelper(vector<unordered_set<int>>& answer, vector<int> remove_vars, unordered_set<int> curr, int i);
+vector<int> kMostOccurring(int vars, vector<vector<int>>& formula, int k);
+void runDivideExperiment(Circuit c, unordered_set<int> remove_vars);
+unordered_set<int> kRandomVariables(int vars, int k);
 

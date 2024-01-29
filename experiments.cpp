@@ -290,7 +290,7 @@ int main() {
     // string file = OSTROWSKI_FILES[0];
 
     string path = SAT2017_PATH;
-    string file = SAT2017_FILES[0];
+    string file = SAT2017_FILES[9];
 
     // Create architecture
     // path = SIMPLE_PATH;
@@ -355,10 +355,18 @@ int main() {
     printGroupsResults(results, num_groups); */
 
     // Divide and Conquer
-    unordered_set<int> vars = {1, 2};
-    vector<unordered_set<int>> lit_combos = generateLitsCombos(vars);
+    int k = 3;
+    vector<int> order = kMostOccurring(c.vars, c.formula, k);
+    unordered_set<int> remove_vars;
+    for(int var : order) remove_vars.insert(var);
 
+    cout << "Using " << k << " Most Occurring Variables: " << endl;
+    runDivideExperiment(c, remove_vars);
 
+    unordered_set<int> rand_vars = kRandomVariables(c.vars, k);
+    cout << "\n\nUsing " << k << " Random Variables: " << endl;
+    runDivideExperiment(c, rand_vars);
+    
 
     return 0;
 }
