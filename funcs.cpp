@@ -3721,33 +3721,50 @@ vector<int> kMostOccurring(int vars, vector<vector<int>>& formula, int k) {
  * Params:
  * - Circuit c: includes information about the SAT formula
  * - unordered_set<int> remove_vars: the variables to remove (tries all literal combos)
+ * - bool print: if true, prints info about each lit combo
 */
-void runDivideExperiment(Circuit c, unordered_set<int> remove_vars) {
+void runDivideExperiment(Circuit c, unordered_set<int> remove_vars, bool print) {
     vector<unordered_set<int>> lit_combos = generateLitsCombos(remove_vars);
 
     // Keep track of stats
     int successes = 0;
     int total_vars = 0;
     int total_clauses = 0;
+    int min_vars = INT_MAX;
+    int min_clauses = INT_MAX;
+
+    // Keep track of vars in order
+    vector<int> remove_vars_order;
+    for(int rv : remove_vars) remove_vars_order.push_back(rv);
+    sort(remove_vars_order.begin(), remove_vars_order.end());
 
     // Iterate through each combination
     for(unordered_set<int> remove_lits : lit_combos) {
         DivideFormula divide(c.vars, c.formula);
         bool success = divide.removeKLiterals(remove_lits, true, true);
-
-        cout << "Removed Lits: ";
-        for(int l : remove_lits) cout << l << " ";
-        cout << endl;
+        if(print) {
+            cout << "Removed Lits: ";
+            for(int var : remove_vars_order) {
+                if(remove_lits.count(var)) cout << var << " ";
+                else cout << -1 * var << " ";
+            }
+            cout << endl;
+        }
         if(success) {
-            cout << "\tVars Remaining: " << divide.vars_2 << endl;
-            cout << "\tClauses Remaining: " << divide.clauses_2 << endl;
+            if(print) {
+                cout << "\tVars Remaining: " << divide.vars_2 << endl;
+                cout << "\tClauses Remaining: " << divide.clauses_2 << endl;
+            }
 
+            // Track stats
             ++successes;
             total_vars += divide.vars_2;
             total_clauses += divide.clauses_2;
+            min_vars = min(min_vars, divide.vars_2);
+            min_clauses = min(min_clauses, divide.clauses_2);
 
         } else {
-            cout << "\tFAILED" << endl;
+            if(print) cout << "\tFAILED" << endl;
         }
     }
 
@@ -3755,10 +3772,14 @@ void runDivideExperiment(Circuit c, unordered_set<int> remove_vars) {
     int avg_clauses = (total_clauses * 1.0 / successes);
 
     cout << endl << "Successes: " << successes << endl;
-    cout << "Avg Vars Remaining: " << avg_vars << endl;
+    cout << "\nAvg Vars Remaining: " << avg_vars << endl;
     cout << "\tPercent: " << avg_vars * 100.0 / c.vars << "%" << endl;
     cout << "Avg Clauses Remaining: " << avg_clauses << endl;
     cout << "\tPercent: " << avg_clauses * 100.0 / c.clauses << "%" << endl;
+    cout << "\nMin Vars Remaining: " << min_vars << endl;
+    cout << "\tPercent: " << min_vars * 100.0 / c.vars << "%" << endl;
+    cout << "Min Clauses Remaining: " << min_clauses << endl;
+    cout << "\tPercent: " << min_clauses * 100.0 / c.clauses << "%\n\n";
 }
 
 /**
@@ -3780,7 +3801,7 @@ unordered_set<int> kRandomVariables(int vars, int k) {
 
         result.insert(r);
     }
-    
+
     return result;
 }
 

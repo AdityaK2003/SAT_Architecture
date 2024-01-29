@@ -284,13 +284,14 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 
 
 int main() {
+    srand(time(0));
     cout << endl;
     // Parse formula
     // string path = OSTROWSKI_PATH;
     // string file = OSTROWSKI_FILES[0];
 
     string path = SAT2017_PATH;
-    string file = SAT2017_FILES[9];
+    string file = SAT2017_FILES[40];
 
     // Create architecture
     // path = SIMPLE_PATH;
@@ -355,7 +356,7 @@ int main() {
     printGroupsResults(results, num_groups); */
 
     // Divide and Conquer
-    int k = 3;
+    int k = 2;
     vector<int> order = kMostOccurring(c.vars, c.formula, k);
     unordered_set<int> remove_vars;
     for(int var : order) remove_vars.insert(var);
