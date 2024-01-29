@@ -3547,16 +3547,18 @@ void printGroupsResults(unordered_map<int, set<int>> results, int num_groups) {
  * - bool: false if error occurs
 */
 bool DivideFormula::removeKLiterals(unordered_set<int> remove, bool recurse, bool renumber) {
-    // Set new vars_2
-    vars_2 = vars - remove.size();
-
     // Keep track of a temporary formula (old version)
     vector<vector<int>> tmp_formula = formula; 
+
+    int tmp_vars = vars;
 
     // Loop
     while(remove.size()) {
         // Clear formula_2
         formula_2.clear();
+
+        // Set new vars_2
+        vars_2 = tmp_vars - remove.size();
 
         // Keep track of unit clause variables to satisfy
         unordered_set<int> unit_clause_vars;
@@ -3627,6 +3629,7 @@ bool DivideFormula::removeKLiterals(unordered_set<int> remove, bool recurse, boo
             }
             // Formula 2 is now the new temp
             tmp_formula = formula_2;
+            tmp_vars = vars_2;
         } else {
             return true;
         }
