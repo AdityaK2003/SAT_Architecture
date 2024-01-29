@@ -293,8 +293,8 @@ int main() {
     string file = SAT2017_FILES[9];
 
     // Create architecture
-    // path = SIMPLE_PATH;
-    // file = "uf16_18.cnf";
+    path = SIMPLE_PATH;
+    file = "uf16_18.cnf";
 
     Circuit c(path+file);
     cout << "File: " << file << endl;
@@ -345,12 +345,28 @@ int main() {
     //     }
     // }
 
+    // Groupings results
+    /*
     bool randomize = false;
     int num_groups = 32;
-    int num_subarrays = 1024;
+    int num_subarrays = c.clauses;
     unordered_map<int, int> mappings = findGroupsMappingHelper(c.clauses, randomize, num_subarrays, num_groups);
     unordered_map<int, set<int>> results = runGroupsExperiment(c.vars, c.formula, mappings);
-    printGroupsResults(results, num_groups);
+    printGroupsResults(results, num_groups); */
+
+    // Divide and Conquer
+    DivideFormula divide(c.vars, c.formula);
+
+    unordered_set<int> remove = {9};
+    bool renumber = true;
+    divide.removeKLiterals(remove, true, renumber);
+
+    for(auto c : divide.formula_2) {
+        for(auto n : c) cout << n << " ";
+        cout << endl;
+    }
+
+
 
     return 0;
 }

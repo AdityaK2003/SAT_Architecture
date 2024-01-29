@@ -294,3 +294,28 @@ public:
 unordered_map<int, int> findGroupsMappingHelper(int num_clauses, bool randomize=false, int num_subarrays=1024, int num_groups=32);
 unordered_map<int, set<int>> runGroupsExperiment(int vars, vector<vector<int>>& formula, unordered_map<int, int>& mappings);
 void printGroupsResults(unordered_map<int, set<int>> results, int num_groups);
+
+
+// Class for "divide and conquer" approach: satisfy k variables to create 2^k smaller problems
+class DivideFormula {
+public:
+    int vars;
+    int clauses;
+    vector<vector<int>> formula;
+
+    int vars_2;
+    int clauses_2;
+    vector<vector<int>> formula_2;
+
+    // Constructor
+    DivideFormula(int v, vector<vector<int>> f) {
+        vars = v;
+        formula = f;
+        clauses = f.size();
+    };
+
+    bool removeKLiterals(unordered_set<int> remove, bool recurse, bool renumber);
+};
+
+
+

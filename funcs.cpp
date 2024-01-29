@@ -3458,13 +3458,14 @@ unordered_map<int, int> findGroupsMappingHelper(int num_clauses, bool randomize,
     }
 
     // Iterate through each clause
-    for(int c : order) {
+    for(int c = 1; c <= num_clauses; ++c) {
         // Create mapping
         int g = ((c - 1) % num_subarrays) / num_groups;
 
         // cout << "Clause " << c << ": " << "group " << g << endl;
 
-        mappings[c] = g;
+        // Use order
+        mappings[order[c]] = g;
     }
 
     return mappings;
@@ -3532,4 +3533,107 @@ void printGroupsResults(unordered_map<int, set<int>> results, int num_groups) {
         cout << i << ": " << results[i].size() << endl;
     }
 }
+
+
+/**
+ * Removes k literals from the formula, saving the answers to vars_2, clauses_2, formula_2
+ * 
+ * Params:
+ * - unordered_set<int> remove: the literals that will be set, thus removing these variables
+ * - bool recurse: if true, then if unit clauses caused by "remove", then will continue to recurse to remove them
+ * - bool renumber: if true, then renumber after every set of removals
+ * 
+ * Returns:
+ * - bool: false if error occurs
+*/
+bool DivideFormula::removeKLiterals(unordered_set<int> remove, bool recurse, bool renumber) {
+    // Set new vars_2
+    vars_2 = vars - remove.size();
+
+    // Keep track of a temporary formula (old version)
+    vector<vector<int>> tmp_formula = formula; 
+
+    // Loop
+    while(remove.size()) {
+        // Clear formula_2
+        formula_2.clear();
+
+        // Keep track of unit clause variables to satisfy
+        unordered_set<int> unit_clause_vars;
+        unordered_set<int> unit_clause_i;
+
+        // Add remove vars to assignment
+        // for(int lit : remove) {
+        //     cout << "assigned " << lit << endl;
+        // }
+
+        // Iterate through each clause
+        for(int c = 0; c < tmp_formula.size(); ++c) {
+            // Check if this clause is already satisfied
+            bool satisfied = false;
+            for(int l : tmp_formula[c]) {
+                if(remove.count(l)) {
+                    satisfied = true;
+                    break;
+                }
+            }
+            if(satisfied) continue;
+
+            // Else, construct the new clause
+            vector<int> new_clause;
+            for(int l : tmp_formula[c]) {
+                // If negative of this literal in remove set, skip literal
+                if(remove.count(-1*l)) continue;
+
+                // Add literal
+                new_clause.push_back(l);
+            }
+            if(new_clause.empty()) {
+                // If empty clause, that means it is unsatisfiable with this assignment
+                cout << "ERROR: Clause " << c+1 << " is now not satisfied." << endl;
+                return false;
+            }
+
+            // If unit clause, keep track of it
+            if(new_clause.size() == 1) {
+                // Make sure there's no contradiction
+                if(unit_clause_vars.count(-1*new_clause[0])) {
+                    cout << "ERROR: Contradiction with variable " << abs(new_clause[0]) << " for unit clauses." << endl;
+                    return false;
+                }
+                // Add
+                unit_clause_vars.insert(new_clause[0]);
+                unit_clause_i.insert(formula_2.size());
+            }
+
+            // Else, can add to formula
+            formula_2.push_back(new_clause);
+
+        }
+
+        // Set clauses
+        clauses_2 = formula_2.size();
+
+        // Renumber the formula
+        if(renumber) renumberFormula(formula_2);
+
+        // Can now clear remove set
+        remove.clear();
+
+        if(recurse) {
+            // Find vars to remove again
+            for(int clause_i : unit_clause_i) {
+                remove.insert(formula_2[clause_i][0]);
+            }
+            // Formula 2 is now the new temp
+            tmp_formula = formula_2;
+        } else {
+            return true;
+        }
+    }
+
+    return true;
+}
+
+
 
