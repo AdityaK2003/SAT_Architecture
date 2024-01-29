@@ -290,7 +290,7 @@ int main() {
     // string file = OSTROWSKI_FILES[0];
 
     string path = SAT2017_PATH;
-    string file = SAT2017_FILES[59];
+    string file = SAT2017_FILES[9];
 
     // Create architecture
     // path = SIMPLE_PATH;
@@ -346,7 +346,11 @@ int main() {
     // }
 
     bool randomize = false;
-    findGroupsHelper(c.clauses, randomize, 1024, 32);
-   
+    int num_groups = 32;
+    int num_subarrays = 1024;
+    unordered_map<int, int> mappings = findGroupsMappingHelper(c.clauses, randomize, num_subarrays, num_groups);
+    unordered_map<int, set<int>> results = runGroupsExperiment(c.vars, c.formula, mappings);
+    printGroupsResults(results, num_groups);
+
     return 0;
 }

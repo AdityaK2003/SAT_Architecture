@@ -291,4 +291,6 @@ public:
 };
 
 
-unordered_map<int, int> findGroupsHelper(int num_clauses, bool randomize=false, int num_subarrays=1024, int num_groups=32);
+unordered_map<int, int> findGroupsMappingHelper(int num_clauses, bool randomize=false, int num_subarrays=1024, int num_groups=32);
+unordered_map<int, set<int>> runGroupsExperiment(int vars, vector<vector<int>>& formula, unordered_map<int, int>& mappings);
+void printGroupsResults(unordered_map<int, set<int>> results, int num_groups);

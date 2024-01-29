@@ -3443,7 +3443,7 @@ unordered_map<int, set<int>> ClausePartition::checkGroupings(int mask) {
  * Returns:
  * - unordered_map<int, int>: map from clause numbers to group numbers
 */
-unordered_map<int, int> findGroupsHelper(int num_clauses, bool randomize, int num_subarrays, int num_groups) {
+unordered_map<int, int> findGroupsMappingHelper(int num_clauses, bool randomize, int num_subarrays, int num_groups) {
     unordered_map<int, int> mappings;
 
     // Create clause order
@@ -3468,5 +3468,68 @@ unordered_map<int, int> findGroupsHelper(int num_clauses, bool randomize, int nu
     }
 
     return mappings;
+}
+
+/**
+ * Helper function that calculates how many vars activate each number of groups, given the 
+ * formula and the grouping
+ * 
+ * Params:
+ * - int vars: number of vars
+ * - vector<vector<int>> formula: the SAT formula
+ * - unordered_map<int, int> mappings: mapping from clause number to group number
+ * 
+ * Returns:
+ * - unordered_map<int, set<int>> results: mapping from number of groups activated, to the vars itself that apply
+*/
+unordered_map<int, set<int>> runGroupsExperiment(int vars, vector<vector<int>>& formula, unordered_map<int, int>& mappings) {
+    // Keep track of results
+    unordered_map<int, set<int>> result;
+
+    // Maintain map from variable to set of clauses
+    unordered_map<int, set<int>> var_to_clauses;
+    for(int c = 0; c < formula.size(); ++c) {
+        for(int l : formula[c]) {
+            int var = abs(l);
+            var_to_clauses[var].insert(c+1);
+        }
+    }
+
+    // Iterate through each var
+    for(int v = 1; v <= vars; ++v) {
+        // Maintain set of groups activated
+        set<int> groups;
+
+        // Iterate through each clause this var is in
+        for(int c : var_to_clauses[v]) {
+            // Find the group number
+            int g = mappings[c];
+
+            groups.insert(g);
+        }
+
+        // Calculate number of groups this var activates
+        int num_groups = groups.size();
+
+        result[num_groups].insert(v);
+    }
+
+    return result;
+}
+
+
+/**
+ * Prints results of mappings experiment
+ * 
+ * Params:
+ * - unordered_map<int, set<int>> results: results of runGroupsExperiment()
+ * - int num_groups: total number of groups
+*/
+void printGroupsResults(unordered_map<int, set<int>> results, int num_groups) {
+    cout << "Number of Groups: Number of Variables that Activate That Amount" << endl;
+    for(int i = 0; i <= num_groups; ++i) {
+        if(results[i].size() == 0) continue;
+        cout << i << ": " << results[i].size() << endl;
+    }
 }
 
