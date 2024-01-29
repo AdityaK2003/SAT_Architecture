@@ -332,24 +332,21 @@ int main() {
     heur = "random";
 
     // clause_part.debug = true;
-    int trials = 10;
-    if(heur == "round-robin") trials = 1;
-    unordered_map<int, float> totals;
-    for(int t = 0; t < trials; ++t) {
-        clause_part.createSubarrays(1024, heur);
-        unordered_map<int, set<int>> groups_activated;
-        groups_activated = clause_part.checkGroupings(0b11111);
+    // int trials = 10;
+    // if(heur == "round-robin") trials = 1;
+    // unordered_map<int, float> totals;
+    // for(int t = 0; t < trials; ++t) {
+    //     clause_part.createSubarrays(1024, heur);
+    //     unordered_map<int, set<int>> groups_activated;
+    //     groups_activated = clause_part.checkGroupings(0b11111);
 
-        for(pair<int, set<int>> p : groups_activated) {
-            totals[p.first] += p.second.size();
-        }
-    }
+    //     for(pair<int, set<int>> p : groups_activated) {
+    //         totals[p.first] += p.second.size();
+    //     }
+    // }
 
-    for(int g = 1; g <= 32; ++g) {
-        totals[g] /= (trials * 1.0);
-        // cout << g << " groups: " << totals[g] << " vars" << endl;
-        cout << totals[g] << endl;
-    }
+    bool randomize = false;
+    findGroupsHelper(c.clauses, randomize, 1024, 32);
    
     return 0;
 }

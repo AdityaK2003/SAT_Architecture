@@ -1634,9 +1634,6 @@ bool Architecture::implementFormula(vector<vector<int>>& formula, int v, bool de
 
 
 
-
-
-
 /**
  * Helper function for implementFormulaPrune() that implements backtrack search
  * Includes pruning - keeps track of literal spans, and updates for each 
@@ -3379,6 +3376,10 @@ void ClausePartition::createSubarrays(int num, string heur) {
  * Params:
  * - int mask: the mask used to put subarrays into groups 
  *      (ex: 31 = 0b0000011111 means least significant 5 bits are flexible)
+ * 
+ * Returns:
+ * - unordered_map<int, set<int>> groups_activated: where groups_activated[i] is set of all vars that activate
+ * a total of i groups
 */
 unordered_map<int, set<int>> ClausePartition::checkGroupings(int mask) {
     // Maintain map from each var to how many groups they activate
@@ -3428,3 +3429,44 @@ unordered_map<int, set<int>> ClausePartition::checkGroupings(int mask) {
     // return the statistics
     return groups_activated;
 }
+
+
+
+/**
+ * Helper function that directly maps clauses to their groups
+ * 
+ * Params:
+ * - int num_clauses: number of clauses in formula
+ * - int num_subarrays: number of subarrays
+ * - int num_groups: number of groups
+ * 
+ * Returns:
+ * - unordered_map<int, int>: map from clause numbers to group numbers
+*/
+unordered_map<int, int> findGroupsHelper(int num_clauses, bool randomize, int num_subarrays, int num_groups) {
+    unordered_map<int, int> mappings;
+
+    // Create clause order
+    vector<int> order;
+    for(int c = 1; c <= num_clauses; ++c) order.push_back(c);
+
+    // Shuffle order if needed
+    if(randomize) {
+        random_device rd;
+        mt19937 g(rd());
+        shuffle(order.begin(), order.end(), g);
+    }
+
+    // Iterate through each clause
+    for(int c : order) {
+        // Create mapping
+        int g = ((c - 1) % num_subarrays) / num_groups;
+
+        // cout << "Clause " << c << ": " << "group " << g << endl;
+
+        mappings[c] = g;
+    }
+
+    return mappings;
+}
+

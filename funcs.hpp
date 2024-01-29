@@ -290,3 +290,5 @@ public:
 
 };
 
+
+unordered_map<int, int> findGroupsHelper(int num_clauses, bool randomize=false, int num_subarrays=1024, int num_groups=32);
