@@ -3826,6 +3826,20 @@ int ContiguousPartition::createPartitionsBySize(int max_size) {
     for(int c = 0; c < clauses; ++c) {
         int curr_clause = c+1;
 
+        cout << c << endl;
+
+        // Edge case
+        if(formula[c].size() > max_size) {
+            if(!vars_seen.empty()) {
+                vars_seen.clear();
+                ++curr_group;
+            }
+            group_to_clauses[curr_group].insert(curr_clause);
+            clause_to_group[curr_clause] = curr_group;
+            ++curr_group;
+            continue;
+        }
+
         // Iterate through each literal
         for(int l : formula[c]) {
             int var = abs(l);
@@ -3848,7 +3862,6 @@ int ContiguousPartition::createPartitionsBySize(int max_size) {
         clause_to_group[curr_clause] = curr_group;
     }
 
-
     // Return number of groups
     return curr_group;
 
@@ -3869,7 +3882,9 @@ void ContiguousPartition::evaluateGroupings() {
     // printGroupsResults(results, group_to_clauses.size());
 
     int max_i = group_to_clauses.size();
-    while(results[max_i].size() == 0) --max_i;
+    while(results[max_i].size() == 0) {
+        --max_i;
+    }
 
     cout << "Number of Groups: Number of Variables that Activate That Amount" << endl;
     for(int i = 0; i <= max_i; ++i) {
