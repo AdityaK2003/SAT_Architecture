@@ -350,5 +350,6 @@ public:
     };
 
     int createPartitionsBySize(int max_vars);
+    void evaluateGroupings();
 
 };

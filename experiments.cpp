@@ -291,11 +291,11 @@ int main() {
     // string file = OSTROWSKI_FILES[0];
 
     string path = SAT2017_PATH;
-    string file = SAT2017_FILES[40];
+    string file = SAT2017_FILES[59];
 
     // Create architecture
-    path = SIMPLE_PATH;
-    file = "uf16_18.cnf";
+    // path = SIMPLE_PATH;
+    // file = "uf16_18.cnf";
 
     Circuit c(path+file);
     cout << "File: " << file << endl;
@@ -370,14 +370,11 @@ int main() {
     runDivideExperiment(c, rand_vars);*/
 
     // Contiguous Partition (by max vars)
+    int max_vars = 64;
     ContiguousPartition cont_part(c.vars, c.formula);
-    int groups = cont_part.createPartitionsBySize(4);
+    int groups = cont_part.createPartitionsBySize(max_vars);
 
-    for(int g = 0; g < groups; ++g) {
-        cout << "Group " << g << ": ";
-        cout << cont_part.group_to_clauses[g].size() << " clauses";
-        cout << endl;
-    }
+    cont_part.evaluateGroupings();
 
     
 

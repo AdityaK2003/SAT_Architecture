@@ -3854,3 +3854,28 @@ int ContiguousPartition::createPartitionsBySize(int max_size) {
 
 }
 
+/**
+ * Evaluates groupings by seeing what number of vars activate 1 group, 2 groups, ...
+ * and prints information about these results
+*/
+void ContiguousPartition::evaluateGroupings() {
+    // Create map for mappings
+    unordered_map<int, int> mappings;
+    for(int i = 1; i < clauses; ++i) {
+        mappings[i] = clause_to_group[i];
+    }
+    unordered_map<int, set<int>> results = runGroupsExperiment(vars, formula, mappings);
+    
+    // printGroupsResults(results, group_to_clauses.size());
+
+    int max_i = group_to_clauses.size();
+    while(results[max_i].size() == 0) --max_i;
+
+    cout << "Number of Groups: Number of Variables that Activate That Amount" << endl;
+    for(int i = 0; i <= max_i; ++i) {
+        // cout << i << ": " ;
+        cout << results[i].size() << endl;
+    }
+}
+
+
