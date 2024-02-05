@@ -294,8 +294,8 @@ int main() {
     string file = SAT2017_FILES[40];
 
     // Create architecture
-    // path = SIMPLE_PATH;
-    // file = "uf16_18.cnf";
+    path = SIMPLE_PATH;
+    file = "uf16_18.cnf";
 
     Circuit c(path+file);
     cout << "File: " << file << endl;
@@ -356,6 +356,7 @@ int main() {
     printGroupsResults(results, num_groups); */
 
     // Divide and Conquer
+    /*
     int k = 2;
     vector<int> order = kMostOccurring(c.vars, c.formula, k);
     unordered_set<int> remove_vars;
@@ -366,7 +367,18 @@ int main() {
 
     unordered_set<int> rand_vars = kRandomVariables(c.vars, k);
     cout << "\n\nUsing " << k << " Random Variables: " << endl;
-    runDivideExperiment(c, rand_vars);
+    runDivideExperiment(c, rand_vars);*/
+
+    // Contiguous Partition (by max vars)
+    ContiguousPartition cont_part(c.vars, c.formula);
+    int groups = cont_part.createPartitionsBySize(4);
+
+    for(int g = 0; g < groups; ++g) {
+        cout << "Group " << g << ": ";
+        cout << cont_part.group_to_clauses[g].size() << " clauses";
+        cout << endl;
+    }
+
     
 
     return 0;

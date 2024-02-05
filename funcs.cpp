@@ -3805,3 +3805,52 @@ unordered_set<int> kRandomVariables(int vars, int k) {
     return result;
 }
 
+/**
+ * Creates contiguous groups by number of unique vars in group
+ * 
+ * Params:
+ * - max_vars: maximum number of unique variables in a group
+ * 
+ * Returns:
+ * - int: number of groups made
+ * - group_to_clauses and clause_to_group class variables get set
+*/
+int ContiguousPartition::createPartitionsBySize(int max_size) {
+    // Keep track of unique vars seen
+    unordered_set<int> vars_seen;
+
+    // Maintain group number
+    int curr_group = 0;
+
+    // Iterate through each clause
+    for(int c = 0; c < clauses; ++c) {
+        int curr_clause = c+1;
+
+        // Iterate through each literal
+        for(int l : formula[c]) {
+            int var = abs(l);
+
+            // Mark as seen
+            vars_seen.insert(var);
+
+            // If over the limit
+            if(vars_seen.size() > max_size) {
+                // Reset
+                vars_seen.clear();
+                --c;
+                ++curr_group;
+                break;
+            }
+        }
+
+        // Assign clause
+        group_to_clauses[curr_group].insert(curr_clause);
+        clause_to_group[curr_clause] = curr_group;
+    }
+
+
+    // Return number of groups
+    return curr_group;
+
+}
+

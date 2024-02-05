@@ -324,3 +324,31 @@ vector<int> kMostOccurring(int vars, vector<vector<int>>& formula, int k);
 void runDivideExperiment(Circuit c, unordered_set<int> remove_vars, bool print=false);
 unordered_set<int> kRandomVariables(int vars, int k);
 
+
+// Class for contiguous partitions (groups created using consecutive clauses)
+class ContiguousPartition {
+public:
+    int vars;
+    int clauses;
+    vector<vector<int>> formula;
+
+    // group_to_clauses[i] is set of all clauses in group i
+    unordered_map<int, set<int>> group_to_clauses;
+    // clause_to_group[i] is the group corresponding to clause i
+    vector<int> clause_to_group;
+
+    // Constructor
+    ContiguousPartition(int v, vector<vector<int>> f) {
+        vars = v;
+        formula = f;
+        clauses = f.size();
+
+        for(int c = 0; c <= clauses; ++c) {
+            // Initialize to no group
+            clause_to_group.push_back(-1);
+        }
+    };
+
+    int createPartitionsBySize(int max_vars);
+
+};
