@@ -3826,8 +3826,6 @@ int ContiguousPartition::createPartitionsBySize(int max_size) {
     for(int c = 0; c < clauses; ++c) {
         int curr_clause = c+1;
 
-        cout << c << endl;
-
         // Edge case
         if(formula[c].size() > max_size) {
             if(!vars_seen.empty()) {

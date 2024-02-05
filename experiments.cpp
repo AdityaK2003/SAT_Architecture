@@ -370,7 +370,7 @@ int main() {
     runDivideExperiment(c, rand_vars);*/
 
     // Contiguous Partition (by max vars)
-    int max_vars = 4;
+    int max_vars = 16;
     ContiguousPartition cont_part(c.vars, c.formula);
     int groups = cont_part.createPartitionsBySize(max_vars);
     cont_part.evaluateGroupings();
