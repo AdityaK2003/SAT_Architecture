@@ -353,3 +353,6 @@ public:
     void evaluateGroupings();
 
 };
+
+void findVarMeanAndSDClause(int var, vector<vector<int>>& formula);
+

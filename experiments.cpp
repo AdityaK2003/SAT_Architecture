@@ -291,7 +291,7 @@ int main() {
     // string file = OSTROWSKI_FILES[0];
 
     string path = SAT2017_PATH;
-    string file = SAT2017_FILES[59];
+    string file = SAT2017_FILES[0];
 
     // Create architecture
     // path = SIMPLE_PATH;
@@ -370,12 +370,14 @@ int main() {
     runDivideExperiment(c, rand_vars);*/
 
     // Contiguous Partition (by max vars)
-    int max_vars = 16;
-    ContiguousPartition cont_part(c.vars, c.formula);
-    int groups = cont_part.createPartitionsBySize(max_vars);
-    cont_part.evaluateGroupings();
+    // int max_vars = 64;
+    // ContiguousPartition cont_part(c.vars, c.formula);
+    // int groups = cont_part.createPartitionsBySize(max_vars);
+    // cont_part.evaluateGroupings();
 
-    
+    for(int v = 1; v <= c.vars; ++v) {
+        findVarMeanAndSDClause(v, c.formula);
+    }
 
     return 0;
 }

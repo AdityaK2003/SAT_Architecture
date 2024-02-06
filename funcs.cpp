@@ -3891,4 +3891,51 @@ void ContiguousPartition::evaluateGroupings() {
     }
 }
 
+/**
+ * Given a variable and a formula, figure out where it occurs in the formula.
+ * Specifically, the mean clause number, and the standard deviation
+ * 
+ * Params:
+ * - int var: the variable to focus on
+ * - vector<vector<int>> formula: the SAT formula
+ * 
+ * Returns:
+ * - prints mean and standard deviation
+*/
+void findVarMeanAndSDClause(int var, vector<vector<int>>& formula) {
+    // Keep track of the clauses this var occurs in
+    unordered_set<int> clauses;
+    // Keep track of the sum
+    int sum = 0;
+
+    // Iterate through each clause
+    for(int i = 0; i < formula.size(); ++i) {
+        int c = i+1;
+        for(int lit : formula[i]) {
+            // If var in formula
+            if(abs(lit) == var) {
+                sum += c;
+                clauses.insert(c);
+                break;
+            }
+        }
+    }
+
+    // Find mean
+    float mean = (sum * 1.0) / (clauses.size() * 1.0);
+
+    // Find standard deviation
+    float tmp = 0;
+    for(int c : clauses) {
+        tmp += (c - mean) * (c - mean);
+    }
+    float sd = pow((tmp / (clauses.size() - 1.0)), 0.5);
+    
+
+    // Print
+    cout << "Var " << var << endl;
+    cout << "\tMean: " << mean << endl;
+    cout << "\tSD: " << sd << endl;
+}
+
 
