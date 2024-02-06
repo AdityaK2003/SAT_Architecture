@@ -3893,14 +3893,14 @@ void ContiguousPartition::evaluateGroupings() {
 
 /**
  * Given a variable and a formula, figure out where it occurs in the formula.
- * Specifically, the mean clause number, and the standard deviation
+ * Specifically, the mean clause number, and the standard deviation, the min clause num, max clause num
  * 
  * Params:
  * - int var: the variable to focus on
  * - vector<vector<int>> formula: the SAT formula
  * 
  * Returns:
- * - prints mean and standard deviation
+ * - prints mean, standard deviation, min clause, max clause
 */
 void findVarMeanAndSDClause(int var, vector<vector<int>>& formula) {
     // Keep track of the clauses this var occurs in
@@ -3908,12 +3908,19 @@ void findVarMeanAndSDClause(int var, vector<vector<int>>& formula) {
     // Keep track of the sum
     int sum = 0;
 
+    // Keep track of min and max clauses
+    int min_clause = INT_MAX;
+    int max_clause = INT_MIN;
+
     // Iterate through each clause
     for(int i = 0; i < formula.size(); ++i) {
         int c = i+1;
         for(int lit : formula[i]) {
             // If var in formula
             if(abs(lit) == var) {
+                min_clause = min(min_clause, c);
+                max_clause = max(max_clause, c);
+
                 sum += c;
                 clauses.insert(c);
                 break;
@@ -3936,6 +3943,7 @@ void findVarMeanAndSDClause(int var, vector<vector<int>>& formula) {
     cout << "Var " << var << endl;
     cout << "\tMean: " << mean << endl;
     cout << "\tSD: " << sd << endl;
+    cout << "\tMin: " << min_clause << "\t\tMax: " << max_clause << endl;
 }
 
 

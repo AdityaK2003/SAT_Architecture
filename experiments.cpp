@@ -291,7 +291,7 @@ int main() {
     // string file = OSTROWSKI_FILES[0];
 
     string path = SAT2017_PATH;
-    string file = SAT2017_FILES[0];
+    string file = SAT2017_FILES[10];
 
     // Create architecture
     // path = SIMPLE_PATH;
