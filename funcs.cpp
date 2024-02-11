@@ -3752,8 +3752,8 @@ void runDivideExperiment(Circuit c, unordered_set<int> remove_vars, bool print) 
         }
         if(success) {
             if(print) {
-                cout << "\tVars Remaining: " << divide.vars_2 << endl;
-                cout << "\tClauses Remaining: " << divide.clauses_2 << endl;
+                cout << "\tVars Remaining: " << divide.vars_2 << "  (" << divide.vars_2 * 100.0 / c.vars << "%)" << endl;
+                cout << "\tClauses Remaining: " << divide.clauses_2 << "  (" << divide.clauses_2 * 100.0 / c.clauses << "%)" << endl;
             }
 
             // Track stats

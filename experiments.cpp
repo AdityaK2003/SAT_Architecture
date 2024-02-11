@@ -28,6 +28,7 @@ string VLSAT2_PATH = "sat_files/nonrandom_sat_files/VLSAT2/";
 string VLSAT2_SIMPLIFIED_PATH = "sat_files/nonrandom_sat_files/VLSAT2_simplified/";
 string VLSAT1_PATH = "sat_files/nonrandom_sat_files/VLSAT1/";
 string SAT2017_PATH = "sat_files/SAT2017_Soowang/";
+string SAT2017_PREPROCESSED_PATH = "sat_files/SAT2017_Preprocessed/";
 
 // Filenames
 
@@ -158,7 +159,7 @@ unordered_map<int, string> SAT2017_FILES = {
  * - inputFolder
  * - inputFile
  * - outputFolder: if empty string (default), appends "_simplified" to inputFolder
- * - outputFile: if empty string (default), appends "_simplified" to inputFilename
+ * - outputFile: if empty string (default), uses inputFilename
  * - renumber: boolean, decides whether to renumber formula (default true)
  * 
  * Returns:
@@ -184,7 +185,8 @@ unordered_set<int> preprocess(string inputFolder, string inputFile, string outpu
     // Create output file name if none provided
     if(outputFile.size() == 0) {
         outputFile = inputFile.substr(0, inputFile.find_last_of('.'));
-        outputFile += "_simplified.cnf";
+        // outputFile += "_simplified.cnf";
+        outputFile += ".cnf";
     }
 
     // Create folder if doesn't exist
@@ -293,6 +295,17 @@ int main() {
     string path = SAT2017_PATH;
     string file = SAT2017_FILES[59];
 
+    // Preprocess all
+    // for(auto p : SAT2017_FILES) {
+    //     file = p.second;
+    //     preprocess(path, file, SAT2017_PREPROCESSED_PATH);
+    //     cout << file << endl;
+    //     Circuit c(path+file);
+    //     Circuit c2(SAT2017_PREPROCESSED_PATH + file);
+    //     cout << "\tBefore: " << c.vars << " vars" << endl;
+    //     cout << "\tAfter: " << c2.vars << " vars" << endl;
+    // }
+
     // Create architecture
     // path = SIMPLE_PATH;
     // file = "uf16_18.cnf";
@@ -328,9 +341,9 @@ int main() {
     // p.debug = true;
 
     // Clause Partitioning
-    ClausePartition clause_part(c.vars, c.formula);
-    string heur = "round-robin";
-    heur = "random";
+    // ClausePartition clause_part(c.vars, c.formula);
+    // string heur = "round-robin";
+    // heur = "random";
 
     // clause_part.debug = true;
     // int trials = 10;
@@ -356,18 +369,17 @@ int main() {
     printGroupsResults(results, num_groups); */
 
     // Divide and Conquer
-    /*
-    int k = 2;
+    int k = 6;
     vector<int> order = kMostOccurring(c.vars, c.formula, k);
     unordered_set<int> remove_vars;
     for(int var : order) remove_vars.insert(var);
 
     cout << "Using " << k << " Most Occurring Variables: " << endl;
-    runDivideExperiment(c, remove_vars);
+    runDivideExperiment(c, remove_vars, true);
 
     unordered_set<int> rand_vars = kRandomVariables(c.vars, k);
     cout << "\n\nUsing " << k << " Random Variables: " << endl;
-    runDivideExperiment(c, rand_vars);*/
+    runDivideExperiment(c, rand_vars, true);
 
     // Contiguous Partition (by max vars)
     // int max_vars = 64;
@@ -375,7 +387,7 @@ int main() {
     // int groups = cont_part.createPartitionsBySize(max_vars);
     // cont_part.evaluateGroupings();
 
-    findAllMeanAndSdClauses(c.vars, c.formula);
+    // findAllMeanAndSdClauses(c.vars, c.formula);
 
     return 0;
 }
