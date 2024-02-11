@@ -355,4 +355,5 @@ public:
 };
 
 void findVarMeanAndSDClause(int var, vector<vector<int>>& formula);
+void findAllMeanAndSdClauses(int total_vars, vector<vector<int>>& formula);
 

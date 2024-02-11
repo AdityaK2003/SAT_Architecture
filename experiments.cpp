@@ -291,7 +291,7 @@ int main() {
     // string file = OSTROWSKI_FILES[0];
 
     string path = SAT2017_PATH;
-    string file = SAT2017_FILES[10];
+    string file = SAT2017_FILES[59];
 
     // Create architecture
     // path = SIMPLE_PATH;
@@ -375,9 +375,7 @@ int main() {
     // int groups = cont_part.createPartitionsBySize(max_vars);
     // cont_part.evaluateGroupings();
 
-    for(int v = 1; v <= c.vars; ++v) {
-        findVarMeanAndSDClause(v, c.formula);
-    }
+    findAllMeanAndSdClauses(c.vars, c.formula);
 
     return 0;
 }

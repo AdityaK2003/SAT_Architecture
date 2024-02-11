@@ -3946,4 +3946,57 @@ void findVarMeanAndSDClause(int var, vector<vector<int>>& formula) {
     cout << "\tMin: " << min_clause << "\t\tMax: " << max_clause << endl;
 }
 
+/**
+ * Identical to previous function, but finds stats for all variables
+*/
+void findAllMeanAndSdClauses(int total_vars, vector<vector<int>>& formula) {
+    // Keep track of the clauses each var occurs in
+    unordered_map<int, set<int>> var_to_clauses;
+
+    // Maintain min clause and max clause
+    unordered_map<int, int> var_to_min_clause;
+    unordered_map<int, int> var_to_max_clause;
+
+    // Keep track of sum of clauses for each var
+    unordered_map<int, int> var_to_sum;
+
+    // Fill in values
+    for(int i = 0; i < formula.size(); ++i) {
+        int c = i+1;
+        for(int lit : formula[i]) {
+            int v = abs(lit);
+            var_to_clauses[v].insert(c);
+
+            if(var_to_min_clause.count(v) == 0 || var_to_min_clause[v] > c) {
+                var_to_min_clause[v] = c;
+            }
+
+            if(var_to_max_clause.count(v) == 0 || var_to_max_clause[v] < c) {
+                var_to_max_clause[v] = c;
+            }
+
+            var_to_sum[v] += c;
+        }
+    }
+
+    // Calculate and print out stats for each var
+    for(int v = 1; v <= total_vars; ++v) {
+        // Find mean
+        float mean = (var_to_sum[v] * 1.0) / (var_to_clauses[v].size() * 1.0);
+
+        // Find standard deviation
+        float tmp = 0;
+        for(int c : var_to_clauses[v]) {
+            tmp += (c - mean) * (c - mean);
+        }
+        float sd = pow((tmp / (var_to_clauses[v].size() - 1.0)), 0.5);
+        
+
+        // Print
+        cout << "Var " << v << endl;
+        cout << "\tMean: " << mean << endl;
+        cout << "\tSD: " << sd << endl;
+        cout << "\tMin: " << var_to_min_clause[v] << "\t\tMax: " << var_to_max_clause[v] << endl;
+    }
+}
 
