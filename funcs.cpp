@@ -3551,6 +3551,7 @@ bool DivideFormula::removeKLiterals(unordered_set<int> remove, bool recurse, boo
     vector<vector<int>> tmp_formula = formula; 
 
     int tmp_vars = vars;
+    renumber = false;
 
     // Loop
     while(remove.size()) {
@@ -3631,9 +3632,29 @@ bool DivideFormula::removeKLiterals(unordered_set<int> remove, bool recurse, boo
             tmp_formula = formula_2;
             tmp_vars = vars_2;
         } else {
+            // Update number of variables to be accurate
+            unordered_set<int> unique_vars;
+            for(vector<int> c : formula_2) {
+                for(int l : c) {
+                    unique_vars.insert(abs(l));
+                }
+            }
+
+            vars_2 = unique_vars.size();
+
             return true;
         }
     }
+    
+    // Update number of variables to be accurate
+    unordered_set<int> unique_vars;
+    for(vector<int> c : formula_2) {
+        for(int l : c) {
+            unique_vars.insert(abs(l));
+        }
+    }
+
+    vars_2 = unique_vars.size();
 
     return true;
 }
@@ -3721,9 +3742,10 @@ vector<int> kMostOccurring(int vars, vector<vector<int>>& formula, int k) {
  * Params:
  * - Circuit c: includes information about the SAT formula
  * - unordered_set<int> remove_vars: the variables to remove (tries all literal combos)
+ * - bool show_stats: prints out stats
  * - bool print: if true, prints info about each lit combo
 */
-void runDivideExperiment(Circuit c, unordered_set<int> remove_vars, bool print) {
+void runDivideExperiment(Circuit c, unordered_set<int> remove_vars, bool show_stats, bool print) {
     vector<unordered_set<int>> lit_combos = generateLitsCombos(remove_vars);
 
     // Keep track of stats
@@ -3768,18 +3790,59 @@ void runDivideExperiment(Circuit c, unordered_set<int> remove_vars, bool print) 
         }
     }
 
-    int avg_vars = (total_vars * 1.0 / successes);
-    int avg_clauses = (total_clauses * 1.0 / successes);
+    if(show_stats) {
+        int avg_vars = (total_vars * 1.0 / successes);
+        int avg_clauses = (total_clauses * 1.0 / successes);
 
-    cout << endl << "Successes: " << successes << endl;
-    cout << "\nAvg Vars Remaining: " << avg_vars << endl;
-    cout << "\tPercent: " << avg_vars * 100.0 / c.vars << "%" << endl;
-    cout << "Avg Clauses Remaining: " << avg_clauses << endl;
-    cout << "\tPercent: " << avg_clauses * 100.0 / c.clauses << "%" << endl;
-    cout << "\nMin Vars Remaining: " << min_vars << endl;
-    cout << "\tPercent: " << min_vars * 100.0 / c.vars << "%" << endl;
-    cout << "Min Clauses Remaining: " << min_clauses << endl;
-    cout << "\tPercent: " << min_clauses * 100.0 / c.clauses << "%\n\n";
+        cout << endl << "Successes: " << successes << endl;
+        cout << "\nAvg Vars Remaining: " << avg_vars << endl;
+        cout << "\tPercent: " << avg_vars * 100.0 / c.vars << "%" << endl;
+        cout << "Avg Clauses Remaining: " << avg_clauses << endl;
+        cout << "\tPercent: " << avg_clauses * 100.0 / c.clauses << "%" << endl;
+        cout << "\nMin Vars Remaining: " << min_vars << endl;
+        cout << "\tPercent: " << min_vars * 100.0 / c.vars << "%" << endl;
+        cout << "Min Clauses Remaining: " << min_clauses << endl;
+        cout << "\tPercent: " << min_clauses * 100.0 / c.clauses << "%\n\n";
+    }
+}
+
+/**
+ * Same as above, but only divides using one variable
+ * Returns a vector of size 2 of Circuit objects after dividing
+ * 
+ * Params:
+ * - Formula f: includes information about the SAT formula
+ * - int remove_var: var to remove
+ * 
+ * Returns:
+ * - vector<Formula>: size 2 where first Formula is after removing negative literal, second one after removing positive literal
+ *   - if either causes error, will be a Formula object with f.vars set to -1
+*/
+vector<Formula> runDivideExperimentSingleVar(Formula f, int remove_var) {
+    // Result
+    vector<Formula> result;
+
+    // Iterate through each combination
+    vector<int> order = {-1 * abs(remove_var), abs(remove_var)};
+    for(int curr_var : order) {
+        // Remove the var
+        DivideFormula divide(f.vars, f.formula);
+        unordered_set<int> curr = {curr_var};
+        bool success = divide.removeKLiterals(curr, true, true);
+
+        // If error
+        if(!success) {
+            Formula f2;
+            f2.vars = -1;
+            result.push_back(f2);
+        } else {
+            Formula f2;
+            f2.vars = divide.vars_2;
+            f2.formula = divide.formula_2;
+            result.push_back(f2);
+        }
+    }
+    return result;
 }
 
 /**
@@ -3998,5 +4061,154 @@ void findAllMeanAndSdClauses(int total_vars, vector<vector<int>>& formula) {
         cout << "\tSD: " << sd << endl;
         cout << "\tMin: " << var_to_min_clause[v] << "\t\tMax: " << var_to_max_clause[v] << endl;
     }
+}
+
+
+/**
+ * Uses most occurred heuristic to determine best var to remove
+ * 
+ * Params:
+ * - vector<vector<int>> formula: the SAT formula
+ * - int vars: the number of variables
+ * 
+ * Returns:
+ * - int: the most occurring var
+*/
+int heurFindMostOccurr(vector<vector<int>>& formula, int vars) {
+    unordered_map<int, int> occur;
+    int max_var = 0, max_occur = -1;
+    for(vector<int> c : formula) {
+        for(int lit : c) {
+            int var = abs(lit);
+            ++occur[var];
+
+            // Update
+            if(max_occur < occur[var]) {
+                max_occur = occur[var];
+                max_var = var;
+            }
+        }
+    }
+    return max_var;
+}
+
+
+
+/**
+ * Uses Jeroslow Wang Heuristic to determine best var
+ * 
+ * Params:
+ * - vector<vector<int>> formula: the SAT formula
+ * - int vars: the number of variables
+ * 
+ * Returns:
+ * - int: the var to remove
+*/
+
+
+
+/**
+ * Applies divide and conquer method with heuristics
+ * Applies heur for one var, then removes, then applies next heuristic, and so on
+ * 
+ * Params:
+ * - Circuit c: the formula to operate on
+ * - int k: number of variables to remove
+ * - string heur: heuristic to use to select next var
+ *      - (default) "max_occur": picks most occurring variable
+ * - bool print: shows extra logs
+ * 
+ * Returns:
+ * - prints info about new formula
+*/
+void divideAndConquerHeur(Circuit c, int k, string heur, bool print) {
+    // Keep track of formula
+    Formula f;
+    f.vars = c.vars;
+    f.formula = c.formula;
+
+    // Create queue of formulas to divide
+    queue<pair<Formula, int>> q; // formula to divide, and its id number
+    q.push(make_pair(f, 0));
+
+    // Keep track of ids
+    int id = 0;
+
+    // Keep track of how many vars have been removed from each problem
+    unordered_map<int, int> id_to_removals = { {0, 0} };
+
+    int min_vars = INT_MAX;
+
+    // Iterate until queue is empty
+    while(q.size()) {
+        pair<Formula, int> curr_pair = q.front();
+        q.pop();
+        Formula f = curr_pair.first;
+        int curr_id = curr_pair.second;
+        int curr_removals = id_to_removals[curr_id];
+
+        // Pick var to remove using heuristics
+        int curr_var = -1;
+        if (heur == "max_occur") {
+            curr_var = heurFindMostOccurr(f.formula, f.vars);
+        }
+
+        if(print || curr_removals == k) {
+            cout << "\nCurr ID: " << curr_id << "  (" << curr_removals << " removals)" << endl;
+            if(print && curr_removals < k) {
+                cout << "\tVars: " << f.vars << endl;
+                cout << "\tClauses: " << f.formula.size() << endl << endl;
+            }
+        }
+
+        // If no more removals required
+        if(curr_removals == k) {
+            // Print required info
+            cout << "\tVars: " << f.vars << "  (" << f.vars * 100.0 / c.vars << "%)" << endl;
+            cout << "\tClauses: " << f.formula.size() << "  (" << f.formula.size() * 100.0 / c.clauses << "%)" << endl;
+
+            // Update min
+            min_vars = min(min_vars, f.vars);
+
+            continue;
+        }
+
+        // Remove this variable
+        vector<Formula> result = runDivideExperimentSingleVar(f, curr_var);
+
+        // Create new ids if valid
+        int id_1 = -1, id_2 = -1;
+        if(result[0].vars != -1 && result[0].vars != 0) {
+            id_1 = id + 1;
+            ++id;
+            id_to_removals[id_1] = id_to_removals[curr_id] + 1;
+
+            q.push(make_pair(result[0], id_1));
+
+            if(print) {
+                cout << "\tCreated ID " << id << " for removing " << -1 * curr_var << ", added to queue" << endl;
+            }
+        } else {
+            if(result[0].vars == -1) cout << "\tAfter removing " << -1 * curr_var << ", FAILURE" << endl;
+            else cout << "\tAfter removing " << -1 * curr_var << ", SUCCESS" << endl;
+        }
+        if(result[1].vars != -1 && result[1].vars != 0) {
+            id_2 = id + 1;
+            ++id;
+            id_to_removals[id_2] = id_to_removals[curr_id] + 1;
+
+            q.push(make_pair(result[1], id_2));
+
+            if(print) {
+                cout << "\tCreated ID " << id << " for removing " << curr_var << ", added to queue" << endl;
+            }
+        }else {
+            if(result[0].vars == -1) cout << "\tAfter removing " << curr_var << ", FAILURE" << endl;
+            else cout << "\tAfter removing " << curr_var << ", SUCCESS" << endl;
+        }
+    }
+
+    // Print min
+    cout << "\n\nMin Vars: " << min_vars << "  (" << min_vars * 100.0 / c.vars << "%)\n";
 }
 

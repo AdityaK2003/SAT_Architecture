@@ -293,7 +293,7 @@ int main() {
     // string file = OSTROWSKI_FILES[0];
 
     string path = SAT2017_PATH;
-    string file = SAT2017_FILES[59];
+    string file = SAT2017_FILES[10];
 
     // Preprocess all
     // for(auto p : SAT2017_FILES) {
@@ -369,17 +369,9 @@ int main() {
     printGroupsResults(results, num_groups); */
 
     // Divide and Conquer
-    int k = 6;
-    vector<int> order = kMostOccurring(c.vars, c.formula, k);
-    unordered_set<int> remove_vars;
-    for(int var : order) remove_vars.insert(var);
+    int k = 3;
+    divideAndConquerHeur(c, k, "max_occur", false);
 
-    cout << "Using " << k << " Most Occurring Variables: " << endl;
-    runDivideExperiment(c, remove_vars, true);
-
-    unordered_set<int> rand_vars = kRandomVariables(c.vars, k);
-    cout << "\n\nUsing " << k << " Random Variables: " << endl;
-    runDivideExperiment(c, rand_vars, true);
 
     // Contiguous Partition (by max vars)
     // int max_vars = 64;

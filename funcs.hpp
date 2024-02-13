@@ -68,6 +68,10 @@ public:
     map<int, set<int>> lit_clauses;
 
     Circuit(string f);
+    Circuit() {
+        // Default constructor
+        vars = -1;
+    };
     Circuit(Circuit& c);
     ~Circuit();
 
@@ -102,6 +106,13 @@ public:
 
     // Constructor
     Line(int l, int c, int start, int end, int row_n);
+};
+
+// Representation of a SAT formula
+class Formula {
+public:
+    int vars;
+    vector<vector<int>> formula;
 };
 
 
@@ -321,7 +332,8 @@ public:
 vector<unordered_set<int>> generateLitsCombos(unordered_set<int> remove_vars);
 void generateLitsCombosHelper(vector<unordered_set<int>>& answer, vector<int> remove_vars, unordered_set<int> curr, int i);
 vector<int> kMostOccurring(int vars, vector<vector<int>>& formula, int k);
-void runDivideExperiment(Circuit c, unordered_set<int> remove_vars, bool print=false);
+void runDivideExperiment(Circuit c, unordered_set<int> remove_vars, bool show_stats=true, bool print=false);
+vector<Formula> runDivideExperimentSingleVar(Formula c, int remove_var);
 unordered_set<int> kRandomVariables(int vars, int k);
 
 
@@ -357,3 +369,5 @@ public:
 void findVarMeanAndSDClause(int var, vector<vector<int>>& formula);
 void findAllMeanAndSdClauses(int total_vars, vector<vector<int>>& formula);
 
+
+void divideAndConquerHeur(Circuit c, int k, string heur, bool print=false);
