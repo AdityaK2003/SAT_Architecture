@@ -1,7 +1,7 @@
 # Usage: "make experiments; ./experiments"
 
 CXX := g++ -g
-CXXFLAGS := -std=c++14 
+CXXFLAGS := -std=c++1y
 
 SRCS := old_funcs.cpp funcs.cpp experiments.cpp
 OBJS := $(SRCS:.cpp=.o)

@@ -2854,8 +2854,8 @@ void toCSV(int vars, int i) {
 
 // Randomly re-order a CNF formula
 vector<vector<int>> reorder(vector<vector<int>> formula) {
-    shuffle(begin(formula), end(formula), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
-
+    // shuffle(begin(formula), end(formula), default_random_engine(chrono::system_clock::now().time_since_epoch().count()));
+    random_shuffle(formula.begin(), formula.end());
     return formula;
 }
 

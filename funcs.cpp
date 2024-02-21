@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <ctime>
 #include <cstdlib>
+#include <climits>
 
 #include "old_funcs.hpp"
 #include "funcs.hpp"
