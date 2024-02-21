@@ -370,7 +370,14 @@ int main() {
 
     // Divide and Conquer
     int k = 3;
-    divideAndConquerHeur(c, k, "max_occur", false);
+    string heur = "mom";
+    cout << "Heur: " << heur << endl;
+    divideAndConquerHeur(c, k, heur, false);
+
+    // Solve
+    // unordered_set<int> s;
+    // int count = 0;
+    // solve(c.formula, s, c.vars, "mom", true, true, count);
 
 
     // Contiguous Partition (by max vars)

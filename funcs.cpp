@@ -4074,7 +4074,7 @@ void findAllMeanAndSdClauses(int total_vars, vector<vector<int>>& formula) {
  * Returns:
  * - int: the most occurring var
 */
-int heurFindMostOccurr(vector<vector<int>>& formula, int vars) {
+int heurFindMostOccurVar(vector<vector<int>>& formula, int vars) {
     unordered_map<int, int> occur;
     int max_var = 0, max_occur = -1;
     for(vector<int> c : formula) {
@@ -4092,6 +4092,32 @@ int heurFindMostOccurr(vector<vector<int>>& formula, int vars) {
     return max_var;
 }
 
+/**
+ * Uses most occurred heuristic to determine best var to remove
+ * 
+ * Params:
+ * - vector<vector<int>> formula: the SAT formula
+ * - int vars: the number of variables
+ * 
+ * Returns:
+ * - int: the most occurring var
+*/
+int heurFindMostOccurLit(vector<vector<int>>& formula, int vars) {
+    unordered_map<int, int> occur;
+    int max_lit = 0, max_occur = -1;
+    for(vector<int> c : formula) {
+        for(int lit : c) {
+            ++occur[lit];
+
+            // Update
+            if(max_occur < occur[lit]) {
+                max_occur = occur[lit];
+                max_lit = lit;
+            }
+        }
+    }
+    return abs(max_lit);
+}
 
 
 /**
@@ -4104,7 +4130,60 @@ int heurFindMostOccurr(vector<vector<int>>& formula, int vars) {
  * Returns:
  * - int: the var to remove
 */
+int heurFindJeroslowWang(vector<vector<int>>& formula, int vars) {
+    double max_score = INT_MIN;
+    int lit_with_max_score = -1;
 
+    // Keep track of scores
+    unordered_map<int, double > score;
+    for(vector<int> c : formula) {
+        double clause_score = (1.0 / pow(2,  c.size()));
+
+        for(int l : c) {
+            // Update score
+            score[l] += clause_score;
+
+            if(max_score < score[l]) {
+                max_score = score[l];
+                lit_with_max_score = l;
+            }
+        }
+    }
+
+
+    // Return variable with max score
+    return abs(lit_with_max_score); 
+}
+
+/**
+ * Uses maximum occurrences in clauses of minimum size heuristic
+*/
+int heurFindMOM(vector<vector<int>>& formula, int vars) {
+    int min_size = INT_MAX;
+    unordered_map<int, set<int>> size_to_clauses;
+    for(int c = 0; c < formula.size(); ++c) {
+        int size = formula[c].size();
+        min_size = min(min_size, size);
+        size_to_clauses[size].insert(c);
+    }
+
+    // Occurrences
+    unordered_map<int, int> occur;
+    int most_occurrences = INT_MIN;
+    int lit_with_most = -1;
+    for(int c : size_to_clauses[min_size]) {
+        for(int l : formula[c]) {
+            ++occur[l];
+
+            if(most_occurrences < occur[l]) {
+                most_occurrences = occur[l];
+                lit_with_most = l;
+            }
+        }
+    }
+
+    return abs(lit_with_most);
+}
 
 
 /**
@@ -4115,7 +4194,12 @@ int heurFindMostOccurr(vector<vector<int>>& formula, int vars) {
  * - Circuit c: the formula to operate on
  * - int k: number of variables to remove
  * - string heur: heuristic to use to select next var
- *      - (default) "max_occur": picks most occurring variable
+ *      - (default) "max_occur_var": picks most occurring variable
+ *      - "max_occur_lit": picks most occurring literal (as a variable)
+ *          ex: -5 occurs 1 time and 5 occurs 6 times, and -10 occurs 5 times and 10 occurs 5 times
+ *             max_occur_lit will choose 5, but max_occur_var will choose 10
+ *      - "jeroslow-wang": uses jeroslow wang equation to pick next
+ *      - "mom": picks var with maximum occurrences in minimum size clauses
  * - bool print: shows extra logs
  * 
  * Returns:
@@ -4137,6 +4221,12 @@ void divideAndConquerHeur(Circuit c, int k, string heur, bool print) {
     // Keep track of how many vars have been removed from each problem
     unordered_map<int, int> id_to_removals = { {0, 0} };
 
+    // For each id, maintains its parent
+    unordered_map<int, int> parent_id;
+
+    // For each id, maintain the lit removed to make it
+    unordered_map<int, int> id_to_lit_removed;
+
     int min_vars = INT_MAX;
 
     // Iterate until queue is empty
@@ -4147,12 +4237,7 @@ void divideAndConquerHeur(Circuit c, int k, string heur, bool print) {
         int curr_id = curr_pair.second;
         int curr_removals = id_to_removals[curr_id];
 
-        // Pick var to remove using heuristics
-        int curr_var = -1;
-        if (heur == "max_occur") {
-            curr_var = heurFindMostOccurr(f.formula, f.vars);
-        }
-
+       
         if(print || curr_removals == k) {
             cout << "\nCurr ID: " << curr_id << "  (" << curr_removals << " removals)" << endl;
             if(print && curr_removals < k) {
@@ -4173,6 +4258,26 @@ void divideAndConquerHeur(Circuit c, int k, string heur, bool print) {
             continue;
         }
 
+
+        // Pick var to remove using heuristics
+        int curr_var = -1;
+        // Jeroslow wang
+        if (heur == "jeroslow-wang") {
+            curr_var = heurFindJeroslowWang(f.formula, f.vars);
+        }
+        // Maximum occurrences in minimum size clauses
+        else if(heur == "mom") {
+            curr_var = heurFindMOM(f.formula, f.vars);
+        }
+        // Most occurring lit
+        else if (heur == "most_occur_lit") {
+            curr_var = heurFindMostOccurLit(f.formula, f.vars);
+        }
+        // Else: most occurring var
+        else {
+            curr_var = heurFindMostOccurVar(f.formula, f.vars);
+        }
+
         // Remove this variable
         vector<Formula> result = runDivideExperimentSingleVar(f, curr_var);
 
@@ -4182,6 +4287,8 @@ void divideAndConquerHeur(Circuit c, int k, string heur, bool print) {
             id_1 = id + 1;
             ++id;
             id_to_removals[id_1] = id_to_removals[curr_id] + 1;
+            parent_id[id_1] = curr_id;
+            id_to_lit_removed[id_1] = -1 * curr_var;
 
             q.push(make_pair(result[0], id_1));
 
@@ -4191,20 +4298,36 @@ void divideAndConquerHeur(Circuit c, int k, string heur, bool print) {
         } else {
             if(result[0].vars == -1) cout << "\tAfter removing " << -1 * curr_var << ", FAILURE" << endl;
             else cout << "\tAfter removing " << -1 * curr_var << ", SUCCESS" << endl;
+            cout << "\t\tAssignment: " << curr_var << " ";
+            int parent = curr_id;
+            while(parent != 0) {
+                cout << id_to_lit_removed[parent] << " ";
+                parent = parent_id[parent];
+            }
+            cout << endl;
         }
         if(result[1].vars != -1 && result[1].vars != 0) {
             id_2 = id + 1;
             ++id;
             id_to_removals[id_2] = id_to_removals[curr_id] + 1;
+            parent_id[id_2] = curr_id;
+            id_to_lit_removed[id_2] = curr_var;
 
             q.push(make_pair(result[1], id_2));
 
             if(print) {
                 cout << "\tCreated ID " << id << " for removing " << curr_var << ", added to queue" << endl;
             }
-        }else {
-            if(result[0].vars == -1) cout << "\tAfter removing " << curr_var << ", FAILURE" << endl;
+        } else {
+            if(result[1].vars == -1) cout << "\tAfter removing " << curr_var << ", FAILURE" << endl;
             else cout << "\tAfter removing " << curr_var << ", SUCCESS" << endl;
+            cout << "\t\tAssignment: " << curr_var << " ";
+            int parent = curr_id;
+            while(parent != 0) {
+                cout << id_to_lit_removed[parent] << " ";
+                parent = parent_id[parent];
+            }
+            cout << endl;
         }
     }
 

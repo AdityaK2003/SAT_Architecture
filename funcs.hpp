@@ -369,5 +369,8 @@ public:
 void findVarMeanAndSDClause(int var, vector<vector<int>>& formula);
 void findAllMeanAndSdClauses(int total_vars, vector<vector<int>>& formula);
 
-
+int heurFindJeroslowWang(vector<vector<int>>& formula, int vars);
+int heurFindMostOccurLit(vector<vector<int>>& formula, int vars);
+int heurFindMostOccurVar(vector<vector<int>>& formula, int vars);
+int heurFindMOM(vector<vector<int>>& formula, int vars);
 void divideAndConquerHeur(Circuit c, int k, string heur, bool print=false);
