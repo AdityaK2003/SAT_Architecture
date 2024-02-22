@@ -310,24 +310,39 @@ int main() {
     // string path = OSTROWSKI_PATH;
     // string file = OSTROWSKI_FILES[0];
 
-    string path = SAT2017_PATH;
+    string path = SAT2017_PREPROCESSED_PATH;
     string file = SAT2017_FILES[30];
 
     // Preprocess all
-    bool print = true;
-    for(auto p : SAT2017_FILES) {
-        file = p.second;
-        cout << file << endl;
-        unordered_set<int> assignment = preprocess(path, file, SAT2017_PREPROCESSED_PATH, "", true, print);
-        if(assignment.size()) {
-            Circuit c(path+file);
-            Circuit c2(SAT2017_PREPROCESSED_PATH + file);
-            cout << "\tBefore: " << c.vars << " vars" << endl;
-            cout << "\tAfter: " << c2.vars << " vars" << endl;
-        } else {
-            cout << "\tskipped since already exists" << endl;
-        }
-    }
+    // bool print = true;
+    // for(auto p : SAT2017_FILES) {
+    //     file = p.second;
+    //     cout << file << endl;
+    //     unordered_set<int> assignment = preprocess(SAT2017_PATH, file, SAT2017_PREPROCESSED_PATH, "", true, print);
+    //     if(assignment.size()) {
+    //         Circuit c(SAT2017_PATH + file);
+    //         Circuit c2(SAT2017_PREPROCESSED_PATH + file);
+    //         cout << "\tBefore: " << c.vars << " vars" << endl;
+    //         cout << "\tAfter: " << c2.vars << " vars" << endl;
+    //     } else {
+    //         cout << "\tskipped since already exists" << endl;
+    //     }
+    // }
+
+    // Loop through all problems
+    // vector<string> filenames;
+    // for(auto p : SAT2017_FILES) {
+    //     filenames.push_back(p.second);
+    // }
+    // sort(filenames.begin(), filenames.end());
+    // for(string f : filenames) {
+    //     Circuit c(SAT2017_PATH + f);
+    //     Circuit c2(SAT2017_PREPROCESSED_PATH + f);
+
+    //     cout << f << endl;
+    //     cout << "\tBefore: " << c.vars << " vars, " << c.clauses << " clauses" << endl;
+    //     cout << "\tAfter: " << c2.vars << " vars, " << c2.clauses << " clauses" << endl;
+    // }
 
     // Create architecture
     // path = SIMPLE_PATH;
