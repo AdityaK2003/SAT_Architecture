@@ -85,7 +85,7 @@ vector<string> VLSAT2_SIMPLIFIED_FILES = {
 };
 // Sorted by number of vars, ascending
 // Size: 60
-unordered_map<int, string> SAT2017_FILES = {
+map<int, string> SAT2017_FILES = {
     {0, "g2-modgen-n200-m90860q08c40-3230.cnf"},
     {1, "g2-modgen-n200-m90860q08c40-13698.cnf"},
     {2, "g2-modgen-n200-m90860q08c40-29667.cnf"},
@@ -94,7 +94,7 @@ unordered_map<int, string> SAT2017_FILES = {
     {5, "g2-hwmcc15deep-6s399b02-k02.cnf"},
     {6, "g2-hwmcc15deep-6s399b03-k02.cnf"},
     {7, "g2-hwmcc15deep-6s179-k17.cnf"},
-    {8, "g2-Sz512151281.smt2-cvc4.cnf"},
+    {8, "g2-Sz512_15128_1.smt2-cvc4.cnf"},
     {9, "g2-hwmcc15deep-6s33-k33.cnf"},
     {10, "g2-hwmcc15deep-6s33-k34.cnf"},
     {11, "g2-gss-28-s100.cnf"},
@@ -103,7 +103,7 @@ unordered_map<int, string> SAT2017_FILES = {
     {14, "g2-gss-34-s100.cnf"},
     {15, "g2-gss-36-s100.cnf"},
     {16, "g2-gss-38-s100.cnf"},
-    {17, "g2-gss-40-s100 .cnf"},
+    {17, "g2-gss-40-s100.cnf"},
     {18, "g2-hwmcc15deep-6s161-k17.cnf"},
     {19, "g2-hwmcc15deep-6s516r-k17.cnf"},
     {20, "g2-hwmcc15deep-6s516r-k18.cnf"},
@@ -166,7 +166,7 @@ unordered_map<int, string> SAT2017_FILES = {
  * - unordered_set<int>: assignment used to simplify formula
  * - creates outputfile
 */
-unordered_set<int> preprocess(string inputFolder, string inputFile, string outputFolder="", string outputFile="", bool renumber=true) {
+unordered_set<int> preprocess(string inputFolder, string inputFile, string outputFolder="", string outputFile="", bool renumber=true, bool print=false) {
     // Add '/' to inputFolder if needed
     if(inputFolder.size() > 0 && inputFolder.back() != '/') {
         inputFolder += "/";
@@ -189,6 +189,14 @@ unordered_set<int> preprocess(string inputFolder, string inputFile, string outpu
         outputFile += ".cnf";
     }
 
+    // Check if file exists
+    ifstream f(outputFolder + outputFile);
+    if(f.good()) {
+        // cout << "file already exists, quitting." << endl;
+        unordered_set<int> tmp;
+        return tmp;
+    }
+
     // Create folder if doesn't exist
     struct stat sb;
     if (stat(outputFolder.c_str(), &sb) != 0) {
@@ -204,7 +212,6 @@ unordered_set<int> preprocess(string inputFolder, string inputFile, string outpu
 
 
     // Simplify
-    bool print = true;
     unordered_set<int> assignment = simplify(old_vars, formula, false, print);
 
     // Renumber if needed, updating number of vars
@@ -215,6 +222,13 @@ unordered_set<int> preprocess(string inputFolder, string inputFile, string outpu
 
     // Output to file
     string description = "This is a simplified version of " + inputFolder + inputFile + ".";
+    description += "\nc Assignments: ";
+    for(int l : assignment) {
+        stringstream ss;
+        ss << l;
+        description += ss.str();
+        description += " ";
+    }
     writeFormulaToFile(formula, vars, assignments, old_vars, old_clauses, outputFolder + outputFile, description);
 
     cout << "Saved simplified formula to: " << outputFolder + outputFile << endl;
@@ -300,26 +314,40 @@ int main() {
     string file = SAT2017_FILES[30];
 
     // Preprocess all
-    // for(auto p : SAT2017_FILES) {
-    //     file = p.second;
-    //     preprocess(path, file, SAT2017_PREPROCESSED_PATH);
-    //     cout << file << endl;
-    //     Circuit c(path+file);
-    //     Circuit c2(SAT2017_PREPROCESSED_PATH + file);
-    //     cout << "\tBefore: " << c.vars << " vars" << endl;
-    //     cout << "\tAfter: " << c2.vars << " vars" << endl;
-    // }
+    bool print = true;
+    for(auto p : SAT2017_FILES) {
+        file = p.second;
+        cout << file << endl;
+        unordered_set<int> assignment = preprocess(path, file, SAT2017_PREPROCESSED_PATH, "", true, print);
+        if(assignment.size()) {
+            Circuit c(path+file);
+            Circuit c2(SAT2017_PREPROCESSED_PATH + file);
+            cout << "\tBefore: " << c.vars << " vars" << endl;
+            cout << "\tAfter: " << c2.vars << " vars" << endl;
+        } else {
+            cout << "\tskipped since already exists" << endl;
+        }
+    }
 
     // Create architecture
     // path = SIMPLE_PATH;
     // file = "uf16_18.cnf";
 
     // Preprocess the problem
-    preprocess(path, file, SAT2017_PREPROCESSED_PATH);
+    // preprocess(path, file, SAT2017_PREPROCESSED_PATH,  "tmp.cnf", true, true);
 
+    // Print info
     // Circuit c(path+file);
     // cout << "File: " << file << endl;
-    // cout << "Vars: " << c.vars << "\tClauses: " << c.clauses << endl << endl;
+    // if(path == SAT2017_PREPROCESSED_PATH) {
+    //     Circuit c_before(SAT2017_PATH + file);
+
+    //     cout << "Before Preprocessing: " << c_before.vars << " vars, " << c_before.clauses << " clauses" << endl;
+    //     cout << "After Preprocessing: " << c.vars << " vars, " << c.clauses << " clauses" << endl;
+    //     cout << "Using Preprocessed Version..." << endl << endl;
+    // } else {
+    //     cout << c.vars << " vars, " << c.clauses << " clauses" << endl << endl;
+    // }
     
     /*
     // Create architecture

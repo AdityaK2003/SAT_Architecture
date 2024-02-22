@@ -1,4 +1,5 @@
 c This is a simplified version of sat_files/SAT2017_Soowang/g2-modgen-n200-m90860q08c40-3230.cnf.
+c Assignments: -1936 -1515 844 
 c Before: p cnf 2200 9086
 c After: p cnf 2197 9069
 c Mappings from old var number to new var number (format is "old:new")

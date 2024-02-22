@@ -1,4 +1,5 @@
 c This is a simplified version of sat_files/SAT2017_Soowang/g2-hwmcc15deep-6s33-k34.cnf.
+c Assignments: -635 -623 638 -637 -24952 
 c Before: p cnf 24952 72572
 c After: p cnf 24947 72564
 c Mappings from old var number to new var number (format is "old:new")

@@ -373,17 +373,23 @@ unordered_set<int> simplify(int vars, vector<vector<int>>& formula, bool method1
         //     unitClauseLiteral = findUnitClauseLiteral(formula);
         // }
 
-        // Maintain unipolar literal and unit clause literal
-        int unipolarLiteral = findUnipolarLiteral(formula);
-        int unitClauseLiteral = findUnitClauseLiteral(formula);
+        // Maintain set of unipolar literals, and set of unit clauses
+        set<int> unipolarLiterals = findUnipolarLiterals(formula);
+        set<int> unitClauseLiterals = findUnitClauseLiterals(formula);
 
-        while(unipolarLiteral != 0 || unitClauseLiteral != 0) {
+        // Iterate until both empty
+        while(unipolarLiterals.size() > 0 || unitClauseLiterals.size() > 0) {
             // Update assignments and formula
-            unipolarLiteral = findUnipolarLiteral(formula);
-            if(unipolarLiteral != 0) {
-                if(print) cout << "Assigned " << unipolarLiteral << " (unipolar)" << endl;
+            unipolarLiterals = findUnipolarLiterals(formula);
+            if(unipolarLiterals.size()) {
+                if(print) {
+                    cout << "Assigned ";
+                    for(int l : unipolarLiterals) cout << l << " ";
+                    cout << "(unipolar)" << endl;
+                }
                 DivideFormula df(vars, formula);
-                unordered_set<int> tmp = { unipolarLiteral };
+                unordered_set<int> tmp;
+                for(int l : unipolarLiterals) tmp.insert(l);
 
                 df.removeKLiterals(tmp, true, false);
 
@@ -393,16 +399,21 @@ unordered_set<int> simplify(int vars, vector<vector<int>>& formula, bool method1
                 if(print) cout << "\t";
                 for(int l : df.assignments_made) {
                     assignment.insert(l);
-                    cout << l << " ";
+                    if(print) cout << l << " ";
                 }
-                cout << endl;
+                if(print) cout << endl;
             }
 
-            unitClauseLiteral = findUnitClauseLiteral(formula);
-            if(unitClauseLiteral != 0) {
-                if(print) cout << "Assigned " << unitClauseLiteral << " (unitClause)" << endl;
+            unitClauseLiterals = findUnitClauseLiterals(formula);
+            if(unitClauseLiterals.size()) {
+                if(print) {
+                    cout << "Assigned ";
+                    for(int l : unitClauseLiterals) cout << l << " ";
+                    cout << "(unitClause)" << endl;
+                }
                 DivideFormula df(vars, formula);
-                unordered_set<int> tmp = { unitClauseLiteral };
+                unordered_set<int> tmp;
+                for(int l : unitClauseLiterals) tmp.insert(l);
 
                 df.removeKLiterals(tmp, true, false);
 
@@ -413,13 +424,13 @@ unordered_set<int> simplify(int vars, vector<vector<int>>& formula, bool method1
                 if(print) cout << "\t";
                 for(int l : df.assignments_made) {
                     assignment.insert(l);
-                    cout << l << " ";
+                    if(print) cout << l << " ";
                 }
-                cout << endl;
+                if(print) cout << endl;
             }
 
-            unipolarLiteral = findUnipolarLiteral(formula);
-            unitClauseLiteral = findUnitClauseLiteral(formula);
+            set<int> unipolarLiterals = findUnipolarLiterals(formula);
+            set<int> unitClauseLiterals = findUnitClauseLiterals(formula);
         }
     }
 
