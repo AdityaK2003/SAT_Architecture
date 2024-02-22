@@ -304,6 +304,7 @@ void updateFormulaWithLiteral(vector<vector<int>>& formula, int lit) {
  * literals and unit clauses
  * 
  * Params:
+ * - vars: number of vars in SAT formula
  * - formula: the SAT formula
  * - method1: uses method1 or method2 (true / false, respectively)
  * - print: if True, prints log messages (default - false)
@@ -312,7 +313,7 @@ void updateFormulaWithLiteral(vector<vector<int>>& formula, int lit) {
  * - unordered_set<int>: the assignment
  * - formula is modified in place
 */
-unordered_set<int> simplify(vector<vector<int>>& formula, bool method1, bool print) {
+unordered_set<int> simplify(int vars, vector<vector<int>>& formula, bool method1, bool print) {
     // Maintain assignment
     unordered_set<int> assignment;
 
@@ -349,6 +350,30 @@ unordered_set<int> simplify(vector<vector<int>>& formula, bool method1, bool pri
     // Method 2: calculate literal every iteration
     else {
         // Maintain unipolar literal and unit clause literal
+        // int unipolarLiteral = findUnipolarLiteral(formula);
+        // int unitClauseLiteral = findUnitClauseLiteral(formula);
+
+        // while(unipolarLiteral != 0 || unitClauseLiteral != 0) {
+        //     // Update assignments and formula
+        //     unipolarLiteral = findUnipolarLiteral(formula);
+        //     if(unipolarLiteral != 0) {
+        //         if(print) cout << "Assigned " << unipolarLiteral << " (unipolar)" << endl;
+        //         updateFormulaWithLiteral(formula, unipolarLiteral);
+        //         assignment.insert(unipolarLiteral);
+        //     }
+
+        //     unitClauseLiteral = findUnitClauseLiteral(formula);
+        //     if(unitClauseLiteral != 0) {
+        //         if(print) cout << "Assigned " << unitClauseLiteral << " (unitClause)" << endl;
+        //         updateFormulaWithLiteral(formula, unitClauseLiteral);
+        //         assignment.insert(unitClauseLiteral);
+        //     }
+
+        //     unipolarLiteral = findUnipolarLiteral(formula);
+        //     unitClauseLiteral = findUnitClauseLiteral(formula);
+        // }
+
+        // Maintain unipolar literal and unit clause literal
         int unipolarLiteral = findUnipolarLiteral(formula);
         int unitClauseLiteral = findUnitClauseLiteral(formula);
 
@@ -357,15 +382,40 @@ unordered_set<int> simplify(vector<vector<int>>& formula, bool method1, bool pri
             unipolarLiteral = findUnipolarLiteral(formula);
             if(unipolarLiteral != 0) {
                 if(print) cout << "Assigned " << unipolarLiteral << " (unipolar)" << endl;
-                updateFormulaWithLiteral(formula, unipolarLiteral);
-                assignment.insert(unipolarLiteral);
+                DivideFormula df(vars, formula);
+                unordered_set<int> tmp = { unipolarLiteral };
+
+                df.removeKLiterals(tmp, true, false);
+
+                vars = df.vars_2;
+                formula = df.formula_2;
+
+                if(print) cout << "\t";
+                for(int l : df.assignments_made) {
+                    assignment.insert(l);
+                    cout << l << " ";
+                }
+                cout << endl;
             }
 
             unitClauseLiteral = findUnitClauseLiteral(formula);
             if(unitClauseLiteral != 0) {
                 if(print) cout << "Assigned " << unitClauseLiteral << " (unitClause)" << endl;
-                updateFormulaWithLiteral(formula, unitClauseLiteral);
-                assignment.insert(unitClauseLiteral);
+                DivideFormula df(vars, formula);
+                unordered_set<int> tmp = { unitClauseLiteral };
+
+                df.removeKLiterals(tmp, true, false);
+
+                vars = df.vars_2;
+                formula = df.formula_2;
+
+
+                if(print) cout << "\t";
+                for(int l : df.assignments_made) {
+                    assignment.insert(l);
+                    cout << l << " ";
+                }
+                cout << endl;
             }
 
             unipolarLiteral = findUnipolarLiteral(formula);
@@ -418,6 +468,48 @@ int renumberFormula(vector<vector<int>>& formula) {
     return curr_num - 1;
 }
 
+/**
+ * Given a simplified SAT formula, renumbers the variables so that there
+ * are no gaps in the numbering
+ * 
+ * Params:
+ * - formula: the SAT formula
+ * - m: will be returned, map from old number to new number
+ * 
+ * Returns:
+ * - int: number of vars when simplified
+ * - modifies formula in place
+*/
+int renumberFormula(vector<vector<int>>& formula, unordered_map<int, int>& m) {
+    // Maintain map from old variable number to new variable number
+    // unordered_map<int, int> m;
+
+    // Assign next number for each new variable seen
+    int curr_num = 1;
+    for(int c = 0; c < formula.size(); ++c) {
+        for(int i = 0; i < formula[c].size(); ++i) {
+            int literal = formula[c][i];
+            int var = abs(literal);
+
+            if(m.find(var) == m.end()) {
+                // Make pairing
+                m[var] = curr_num;
+                ++curr_num;
+            }
+
+            // Update formula
+            if(literal > 0) {
+                formula[c][i] = m[var];
+            } else {
+                formula[c][i] = -1 * m[var];
+            }
+        }
+    }
+
+    // Return number of vars used
+    return curr_num - 1;
+}
+
 
 /**
  * Given a SAT formula, saves it to a file
@@ -425,19 +517,35 @@ int renumberFormula(vector<vector<int>>& formula) {
  * Params:
  * - formula: the SAT formula
  * - vars: the number of variables
+ * - assignments: any mappings to write
+ * - old_vars: number of variables there used to be (or -1)
+ * - old_clauses: number of clauses there used to be
  * - outputFilename
  * - description: added to top of file as a comment (default - empty)
  * 
  * Returns:
  * - creates file
 */
-void writeFormulaToFile(vector<vector<int>>& formula, int vars, string outputFilename, string description) {
+void writeFormulaToFile(vector<vector<int>>& formula, int vars, unordered_map<int, int> assignments, int old_vars, int old_clauses, string outputFilename, string description) {
     // Create outputfile
     ofstream myfile(outputFilename);
 
     // Add description
     if(description.size()) {
         myfile << "c " << description << endl;
+    }
+
+    // Write num vars, num clauses
+    if(old_vars > 0) {
+        myfile << "c Before: p cnf " << old_vars << " " << old_clauses << endl;
+        myfile << "c After: p cnf " << vars << " " << formula.size() << endl;
+    }
+
+    if(assignments.size()) {
+        myfile << "c Mappings from old var number to new var number (format is \"old:new\")" << endl;
+        for(int i = 1; i <= assignments.size(); ++i) {
+            myfile << "c\t" << i << ": " << assignments[i] << endl;
+        }
     }
 
     // Write first line (num vars, num clauses)
@@ -3620,6 +3728,9 @@ bool DivideFormula::removeKLiterals(unordered_set<int> remove, bool recurse, boo
 
         // Renumber the formula
         if(renumber) renumberFormula(formula_2);
+
+        // Mark as assigned
+        for(int l : remove) assignments_made.insert(l);
 
         // Can now clear remove set
         remove.clear();

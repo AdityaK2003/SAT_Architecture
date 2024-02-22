@@ -20,9 +20,10 @@ int findUnipolarLiteral(vector<vector<int>>& formula);
 set<int> findUnitClauseLiterals(vector<vector<int>>& formula);
 int findUnitClauseLiteral(vector<vector<int>>& formula);
 void updateFormulaWithLiteral(vector<vector<int>>& formula, int lit);
-unordered_set<int> simplify(vector<vector<int>>& formula, bool method1=false, bool print=false);
+unordered_set<int> simplify(int vars, vector<vector<int>>& formula, bool method1=false, bool print=false);
 int renumberFormula(vector<vector<int>>& formula);
-void writeFormulaToFile(vector<vector<int>>& formula, int vars, string outputFilename, string description="");
+int renumberFormula(vector<vector<int>>& formula, unordered_map<int, int>& m);
+void writeFormulaToFile(vector<vector<int>>& formula, int vars, unordered_map<int, int> assignments, int old_vars, int old_clauses, string outputFilename, string description="");
 
 int areVarsDisjoint(vector<vector<int>>& formula, int var1, int var2);
 int areVarsDisjoint(map<int, set<int>>& lit_clauses, int var1, int var2);
@@ -317,6 +318,8 @@ public:
     int vars_2;
     int clauses_2;
     vector<vector<int>> formula_2;
+
+    unordered_set<int> assignments_made;
 
     // Constructor
     DivideFormula(int v, vector<vector<int>> f) {

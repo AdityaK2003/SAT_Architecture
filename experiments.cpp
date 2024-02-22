@@ -200,18 +200,22 @@ unordered_set<int> preprocess(string inputFolder, string inputFile, string outpu
     vector<vector<int>> formula;
     parse(inputFolder + inputFile, formula, vars, clauses);
 
+    int old_vars = vars, old_clauses = clauses;
+
 
     // Simplify
-    unordered_set<int> assignment = simplify(formula);
+    bool print = true;
+    unordered_set<int> assignment = simplify(old_vars, formula, false, print);
 
     // Renumber if needed, updating number of vars
+    unordered_map<int, int> assignments;
     if(renumber) {
-        vars = renumberFormula(formula);
+        vars = renumberFormula(formula, assignments);
     }
 
     // Output to file
     string description = "This is a simplified version of " + inputFolder + inputFile + ".";
-    writeFormulaToFile(formula, vars, outputFolder + outputFile, description);
+    writeFormulaToFile(formula, vars, assignments, old_vars, old_clauses, outputFolder + outputFile, description);
 
     cout << "Saved simplified formula to: " << outputFolder + outputFile << endl;
     return assignment;
@@ -293,7 +297,7 @@ int main() {
     // string file = OSTROWSKI_FILES[0];
 
     string path = SAT2017_PATH;
-    string file = SAT2017_FILES[10];
+    string file = SAT2017_FILES[30];
 
     // Preprocess all
     // for(auto p : SAT2017_FILES) {
@@ -310,9 +314,12 @@ int main() {
     // path = SIMPLE_PATH;
     // file = "uf16_18.cnf";
 
-    Circuit c(path+file);
-    cout << "File: " << file << endl;
-    cout << "Vars: " << c.vars << "\tClauses: " << c.clauses << endl << endl;
+    // Preprocess the problem
+    preprocess(path, file, SAT2017_PREPROCESSED_PATH);
+
+    // Circuit c(path+file);
+    // cout << "File: " << file << endl;
+    // cout << "Vars: " << c.vars << "\tClauses: " << c.clauses << endl << endl;
     
     /*
     // Create architecture
@@ -369,10 +376,10 @@ int main() {
     printGroupsResults(results, num_groups); */
 
     // Divide and Conquer
-    int k = 3;
-    string heur = "mom";
-    cout << "Heur: " << heur << endl;
-    divideAndConquerHeur(c, k, heur, false);
+    // int k = 3;
+    // string heur = "mom";
+    // cout << "Heur: " << heur << endl;
+    // divideAndConquerHeur(c, k, heur, false);
 
     // Solve
     // unordered_set<int> s;
