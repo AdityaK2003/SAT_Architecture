@@ -377,3 +377,8 @@ int heurFindMostOccurLit(vector<vector<int>>& formula, int vars);
 int heurFindMostOccurVar(vector<vector<int>>& formula, int vars);
 int heurFindMOM(vector<vector<int>>& formula, int vars);
 void divideAndConquerHeur(Circuit c, int k, string heur, bool print=false);
+
+vector<int> calculateHeurList(string heur, vector<vector<int>>& formula, int vars);
+unordered_set<int> parseAssignmentsFile(string filename, int& propagations);
+vector<vector<int>> assign(vector<vector<int>>& formula, unordered_set<int> assignments);
+

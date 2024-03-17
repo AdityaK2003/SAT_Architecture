@@ -4458,3 +4458,114 @@ void divideAndConquerHeur(Circuit c, int k, string heur, bool print) {
     cout << "\n\nMin Vars: " << min_vars << "  (" << min_vars * 100.0 / c.vars << "%)\n";
 }
 
+/**
+* Calculates heuristic list (ex: list of most occurring to least occurring variables)
+*
+* Params:
+* - heur: {"occurrences", "balance"}
+* - formula: the SAT formula
+* - vars: the number of variables
+* 
+* Returns:
+* - vector<int>: the heuristic list, in descending order
+*/
+vector<int> calculateHeurList(string heur, vector<vector<int>>& formula, int vars) {
+    // Maintain map from the var to the heuristic, use a vector
+    vector<int> var_to_heur(vars+1, 0);
+
+    // Final result
+    vector<int> result;
+
+    // Most occurrences
+    if(heur == "occurrences") {
+        // Iterate through formula, adding occurrences
+        for(vector<int> clause : formula) {
+            for(int lit : clause) {
+                ++var_to_heur[abs(lit)];
+            }
+        }
+
+        // Add to priority queue
+        priority_queue<pair<int, int>> pq;
+        for(int var = 1; var < var_to_heur.size(); ++var) {
+            pq.push(make_pair(var_to_heur[var], var));
+        }
+
+        // Remove from queue to add to result
+        while(pq.size()) {
+            pair<int, int> p = pq.top();
+            pq.pop();
+
+            result.push_back(p.second);
+        }
+    }
+
+    return result;
+}
+
+
+/**
+* Given an assignments filename, parses into set
+*/
+unordered_set<int> parseAssignmentsFile(string filename, int& propagations) {
+    unordered_set<int> assignments;
+    ifstream inFile(filename);
+    if (inFile.is_open()) {
+        string line;
+        // Read the first line to get the number of propagations
+        if (getline(inFile, line)) {
+            istringstream iss(line);
+            string keyword;
+            iss >> keyword; // Read "Propagations:"
+            iss >> propagations;
+        } else {
+            cerr << "Error reading file: " << filename << endl;
+            return assignments;
+        }
+
+        // Read the second line to get the assignments
+        if (getline(inFile, line)) {
+            istringstream iss(line);
+            int num;
+            while (iss >> num) {
+                assignments.insert(num);
+            }
+        } else {
+            cerr << "Error reading file: " << filename << endl;
+            return assignments;
+        }
+        // cout << "File parsed successfully: " << filename << endl;
+    } else {
+        cerr << "Error opening file: " << filename << endl;
+    }
+    inFile.close();
+    return assignments;
+}
+
+/**
+* Given an assignment, simplifies the formula by setting those assignments
+* Does NOT do unit propagation
+*/
+vector<vector<int>> assign(vector<vector<int>>& formula, unordered_set<int> assignments) {
+    // Create new formula
+    vector<vector<int>> new_formula;
+
+    for(vector<int> c : formula) {
+        bool skip = false;
+        vector<int> new_clause;
+        for(int lit : c) {
+            // If skip
+            if(assignments.count(lit)) {
+                skip = true;
+                break;
+            }
+
+            // Else, add to new clause if needed
+            if(assignments.count(lit * -1) == 0) new_clause.push_back(lit);
+        }
+
+        if(!skip && new_clause.size()) new_formula.push_back(new_clause);
+    }
+
+    return new_formula;
+}

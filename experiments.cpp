@@ -14,6 +14,7 @@
 #include <chrono>
 #include <ctime>
 #include <cstdlib>
+#include <dirent.h>
 
 #include "old_funcs.hpp"
 #include "funcs.hpp"
@@ -303,6 +304,75 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 }
 
 
+
+/**
+* Runs minisat experiment with heur list (all params inside function)
+*/
+void minisat_experiment() {
+    // Choose file 
+    string path = SIMPLE_PATH;
+    string file = "uf16_18.cnf";
+
+    // Choose heuristic
+    string heur = "occurrences";
+
+    // Choose input folder (with assignments)
+    string input_folder = "../minisat/output_assignments/";
+
+    // Choose output folder
+    string output_folder = "minisat_experiments/";
+
+    string output_file_prefix = output_folder + file.substr(0, file.find_last_of('.')) + "_";
+
+
+    // Open all assignment files and save them
+    vector<string> assignment_filenames;
+    struct dirent *entry;
+    DIR *dp;
+    dp = opendir(input_folder.c_str());
+    while ((entry = readdir(dp))) {
+        string filename = entry->d_name;
+        if(filename.find("assignments") == 0) {
+            assignment_filenames.push_back(filename);
+        }
+    }
+    closedir(dp);
+
+    // Maintain list of files made
+    vector<string> files_made;
+
+    // Open original formula, and calculate/save heuristic list
+    Circuit c(path + file);
+    vector<int> original_list = calculateHeurList(heur, c.formula, c.vars);
+    ofstream original_file(output_file_prefix + "original_list.txt");
+    for(int num : original_list) original_file << num << endl;
+    original_file.close();
+    files_made.push_back(output_file_prefix + "original_list.txt");
+
+    // Iterate through other files
+    for(string curr_file : assignment_filenames) {
+        // Parse assignments
+        int propagations = 0;
+        unordered_set<int> assignments = parseAssignmentsFile(input_folder + curr_file, propagations);
+        
+        string str_prop = "";
+        stringstream ss;
+        ss << propagations;
+        str_prop = ss.str();
+
+        // Make new list from new formula
+        vector<vector<int>> new_formula = assign(c.formula, assignments);
+        vector<int> new_list = calculateHeurList(heur, new_formula, c.vars);
+        ofstream new_file(output_file_prefix + str_prop + "_list.txt");
+        for(int num : new_list) new_file << num << endl;
+        new_file.close();
+        files_made.push_back(output_file_prefix + str_prop + "_list.txt");
+    }
+
+
+}
+
+
 int main() {
     srand(time(0));
     cout << endl;
@@ -437,6 +507,8 @@ int main() {
     // cont_part.evaluateGroupings();
 
     // findAllMeanAndSdClauses(c.vars, c.formula);
+
+    minisat_experiment();
 
     return 0;
 }
