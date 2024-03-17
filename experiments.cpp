@@ -15,6 +15,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <dirent.h>
+#include <bits/stdc++.h>
 
 #include "old_funcs.hpp"
 #include "funcs.hpp"
@@ -306,12 +307,10 @@ bool fitFormulaToArchitecture(int vars, int clauses, vector<vector<int>> formula
 
 
 /**
-* Runs minisat experiment with heur list (all params inside function)
+* Runs minisat experiment with heur list (all params except path/file inside function)
+* Returns a list of strings of output filepaths
 */
-void minisat_experiment() {
-    // Choose file 
-    string path = SIMPLE_PATH;
-    string file = "uf16_18.cnf";
+vector<string> minisat_experiment_run(string path, string file) {
 
     // Choose heuristic
     string heur = "occurrences";
@@ -337,6 +336,7 @@ void minisat_experiment() {
         }
     }
     closedir(dp);
+    sort(assignment_filenames.begin(), assignment_filenames.end());
 
     // Maintain list of files made
     vector<string> files_made;
@@ -346,30 +346,60 @@ void minisat_experiment() {
     vector<int> original_list = calculateHeurList(heur, c.formula, c.vars);
     ofstream original_file(output_file_prefix + "original_list.txt");
     for(int num : original_list) original_file << num << endl;
+    original_file << endl << "Propagations: 0\n";
     original_file.close();
     files_made.push_back(output_file_prefix + "original_list.txt");
 
     // Iterate through other files
+    int counter = 1;
     for(string curr_file : assignment_filenames) {
         // Parse assignments
         int propagations = 0;
         unordered_set<int> assignments = parseAssignmentsFile(input_folder + curr_file, propagations);
         
-        string str_prop = "";
+        string str_counter = "";
         stringstream ss;
-        ss << propagations;
-        str_prop = ss.str();
+        ss << counter;
+        str_counter = ss.str();
 
         // Make new list from new formula
         vector<vector<int>> new_formula = assign(c.formula, assignments);
         vector<int> new_list = calculateHeurList(heur, new_formula, c.vars);
-        ofstream new_file(output_file_prefix + str_prop + "_list.txt");
+        ofstream new_file(output_file_prefix + "part" + str_counter + "_list.txt");
         for(int num : new_list) new_file << num << endl;
+        new_file << endl << "Propagations: " << propagations << endl;
         new_file.close();
-        files_made.push_back(output_file_prefix + str_prop + "_list.txt");
+        files_made.push_back(output_file_prefix + "part" + str_counter + "_list.txt");
+        ++counter;
     }
 
+    return files_made;
+}
 
+/**
+* Analyzes heuristic lists made from minisat_experiment_run()
+*/
+void minisat_experiment_analyze(vector<string> files) {
+    // Assume that files list is sorted by parts (original list is first)
+
+    // Choose metric
+    string metric = "index diff";
+
+    // Parse original list
+    int tmp = 0;
+    vector<int> original_list = parseHeurListFile(files[0], tmp);
+
+    // Iterate through other files
+    for(int i = 1; i < files.size(); ++i) {
+        int curr_props = 0;
+        vector<int> curr_list = parseHeurListFile(files[i], curr_props);
+
+        // Compare original to current
+        int score = compareHeurLists(original_list, curr_list, metric);
+
+        cout << "Part " << i << ": " << curr_props << " propagations" << endl;
+        cout << "\tScore: " << score << endl << endl;
+    }
 }
 
 
@@ -377,11 +407,11 @@ int main() {
     srand(time(0));
     cout << endl;
     // Parse formula
-    // string path = OSTROWSKI_PATH;
-    // string file = OSTROWSKI_FILES[0];
+    string path = OSTROWSKI_PATH;
+    string file = OSTROWSKI_FILES[0];
 
-    string path = SAT2017_PREPROCESSED_PATH;
-    string file = SAT2017_FILES[30];
+    // path = SIMPLE_PATH;
+    // file = "uf16_18.cnf";
 
     // Preprocess all
     // bool print = true;
@@ -433,6 +463,10 @@ int main() {
     // } else {
     //     cout << c.vars << " vars, " << c.clauses << " clauses" << endl << endl;
     // }
+
+    Circuit c(path+file);
+    cout << "File: " << file << endl;
+    cout << c.vars << " vars, " << c.clauses << " clauses" << endl << endl;
     
     /*
     // Create architecture
@@ -508,7 +542,11 @@ int main() {
 
     // findAllMeanAndSdClauses(c.vars, c.formula);
 
-    minisat_experiment();
+    // Before running these, make sure ../minisat/output_assignments has only assignments for this problem
+    cout << "Creating heuristic lists..." << endl;
+    vector<string> files = minisat_experiment_run(path, file);
+    cout << "Comparing heuristic lists..." << endl;
+    minisat_experiment_analyze(files);
 
     return 0;
 }

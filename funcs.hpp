@@ -381,4 +381,6 @@ void divideAndConquerHeur(Circuit c, int k, string heur, bool print=false);
 vector<int> calculateHeurList(string heur, vector<vector<int>>& formula, int vars);
 unordered_set<int> parseAssignmentsFile(string filename, int& propagations);
 vector<vector<int>> assign(vector<vector<int>>& formula, unordered_set<int> assignments);
+vector<int> parseHeurListFile(string filename, int& propagations);
+int compareHeurLists(const vector<int> l1, const vector<int> l2, string metric="index diff");
 

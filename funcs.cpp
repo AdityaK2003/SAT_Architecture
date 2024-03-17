@@ -4569,3 +4569,71 @@ vector<vector<int>> assign(vector<vector<int>>& formula, unordered_set<int> assi
 
     return new_formula;
 }
+
+/*
+* Parses heuristic list file from minisat_experiments/
+*/
+vector<int> parseHeurListFile(string filename, int& propagations) {
+    vector<int> heuristicList;
+    ifstream file(filename);
+    string line;
+
+    if (file.is_open()) {
+        // Read the heuristic list
+        while (getline(file, line)) {
+            if (line.empty()) {
+                // Empty line encountered, stop reading the heuristic list
+                break;
+            }
+            heuristicList.push_back(stoi(line));
+        }
+
+        // Read the line containing the number of propagations
+        if (getline(file, line)) {
+            size_t pos = line.find(':');
+            if (pos != string::npos) {
+                propagations = stoi(line.substr(pos + 1));
+            }
+        } else {
+            cerr << "Error: File format incorrect. Expected propagations." << endl;
+            return heuristicList; // Return heuristic list read so far
+        }
+
+        file.close();
+    } else {
+        cerr << "Error: Unable to open file " << filename << endl;
+    }
+
+    return heuristicList;
+}
+
+/*
+* Compares two heuristic lists, and returns a score, given a comparison metric
+* metrics: "index diff MSE", "index diff"
+*/
+int compareHeurLists(const vector<int> l1, const vector<int> l2, string metric) {
+    int score = 0;
+
+    // Map each value in l2 to its index
+    unordered_map<int, int> l2_index;
+    for(int i = 0; i < l2.size(); ++i) {
+        l2_index[l2[i]] = i;
+    }
+
+    // Find score
+    for(int i = 0; i < l1.size(); ++i) {
+        int diff = abs(i - l2_index[l1[i]]);
+
+        // mean square of differences of indices
+        if(metric == "index diff MSE") {
+            score += (diff * diff);
+        }
+        // sum up differences of indices without squaring
+        else if(metric == "index diff") {
+            score += diff;
+        }
+    }
+
+    return score;
+}
+
