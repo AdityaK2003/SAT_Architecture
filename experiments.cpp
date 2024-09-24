@@ -15,7 +15,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <dirent.h>
-#include <bits/stdc++.h>
+// #include <bits/stdc++.h>
 
 #include "old_funcs.hpp"
 #include "funcs.hpp"
@@ -464,9 +464,9 @@ int main() {
     //     cout << c.vars << " vars, " << c.clauses << " clauses" << endl << endl;
     // }
 
-    Circuit c(path+file);
-    cout << "File: " << file << endl;
-    cout << c.vars << " vars, " << c.clauses << " clauses" << endl << endl;
+    // Circuit c(path+file);
+    // cout << "File: " << file << endl;
+    // cout << c.vars << " vars, " << c.clauses << " clauses" << endl << endl;
     
     /*
     // Create architecture
@@ -543,10 +543,15 @@ int main() {
     // findAllMeanAndSdClauses(c.vars, c.formula);
 
     // Before running these, make sure ../minisat/output_assignments has only assignments for this problem
-    cout << "Creating heuristic lists..." << endl;
-    vector<string> files = minisat_experiment_run(path, file);
-    cout << "Comparing heuristic lists..." << endl;
-    minisat_experiment_analyze(files);
+    // cout << "Creating heuristic lists..." << endl;
+    // vector<string> files = minisat_experiment_run(path, file);
+    // cout << "Comparing heuristic lists..." << endl;
+    // minisat_experiment_analyze(files);
+
+    for(pair<int, string> p : SAT2017_FILES) {
+        Circuit c(SAT2017_PATH + p.second);
+        cout << c.clauses << endl;
+    }
 
     return 0;
 }
