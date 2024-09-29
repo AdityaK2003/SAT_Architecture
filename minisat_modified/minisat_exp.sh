@@ -1,5 +1,5 @@
 #!/bin/bash
-export PATH=$PATH:/home/aditya/minisat/bin
+export PATH=$PATH:/home/aditya/SAT_Architecture/minisat_modified/bin/
 
 # Usage
 if [ "$#" -lt 1 ]; then
