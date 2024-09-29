@@ -1,4 +1,4 @@
-#!/bin/bash
+./#!/bin/bash
 
 # Run "nohup ./run_minisat_exp.sh &"
 
