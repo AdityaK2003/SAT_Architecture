@@ -20,7 +20,7 @@
 # ../SAT_Architecture/sat_files/nonrandom_sat_files/VLSAT2/vlsat2_1134.cnf
 # ../SAT_Architecture/sat_files/nonrandom_sat_files/VLSAT2/vlsat2_1209.cnf
 #
-# ../SAT_Architecture/sat_files/simple_files/uf16_18.cnf
+../sat_files/simple_files/uf16_18.cnf
 # ../Old_Files/50Vars/uf50-01.cnf
 # 
 # SAT2017 UNSAT Problems:
@@ -36,8 +36,8 @@
 # ../SAT2017Benchmark/mp1-tri_ali_s11_c35_sinz_UNS.cnf
 # 
 # SAT2017 MP Problems (Sample):
-../SAT2017Benchmark/mp1-9_1.cnf
-../SAT2017Benchmark/mp1-9_4.cnf
+# ../SAT2017Benchmark/mp1-9_1.cnf
+# ../SAT2017Benchmark/mp1-9_4.cnf
 # ../SAT2017Benchmark/mp1-9_9.cnf
 # ../SAT2017Benchmark/mp1-9_11.cnf
 # ../SAT2017Benchmark/mp1-9_19.cnf
