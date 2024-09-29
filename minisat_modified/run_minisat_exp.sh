@@ -12,7 +12,6 @@ directory="outputs"
 heuristic="$1"
 if [ -z "heuristic" ]; then
   heuristic="activity"
-  directory="outputs_activity"
 else
   directory="outputs_$heuristic"
 fi
