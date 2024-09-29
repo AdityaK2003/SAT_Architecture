@@ -1,0 +1,4 @@
+config.mk
+build
+nohup.out
+output*/

@@ -1,0 +1,54 @@
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_34_150.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_64_298.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_97_444.cnf
+# ../SAT_Architecture/sat_files/SAT2017_Soowang/g2-modgen-n200-m90860q08c40-3230.cnf
+# ../SAT_Architecture/sat_files/SAT2017_Soowang/g2-hwmcc15deep-6s33-k34.cnf
+# ../SAT_Architecture/sat_files/SAT2017_Soowang/g2-hwmcc15deep-6s399b02-k02.cnf
+# 
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_34_150.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_64_298.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_97_444.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_149_738.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_185_788.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_249_1118.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_890_4082.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_1566_7016.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_2484_11402.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_3622_17076.cnf
+# 
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/VLSAT2/vlsat2_1000.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/VLSAT2/vlsat2_1134.cnf
+# ../SAT_Architecture/sat_files/nonrandom_sat_files/VLSAT2/vlsat2_1209.cnf
+#
+# ../SAT_Architecture/sat_files/simple_files/uf16_18.cnf
+# ../Old_Files/50Vars/uf50-01.cnf
+# 
+# SAT2017 UNSAT Problems:
+# ../SAT2017Benchmark/mp1-squ_any_s09x07_c27_abio_UNS.cnf
+# ../SAT2017Benchmark/mp1-squ_any_s09x07_c27_abix_UNS.cnf
+# ../SAT2017Benchmark/mp1-squ_any_s09x07_c27_bail_UNS.cnf
+# ../SAT2017Benchmark/mp1-squ_any_s09x07_c27_sinx_UNS.cnf
+# ../SAT2017Benchmark/mp1-squ_any_s09x07_c27_sinz_UNS.cnf
+# ../SAT2017Benchmark/mp1-tri_ali_s11_c35_abio_UNS.cnf
+# ../SAT2017Benchmark/mp1-tri_ali_s11_c35_abix_UNS.cnf
+# ../SAT2017Benchmark/mp1-tri_ali_s11_c35_bail_UNS.cnf
+# ../SAT2017Benchmark/mp1-tri_ali_s11_c35_sinx_UNS.cnf
+# ../SAT2017Benchmark/mp1-tri_ali_s11_c35_sinz_UNS.cnf
+# 
+# SAT2017 MP Problems (Sample):
+../SAT2017Benchmark/mp1-9_1.cnf
+../SAT2017Benchmark/mp1-9_4.cnf
+# ../SAT2017Benchmark/mp1-9_9.cnf
+# ../SAT2017Benchmark/mp1-9_11.cnf
+# ../SAT2017Benchmark/mp1-9_19.cnf
+# ../SAT2017Benchmark/mp1-9_22.cnf
+# ../SAT2017Benchmark/mp1-9_44.cnf
+# ../SAT2017Benchmark/mp1-21.0.cnf
+# ../SAT2017Benchmark/mp1-21.3.cnf
+# ../SAT2017Benchmark/mp1-21.9.cnf
+# ../SAT2017Benchmark/mp1-22.4.cnf
+# ../SAT2017Benchmark/mp1-22.7.cnf
+# ../SAT2017Benchmark/mp1-23.2.cnf
+# ../SAT2017Benchmark/mp1-23.8.cnf
+# ../SAT2017Benchmark/mp1-24.1.cnf
+# ../SAT2017Benchmark/mp1-24.9.cnf
