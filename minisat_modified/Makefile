@@ -14,7 +14,7 @@ all:	r lr lsh
 BUILD_DIR      ?= build
 
 # Include debug-symbols in release builds
-MINISAT_RELSYM ?= -g
+MINISAT_RELSYM ?= -g -pg
 
 # Sets of compile flags for different build types
 MINISAT_REL    ?= -O3 -D NDEBUG

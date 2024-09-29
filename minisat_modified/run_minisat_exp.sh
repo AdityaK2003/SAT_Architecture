@@ -29,6 +29,7 @@ while IFS= read -r filepath; do
     if [[ "$filepath" != \#* ]]; then
         # Run the command for each filepath
         echo "Running $filepath..."
-        ./minisat_exp.sh "$filepath" "$directory" "$args"
+        # ./minisat_exp.sh "$filepath" "$directory" "$args"
+        ./minisat_gprof.sh "$filepath" "$directory" "$args"
     fi
 done < "$input_file"
