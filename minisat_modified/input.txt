@@ -8,7 +8,7 @@
 # ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_34_150.cnf
 # ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_64_298.cnf
 # ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_97_444.cnf
-../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_149_738.cnf
+# ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_149_738.cnf
 # ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_185_788.cnf
 # ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_249_1118.cnf
 # ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_890_4082.cnf
@@ -24,16 +24,16 @@
 # ../Old_Files/50Vars/uf50-01.cnf
 # 
 # SAT2017 UNSAT Problems:
-# ../SAT2017Benchmark/mp1-squ_any_s09x07_c27_abio_UNS.cnf
-# ../SAT2017Benchmark/mp1-squ_any_s09x07_c27_abix_UNS.cnf
-# ../SAT2017Benchmark/mp1-squ_any_s09x07_c27_bail_UNS.cnf
-# ../SAT2017Benchmark/mp1-squ_any_s09x07_c27_sinx_UNS.cnf
-# ../SAT2017Benchmark/mp1-squ_any_s09x07_c27_sinz_UNS.cnf
-# ../SAT2017Benchmark/mp1-tri_ali_s11_c35_abio_UNS.cnf
-# ../SAT2017Benchmark/mp1-tri_ali_s11_c35_abix_UNS.cnf
-# ../SAT2017Benchmark/mp1-tri_ali_s11_c35_bail_UNS.cnf
-# ../SAT2017Benchmark/mp1-tri_ali_s11_c35_sinx_UNS.cnf
-# ../SAT2017Benchmark/mp1-tri_ali_s11_c35_sinz_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_abio_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_abix_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_bail_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_sinx_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_sinz_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-tri_ali_s11_c35_abio_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-tri_ali_s11_c35_abix_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-tri_ali_s11_c35_bail_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-tri_ali_s11_c35_sinx_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-tri_ali_s11_c35_sinz_UNS.cnf
 # 
 # SAT2017 MP Problems (Sample):
 # ../SAT2017Benchmark/mp1-9_1.cnf

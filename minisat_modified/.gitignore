@@ -2,3 +2,5 @@ config.mk
 build
 nohup.out
 output*/
+gmon.out
+benches/

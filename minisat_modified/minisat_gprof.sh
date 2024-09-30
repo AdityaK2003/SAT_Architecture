@@ -20,11 +20,16 @@ stripped_filename=$(basename "$1")
 
 # Extract arguments for minisat from next input argument
 directory="$2"
-args="$3"
+bench="$3"
+args="$4"
+if [-z "$bench" ]; then
+  bench=1
+fi
 if [ -z "$args" ]; then
   # Default value of arguments if none provided
   args="-no-luby -rinc=1.5 -phase-saving=0 -rnd-freq=0.02 -no-elim -rnd-seed=42 -verb=1"
 fi
+echo "Using bench $bench\n"
 echo $args
 
 # Define the file to save the output to
@@ -39,11 +44,12 @@ make cpp
 
 # Move the new executable
 cp -f "build/release/bin/minisat" "bin/"
-
+cp "bin/minisat" "benches/b$bench/"
+MSAT="./benches/b$bench/minisat"
 
 echo "Running: minisat $filename $args 2>&1 >> $outputfile" > $outputfile
-$MSATP $filename $args 2>&1 >> $outputfile
-gprof $MSATP gmon.out > $directory/$stripped_filename.gprof.txt
+$MSAT $filename $args 2>&1 >> $outputfile
+gprof $MSAT gmon.out > $directory/$stripped_filename.gprof.txt
 
 # Save to output file
 # echo "$output" >> $outputfile
