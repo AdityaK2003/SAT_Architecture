@@ -147,6 +147,10 @@ Var Solver::newVar(lbool upol, bool dvar)
     decision .reserve(v);
     trail    .capacity(v+1);
     setDecisionVar(v, dvar);
+
+    if (custom_heuristic.getHeuristic() == "chb") {
+        custom_heuristic.chb_new_var();
+    }
     return v;
 }
 
@@ -775,6 +779,10 @@ lbool Solver::search(int nof_conflicts)
     int         conflictC = 0;
     vec<Lit>    learnt_clause;
     starts++;
+
+    if (custom_heuristic.getHeuristic() == "chb") {
+        custom_heuristic.chb_reinitialize();
+    }
 
     // long long total_heap_size = 0;
     // long long iterations = 0;
