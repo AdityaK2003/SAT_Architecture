@@ -287,8 +287,8 @@ Lit Solver::pickBranchLit()
             order_heap.remove(next);
         }
         else {
-            // If default activity heuristic used
-            if (custom_heuristic.getHeuristic() == "activity") {
+            // If default activity heuristic used, or chb
+            if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "chb") {
                 next = order_heap.removeMin();
             } else {
                 // Cycle through heuristic vector
@@ -319,6 +319,10 @@ Lit Solver::pickBranchLit()
         lit = mkLit(next, drand(random_seed) < 0.5);
     else
         lit = mkLit(next, polarity[next]);
+
+    if (custom_heuristic.getHeuristic() == "chb" && next != var_Undef) {
+        custom_heuristic.add_to_plays(next);
+    }
     
 
     // std::cout << "@@@ picked " << (sign(lit) ? "-" : "") << var(lit)+1 << "\n";
@@ -368,6 +372,9 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
                     varBumpActivity(var(q));
                 }
                 seen[var(q)] = 1;
+                if (custom_heuristic.getHeuristic() == "chb") {
+                    custom_heuristic.conflict_analysis_push(var(q));
+                }
                 if (level(var(q)) >= decisionLevel())
                     pathC++;
                 else
@@ -384,6 +391,11 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
 
     }while (pathC > 0);
     out_learnt[0] = ~p;
+
+    if (custom_heuristic.getHeuristic() == "chb") {
+        custom_heuristic.conflict_analysis_push(var(p));
+        custom_heuristic.add_to_plays(var(p));
+    }
 
     // Simplify conflict clause:
     //
@@ -563,6 +575,9 @@ CRef Solver::propagate()
 
     while (qhead < trail.size()){
         Lit            p   = trail[qhead++];     // 'p' is enqueued fact to propagate.
+        if (custom_heuristic.getHeuristic() == "chb") {
+            custom_heuristic.add_to_plays(var(p));
+        }
         // std::cout << "@@@ about to propagate: " << (sign(p) ? "-" : "") << var(p)+1 << "\n";
         vec<Watcher>&  ws  = watches.lookup(p);
         Watcher        *i, *j, *end;
@@ -798,6 +813,13 @@ lbool Solver::search(int nof_conflicts)
         // total_heap_size += order_heap.size();
 
         CRef confl = propagate();
+
+        // Choose chb multiplier value, and set rewards
+        if (custom_heuristic.getHeuristic() == "chb") {
+            bool was_conflict = (confl != CRef_Undef);
+            custom_heuristic.chb_update(activity, conflicts, was_conflict);
+        }
+
         if (confl != CRef_Undef){
             // CONFLICT
             conflicts++; conflictC++;
@@ -805,6 +827,10 @@ lbool Solver::search(int nof_conflicts)
                 // double avg_size = (total_heap_size * 1.0) / (iterations * 1.0);
                 // std::cout << "AVERAGE HEAP SIZE: " << avg_size << std::endl << std::endl;
                 return l_False;
+            }
+
+            if (custom_heuristic.getHeuristic() == "chb") {
+                custom_heuristic.chb_encountered_conflict();
             }
 
             learnt_clause.clear();
@@ -823,6 +849,9 @@ lbool Solver::search(int nof_conflicts)
 
             if (custom_heuristic.getHeuristic() == "activity") {
                 varDecayActivity();
+            } else if (custom_heuristic.getHeuristic() == "chb") {
+                custom_heuristic.chb_update_last_conflicts(conflicts);
+                custom_heuristic.add_to_plays(var(learnt_clause[0]));
             }
             claDecayActivity();
 
