@@ -21,7 +21,7 @@
 # ../sat_files/nonrandom_sat_files/VLSAT2/vlsat2_1209.cnf
 #
 # ../sat_files/simple_files/uf16_18.cnf
-../sat_files/50Vars/uf50-01.cnf
+# ../sat_files/50Vars/uf50-01.cnf
 # 
 # SAT2017 UNSAT Problems:
 # ../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_abio_UNS.cnf
