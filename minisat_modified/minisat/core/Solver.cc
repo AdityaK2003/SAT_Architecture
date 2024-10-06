@@ -28,6 +28,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "minisat/utils/System.h"
 #include "minisat/core/Solver.h"
 #include "minisat/mtl/Vec.h"
+#include "minisat/utils/CustomHeuristic.h"
 
 using namespace Minisat;
 
@@ -784,41 +785,25 @@ lbool Solver::search(int nof_conflicts)
         custom_heuristic.chb_reinitialize();
     }
 
-    // long long total_heap_size = 0;
-    // long long iterations = 0;
+    long long total_heap_size = 0;
+    long long iterations = 0;
 
     // Code for initial static list tracking experimentation: keeping track of assignments after every k propagations
-    // int k = 1;
-    // unsigned int prop_goal = propagations + k;
-    // int counter = 1;
+    int k = 1;
+    unsigned int prop_goal = propagations + k;
+    int counter = 1;
+    printf("Starting Propagations: %d\n", propagations);
     for (;;){
-        // if(propagations >= prop_goal) {
-            // printf("Propagations: %d\n", propagations);
-            // for (int i = 0; i < trail.size(); i++) {
-            //     printf("%s%d ", sign(trail[i]) ? "-" : "", var(trail[i]) + 1);
-            // }
-            // printf("\n\n");
-            // prop_goal += k;
-
-        //     char filename[100];
-        //     snprintf(filename, sizeof(filename), "output_assignments/assignments_part%03d.txt", counter);
-        //     ++counter;
-        //     FILE* file = fopen(filename, "w");
-        //     if (file != NULL) {
-        //         fprintf(file, "Propagations: %lu\n", propagations);
-        //         for (int i = 0; i < trail.size(); i++) {
-        //             fprintf(file, "%s%d ", sign(trail[i]) ? "-" : "", var(trail[i]) + 1);
-        //         }
-        //         fprintf(file, "\n\n");
-        //         fclose(file);
-        //     } else {
-        //         fprintf(stderr, "Error: Failed to open file for writing.\n");
-        //     }
-        // }
+        printf("Propagations: %d\n", propagations);
+        for (int i = 0; i < trail.size(); i++) {
+            printf("%s%d ", sign(trail[i]) ? "-" : "", var(trail[i]) + 1);
+        }
+        printf("\n\n");
+        prop_goal += k;
 
         // Calculate heap size
-        // iterations++;
-        // total_heap_size += order_heap.size();
+        iterations++;
+        total_heap_size += order_heap.size();
 
         CRef confl = propagate();
 

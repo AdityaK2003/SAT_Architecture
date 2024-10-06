@@ -143,6 +143,9 @@ std::vector<Var> CustomHeuristic::findHeuristicVector(Solver& solver) {
             pq.pop();
         }
         return var_occurrences_;
+    } else if (heuristic_ == "chb") {
+        // Nothing to do
+        return std::vector<Minisat::Var>();
     }
 
     // Unidentified heuristic (error)
@@ -167,4 +170,54 @@ void CustomHeuristic::printClauses(Solver& solver) {
         std::cout << std::endl;
     }
     // std::cout << "Printed clauses: " << printedClauses << std::endl << std::endl;
+}
+
+// For use in CHB
+void CustomHeuristic::add_to_plays(Var v) {
+    assert(v!=var_Undef);
+    if(!inplays_[v]) {	
+        inplays_[v]=true;
+	    plays_.push(v);
+    }
+}
+
+void CustomHeuristic::chb_update(IntMap<Var, double>&  activity, int conflicts, bool was_conflict) {
+    if (was_conflict) {
+        multiplier_ = 1;
+    } else {
+        multiplier_ = 0.9;
+    }
+    for (int i = 0; i < plays_.size() ;++i) {
+        Var x = plays_[i];
+        reward_ = multiplier_ / ((long double)(conflicts - last_conflict_[x]+1.0));
+        activity[x]=(((1-alpha_) * activity[x])+(alpha_ * reward_));
+    }
+}
+
+void CustomHeuristic::chb_encountered_conflict() {
+    if (alpha_ > 0.06)
+        alpha_ = alpha_ - (1e-6);
+    conflict_analysis_.clear();
+}
+
+void CustomHeuristic::chb_update_last_conflicts(int conflicts) {
+    for (int i=0; i< conflict_analysis_.size(); ++i)
+    {  
+        last_conflict_[(conflict_analysis_[i])]=conflicts;
+    }
+}
+
+void CustomHeuristic::chb_reinitialize() {
+    alpha_ = 0.4;
+    for (int i=0;i<plays_.size();++i)
+	{ 
+        inplays_[plays_[i]]=false;
+	}
+    	
+    plays_.clear();
+}
+
+void CustomHeuristic::chb_new_var() {
+    last_conflict_.push(0);
+    inplays_.push(false);
 }
