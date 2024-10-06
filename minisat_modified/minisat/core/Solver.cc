@@ -789,21 +789,21 @@ lbool Solver::search(int nof_conflicts)
     long long iterations = 0;
 
     // Code for initial static list tracking experimentation: keeping track of assignments after every k propagations
-    int k = 1;
-    unsigned int prop_goal = propagations + k;
-    int counter = 1;
-    printf("Starting Propagations: %d\n", propagations);
+    // int k = 1;
+    // unsigned int prop_goal = propagations + k;
+    // int counter = 1;
+    // printf("Starting Propagations: %d\n", propagations);
     for (;;){
-        printf("Propagations: %d\n", propagations);
-        for (int i = 0; i < trail.size(); i++) {
-            printf("%s%d ", sign(trail[i]) ? "-" : "", var(trail[i]) + 1);
-        }
-        printf("\n\n");
-        prop_goal += k;
+        // printf("Propagations: %d\n", propagations);
+        // for (int i = 0; i < trail.size(); i++) {
+        //     printf("%s%d ", sign(trail[i]) ? "-" : "", var(trail[i]) + 1);
+        // }
+        // printf("\n\n");
+        // prop_goal += k;
 
-        // Calculate heap size
-        iterations++;
-        total_heap_size += order_heap.size();
+        // // Calculate heap size
+        // iterations++;
+        // total_heap_size += order_heap.size();
 
         CRef confl = propagate();
 
