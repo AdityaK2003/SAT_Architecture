@@ -151,7 +151,7 @@ std::vector<Var> CustomHeuristic::findHeuristicVector(Solver& solver) {
             int pos_count = solver.watches[mkLit(v, false)].size();
             int neg_count = solver.watches[mkLit(v, true)].size();
             varOccurrences[(Var)v] = pos_count + neg_count;
-            std::cout << "Var " << v << " has count " << pos_count + neg_count << std::endl;
+            // std::cout << "Var " << v << " has count " << pos_count + neg_count << std::endl;
         }
         // Sort using pair <occurrences, var>
         std::priority_queue<std::pair<int, Var>> pq;
