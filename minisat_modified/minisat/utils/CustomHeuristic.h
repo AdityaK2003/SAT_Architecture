@@ -42,11 +42,10 @@ public:
     void chb_new_var();
 
 
-    // Heuristic options: activity, static_var_occurrences, static_jeroslow_wang, dynamic_mom, chb, random
+    // Heuristic options: activity, dynamic_var_occurrences, dynamic_jeroslow_wang, dynamic_mom, static_var_occurrences, lazy_var_occurrences, chb, random
     std::string heuristic_;
 
-    std::vector<Var> var_occurrences_;
-
+    std::vector<Var> var_occurrences_; // static_var_occurrences
 
     double alpha_; // chb
     double multiplier_; // chb

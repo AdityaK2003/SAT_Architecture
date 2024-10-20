@@ -36,19 +36,19 @@
 # ../sat_files/SAT2017_mp1/mp1-tri_ali_s11_c35_sinz_UNS.cnf
 # 
 # SAT2017 MP Problems (Sample):
-../sat_files/SAT2017_mp1/mp1-9_1.cnf
-../sat_files/SAT2017_mp1/mp1-9_4.cnf
-../sat_files/SAT2017_mp1/mp1-9_9.cnf
-../sat_files/SAT2017_mp1/mp1-9_11.cnf
-../sat_files/SAT2017_mp1/mp1-9_19.cnf
-../sat_files/SAT2017_mp1/mp1-9_22.cnf
-../sat_files/SAT2017_mp1/mp1-9_44.cnf
-../sat_files/SAT2017_mp1/mp1-21.0.cnf
-../sat_files/SAT2017_mp1/mp1-21.3.cnf
-../sat_files/SAT2017_mp1/mp1-21.9.cnf
-../sat_files/SAT2017_mp1/mp1-22.4.cnf
-../sat_files/SAT2017_mp1/mp1-22.7.cnf
-../sat_files/SAT2017_mp1/mp1-23.2.cnf
+# ../sat_files/SAT2017_mp1/mp1-9_1.cnf
+# ../sat_files/SAT2017_mp1/mp1-9_4.cnf
+# ../sat_files/SAT2017_mp1/mp1-9_9.cnf
+# ../sat_files/SAT2017_mp1/mp1-9_11.cnf
+# ../sat_files/SAT2017_mp1/mp1-9_19.cnf
+# ../sat_files/SAT2017_mp1/mp1-9_22.cnf
+# ../sat_files/SAT2017_mp1/mp1-9_44.cnf
+# ../sat_files/SAT2017_mp1/mp1-21.0.cnf
+# ../sat_files/SAT2017_mp1/mp1-21.3.cnf
+# ../sat_files/SAT2017_mp1/mp1-21.9.cnf
+# ../sat_files/SAT2017_mp1/mp1-22.4.cnf
+# ../sat_files/SAT2017_mp1/mp1-22.7.cnf
+# ../sat_files/SAT2017_mp1/mp1-23.2.cnf
 # ../SAT2017Benchmark/mp1-23.8.cnf
 # ../SAT2017Benchmark/mp1-24.1.cnf
 # ../SAT2017Benchmark/mp1-24.9.cnf

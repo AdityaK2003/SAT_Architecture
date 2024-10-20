@@ -14,6 +14,7 @@ using namespace Minisat;
 // - dynamic_jeroslow_wang: recomputes each time the jeroslow-wang heuristic (exponential weightage of shorter clause occurrences)
 // - dynamic_mom: maximum occurrences of clauses of minimum size formula, and recomputes each time
 // - static_var_occurrences: computes map once at beginning then doesn't recompute
+// - chb: this function is not used
 std::vector<Var> CustomHeuristic::findHeuristicVector(Solver& solver) {
     // Do nothing if this function is called with "activity" or "random", since already taken care of
     if (heuristic_ == "activity" || heuristic_ == "random") {
@@ -143,6 +144,27 @@ std::vector<Var> CustomHeuristic::findHeuristicVector(Solver& solver) {
             pq.pop();
         }
         return var_occurrences_;
+    } else if (heuristic_ == "lazy_var_occurrences") {
+        // Calculate occurrences of each variable
+        std::unordered_map<Var, int> varOccurrences;
+        for(int v = 0; v < solver.nVars(); ++v) {
+            int pos_count = solver.watches[mkLit(v, false)].size();
+            int neg_count = solver.watches[mkLit(v, true)].size();
+            varOccurrences[(Var)v] = pos_count + neg_count;
+            std::cout << "Var " << v << " has count " << pos_count + neg_count << std::endl;
+        }
+        // Sort using pair <occurrences, var>
+        std::priority_queue<std::pair<int, Var>> pq;
+        for(const auto& entry : varOccurrences) {
+            pq.push(std::make_pair(entry.second, entry.first));
+        }
+        std::vector<Var> result;
+        // Sort vars
+        while(pq.size()) {
+            result.push_back(pq.top().second);
+            pq.pop();
+        }
+        return result;
     } else if (heuristic_ == "chb") {
         // Nothing to do
         return std::vector<Minisat::Var>();
@@ -171,6 +193,7 @@ void CustomHeuristic::printClauses(Solver& solver) {
     }
     // std::cout << "Printed clauses: " << printedClauses << std::endl << std::endl;
 }
+
 
 // For use in CHB
 void CustomHeuristic::add_to_plays(Var v) {
