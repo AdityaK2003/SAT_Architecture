@@ -148,6 +148,9 @@ std::vector<Var> CustomHeuristic::findHeuristicVector(Solver& solver) {
         // Calculate occurrences of each variable
         std::unordered_map<Var, int> varOccurrences;
         for(int v = 0; v < solver.nVars(); ++v) {
+            // Only use variables without assignments
+            if (solver.value((Var)v) != l_Undef) continue;
+
             int pos_count = solver.watches[mkLit(v, false)].size();
             int neg_count = solver.watches[mkLit(v, true)].size();
             varOccurrences[(Var)v] = pos_count + neg_count;
