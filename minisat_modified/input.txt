@@ -52,3 +52,10 @@
 # ../SAT2017Benchmark/mp1-23.8.cnf
 # ../SAT2017Benchmark/mp1-24.1.cnf
 # ../SAT2017Benchmark/mp1-24.9.cnf
+# 
+# Big Files
+# ../sat_files/BigFiles/g2-T1.2.1.cnf
+# ../sat_files/BigFiles/vlsat2_01.cnf
+# ../sat_files/BigFiles/vlsat2_04.cnf
+# ../sat_files/BigFiles/vlsat2_08.cnf
+# ../sat_files/BigFiles/vlsat2_10.cnf
