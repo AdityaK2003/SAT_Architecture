@@ -7,3 +7,5 @@ benches/
 
 # input_0.txt, input_1.txt, etc. all ignored
 input_*.txt
+
+bin/minisat
