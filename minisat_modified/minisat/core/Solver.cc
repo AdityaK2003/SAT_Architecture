@@ -19,9 +19,12 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 **************************************************************************************************/
 
 #include <math.h>
+#include <chrono>
+#include <thread>
 #include <iostream>
 #include <unordered_map>
 #include <queue>
+#include <cstdlib>
 
 #include "minisat/mtl/Alg.h"
 #include "minisat/mtl/Sort.h"
@@ -52,6 +55,7 @@ static DoubleOption  opt_garbage_frac      (_cat, "gc-frac",     "The fraction o
 static IntOption     opt_min_learnts_lim   (_cat, "min-learnts", "Minimum learnt clause limit",  0, IntRange(0, INT32_MAX));
 
 static StringOption  opt_custom_heuristic  ("activity", "custom-heuristic",   "Heuristic to use [activity (default), dynamic_var_occurrences, dynamic_jeroslow_wang, dynamic_mom, random]");
+static IntOption     opt_duration_threshold_seconds     (_cat, "duration-threshold-seconds", "Duration threshold in seconds (if nonpositive, ignored)",  -1,  IntRange(-100, INT32_MAX));
 
 
 //=================================================================================================
@@ -114,6 +118,11 @@ Solver::Solver() :
     if (opt_custom_heuristic) {
         custom_heuristic.heuristic_ = std::string((const char*)opt_custom_heuristic);
     }
+
+    // Set the start time for the threshold
+    duration_threshold_seconds = opt_duration_threshold_seconds;
+    start_time = std::chrono::steady_clock::now();
+    std::cout << "duration threshold seconds set to: " << duration_threshold_seconds << ", and start time set!!\n";
 }
 
 
@@ -788,6 +797,7 @@ lbool Solver::search(int nof_conflicts)
     long long total_heap_size = 0;
     long long iterations = 0;
 
+
     // Code for initial static list tracking experimentation: keeping track of assignments after every k propagations
     // int k = 1;
     // unsigned int prop_goal = propagations + k;
@@ -804,6 +814,25 @@ lbool Solver::search(int nof_conflicts)
         // // Calculate heap size
         // iterations++;
         // total_heap_size += order_heap.size();
+
+        // Check if threshold exceeded
+        bool duration_exceeded = false;
+        std::chrono::seconds elapsed_seconds(0);
+        if( duration_threshold_seconds > 0 ) {
+            auto now = std::chrono::steady_clock::now();
+            elapsed_seconds = std::chrono::duration_cast<std::chrono::seconds>(now - start_time);
+            if (elapsed_seconds.count() >= duration_threshold_seconds) {
+                duration_exceeded = true;
+            }
+        }
+        if (duration_exceeded) {
+            // Instantly quit after printing stats
+            printStats();
+            std::cout << "\nEXITED FROM EXCEEDING TIME LIMIT...\n";
+            std::cout << "\tDuration of " << duration_threshold_seconds << " seconds exceeded (" << elapsed_seconds.count() << "s elapsed)\n";
+            exit(0);
+        }
+
 
         CRef confl = propagate();
 

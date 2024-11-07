@@ -1,6 +1,9 @@
 ./#!/bin/bash
 
-# Run "nohup ./run_minisat_exp.sh activity &"
+# Run "nohup ./run_minisat_exp.sh activity -1 true &"
+# activity -> heuristic
+# -1 -> threshold (set to positive to cap running time)
+# true -> whether to use gprof or not
 
 # Input file
 input_file="input.txt"
@@ -10,16 +13,30 @@ directory="outputs"
 
 # Extract argument for heuristic
 heuristic="$1"
-if [ -z "heuristic" ]; then
+if [ -z "$heuristic" ]; then
   heuristic="activity"
 else
   directory="outputs_$heuristic"
 fi
 echo "Using heuristic: $heuristic and directory: $directory"
 
+# Extract argument for threshold time
+threshold="$2"
+if [ -z "$threshold" ]; then
+  threshold="-1"
+fi
+echo "Using threshold: $threshold"
+
+# Extract gprof flag
+gprof=false
+if [ "$3" == "true" ]; then
+    gprof=true
+fi
+echo "Using gprof? $gprof"
+
 # Arguments for MiniSAT
 # Custom Heuristic options: activity, dynamic_var_occurrences, dynamic_jeroslow_wang, dynamic_mom, static_var_occurrences, lazy_var_occurrences, chb, random
-args="-no-luby -rinc=1.5 -phase-saving=0 -rnd-freq=0.02 -no-elim -rnd-seed=42 -verb=2 -custom-heuristic=$heuristic"
+args="-no-luby -rinc=1.5 -phase-saving=0 -rnd-freq=0.02 -no-elim -rnd-seed=42 -verb=2 -custom-heuristic=$heuristic -duration-threshold-seconds=$threshold"
 
 #  ../SAT_Architecture/sat_files/SAT2017_Soowang/g2-ak128astepbg2msisc.cnf
 
@@ -48,7 +65,14 @@ while IFS= read -r filepath; do
     if [[ "$filepath" != \#* ]]; then
         # Run the command for each filepath
         echo "Running $filepath..."
-        ./minisat_exp.sh "$filepath" "$directory" "$args"
-        # ./minisat_gprof.sh "$filepath" "$directory" "$bench" "$args"
+    
+        # Decide which script to run based on the gprof flag
+        if [ "$gprof" = true ]; then
+            echo "Running with gprof flag enabled"
+            ./minisat_gprof.sh "$filepath" "$directory" "$bench" "$args"
+        else
+            echo "Running without gprof flag"
+            ./minisat_exp.sh "$filepath" "$directory" "$args"
+        fi
     fi
 done < "$input_file"

@@ -30,6 +30,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "minisat/core/SolverTypes.h"
 
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 
 namespace Minisat {
@@ -244,6 +246,10 @@ public:
     // Custom Heuristic
     CustomHeuristic     custom_heuristic;
     friend class CustomHeuristic;
+
+    // Start time threshold
+    std::chrono::steady_clock::time_point start_time;
+    int duration_threshold_seconds;
 
     // Main internal methods:
     //

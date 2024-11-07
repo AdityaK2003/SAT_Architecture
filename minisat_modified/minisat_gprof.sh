@@ -29,7 +29,7 @@ if [ -z "$args" ]; then
   # Default value of arguments if none provided
   args="-no-luby -rinc=1.5 -phase-saving=0 -rnd-freq=0.02 -no-elim -rnd-seed=42 -verb=1"
 fi
-echo "Using bench $bench\n"
+echo "Using bench $bench"
 echo $args
 
 # Define the file to save the output to
