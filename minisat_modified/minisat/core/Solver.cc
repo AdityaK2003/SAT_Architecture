@@ -28,6 +28,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "minisat/utils/System.h"
 #include "minisat/core/Solver.h"
 #include "minisat/mtl/Vec.h"
+#include "minisat/utils/CustomHeuristic.h"
 
 using namespace Minisat;
 
@@ -147,6 +148,10 @@ Var Solver::newVar(lbool upol, bool dvar)
     decision .reserve(v);
     trail    .capacity(v+1);
     setDecisionVar(v, dvar);
+
+    if (custom_heuristic.getHeuristic() == "chb") {
+        custom_heuristic.chb_new_var();
+    }
     return v;
 }
 
@@ -287,8 +292,8 @@ Lit Solver::pickBranchLit()
             order_heap.remove(next);
         }
         else {
-            // If default activity heuristic used
-            if (custom_heuristic.getHeuristic() == "activity") {
+            // If default activity heuristic used, or chb
+            if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "chb") {
                 next = order_heap.removeMin();
             } else {
                 // Cycle through heuristic vector
@@ -319,6 +324,10 @@ Lit Solver::pickBranchLit()
         lit = mkLit(next, drand(random_seed) < 0.5);
     else
         lit = mkLit(next, polarity[next]);
+
+    if (custom_heuristic.getHeuristic() == "chb" && next != var_Undef) {
+        custom_heuristic.add_to_plays(next);
+    }
     
 
     // std::cout << "@@@ picked " << (sign(lit) ? "-" : "") << var(lit)+1 << "\n";
@@ -368,6 +377,9 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
                     varBumpActivity(var(q));
                 }
                 seen[var(q)] = 1;
+                if (custom_heuristic.getHeuristic() == "chb") {
+                    custom_heuristic.conflict_analysis_push(var(q));
+                }
                 if (level(var(q)) >= decisionLevel())
                     pathC++;
                 else
@@ -384,6 +396,11 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
 
     }while (pathC > 0);
     out_learnt[0] = ~p;
+
+    if (custom_heuristic.getHeuristic() == "chb") {
+        custom_heuristic.conflict_analysis_push(var(p));
+        custom_heuristic.add_to_plays(var(p));
+    }
 
     // Simplify conflict clause:
     //
@@ -563,6 +580,9 @@ CRef Solver::propagate()
 
     while (qhead < trail.size()){
         Lit            p   = trail[qhead++];     // 'p' is enqueued fact to propagate.
+        if (custom_heuristic.getHeuristic() == "chb") {
+            custom_heuristic.add_to_plays(var(p));
+        }
         // std::cout << "@@@ about to propagate: " << (sign(p) ? "-" : "") << var(p)+1 << "\n";
         vec<Watcher>&  ws  = watches.lookup(p);
         Watcher        *i, *j, *end;
@@ -761,43 +781,38 @@ lbool Solver::search(int nof_conflicts)
     vec<Lit>    learnt_clause;
     starts++;
 
-    // long long total_heap_size = 0;
-    // long long iterations = 0;
+    if (custom_heuristic.getHeuristic() == "chb") {
+        custom_heuristic.chb_reinitialize();
+    }
+
+    long long total_heap_size = 0;
+    long long iterations = 0;
 
     // Code for initial static list tracking experimentation: keeping track of assignments after every k propagations
     // int k = 1;
     // unsigned int prop_goal = propagations + k;
     // int counter = 1;
+    // printf("Starting Propagations: %d\n", propagations);
     for (;;){
-        // if(propagations >= prop_goal) {
-            // printf("Propagations: %d\n", propagations);
-            // for (int i = 0; i < trail.size(); i++) {
-            //     printf("%s%d ", sign(trail[i]) ? "-" : "", var(trail[i]) + 1);
-            // }
-            // printf("\n\n");
-            // prop_goal += k;
-
-        //     char filename[100];
-        //     snprintf(filename, sizeof(filename), "output_assignments/assignments_part%03d.txt", counter);
-        //     ++counter;
-        //     FILE* file = fopen(filename, "w");
-        //     if (file != NULL) {
-        //         fprintf(file, "Propagations: %lu\n", propagations);
-        //         for (int i = 0; i < trail.size(); i++) {
-        //             fprintf(file, "%s%d ", sign(trail[i]) ? "-" : "", var(trail[i]) + 1);
-        //         }
-        //         fprintf(file, "\n\n");
-        //         fclose(file);
-        //     } else {
-        //         fprintf(stderr, "Error: Failed to open file for writing.\n");
-        //     }
+        // printf("Propagations: %d\n", propagations);
+        // for (int i = 0; i < trail.size(); i++) {
+        //     printf("%s%d ", sign(trail[i]) ? "-" : "", var(trail[i]) + 1);
         // }
+        // printf("\n\n");
+        // prop_goal += k;
 
-        // Calculate heap size
+        // // Calculate heap size
         // iterations++;
         // total_heap_size += order_heap.size();
 
         CRef confl = propagate();
+
+        // Choose chb multiplier value, and set rewards
+        if (custom_heuristic.getHeuristic() == "chb") {
+            bool was_conflict = (confl != CRef_Undef);
+            custom_heuristic.chb_update(activity, conflicts, was_conflict);
+        }
+
         if (confl != CRef_Undef){
             // CONFLICT
             conflicts++; conflictC++;
@@ -805,6 +820,10 @@ lbool Solver::search(int nof_conflicts)
                 // double avg_size = (total_heap_size * 1.0) / (iterations * 1.0);
                 // std::cout << "AVERAGE HEAP SIZE: " << avg_size << std::endl << std::endl;
                 return l_False;
+            }
+
+            if (custom_heuristic.getHeuristic() == "chb") {
+                custom_heuristic.chb_encountered_conflict();
             }
 
             learnt_clause.clear();
@@ -823,6 +842,9 @@ lbool Solver::search(int nof_conflicts)
 
             if (custom_heuristic.getHeuristic() == "activity") {
                 varDecayActivity();
+            } else if (custom_heuristic.getHeuristic() == "chb") {
+                custom_heuristic.chb_update_last_conflicts(conflicts);
+                custom_heuristic.add_to_plays(var(learnt_clause[0]));
             }
             claDecayActivity();
 
