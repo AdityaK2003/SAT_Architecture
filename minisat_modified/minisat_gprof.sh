@@ -22,7 +22,7 @@ stripped_filename=$(basename "$1")
 directory="$2"
 bench="$3"
 args="$4"
-if [-z "$bench" ]; then
+if [ -z "$bench" ]; then
   bench=1
 fi
 if [ -z "$args" ]; then
