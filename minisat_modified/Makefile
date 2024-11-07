@@ -22,6 +22,10 @@ MINISAT_DEB    ?= -O0 -D DEBUG
 MINISAT_PRF    ?= -O3 -D NDEBUG
 MINISAT_FPIC   ?= -fpic
 
+# Call "make noinline" to do "make cpp" but also with no inlining, so gprof will catch all functions
+noinline:
+	$(MAKE) MINISAT_REL="$(MINISAT_REL) -fno-inline" CPP=-std=c++11
+
 # GNU Standard Install Prefix
 prefix         ?= /usr/local
 

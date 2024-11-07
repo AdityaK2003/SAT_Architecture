@@ -38,9 +38,9 @@ outputfile="$directory/${stripped_filename}_out.txt"
 # Clear output file
 > $outputfile
 
-# Run make (can use make cpp for C++)
+# Run make (can use make noinline for C++ with no inlining)
 # make clean
-make cpp
+make noinline
 
 # Move the new executable
 cp -f "build/release/bin/minisat" "bin/"
