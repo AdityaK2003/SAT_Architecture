@@ -378,12 +378,14 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
         if (c.learnt())
             claBumpActivity(c);
 
+        std::vector<Var> bumped_vars;
         for (int j = (p == lit_Undef) ? 0 : 1; j < c.size(); j++){
             Lit q = c[j];
 
             if (!seen[var(q)] && level(var(q)) > 0){
                 if (custom_heuristic.getHeuristic() == "activity") {
                     varBumpActivity(var(q));
+                    bumped_vars.push_back(var(q));
                 }
                 seen[var(q)] = 1;
                 if (custom_heuristic.getHeuristic() == "chb") {
@@ -395,6 +397,9 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
                     out_learnt.push(q);
             }
         }
+        std::cout << "Bumped Activities of " << bumped_vars.size() << " vars: ";
+        for(Var v : bumped_vars) std::cout << v << " ";
+        std::cout << std::endl;
         
         // Select next clause to look at:
         while (!seen[var(trail[index--])]);
