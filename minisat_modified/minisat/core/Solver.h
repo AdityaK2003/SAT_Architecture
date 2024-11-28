@@ -251,6 +251,11 @@ public:
     std::chrono::steady_clock::time_point start_time;
     int duration_threshold_seconds;
 
+    // Number of variables at a time which are bumped
+    std::vector<int> num_vars_bumped;
+    // Holds backtrack amounts
+    std::vector<int> backtrack_levels;
+
     // Main internal methods:
     //
     void     insertVarOrder   (Var x);                                                 // Insert a variable in the decision order priority queue.

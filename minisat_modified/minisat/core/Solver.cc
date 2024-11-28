@@ -255,6 +255,14 @@ bool Solver::satisfied(const Clause& c) const {
 //
 void Solver::cancelUntil(int level) {
     if (decisionLevel() > level){
+        // std::cout << "backtrack from level " << decisionLevel() << " to " << level << " (" << (decisionLevel() - level) << " levels)\n";
+        backtrack_levels.push_back(decisionLevel() - level);
+        int sum = 0;
+        for(int n : backtrack_levels) sum += n;
+        std::cout << "average so far (out of " << backtrack_levels.size() << " backtracks): ";
+        std::cout << (double) sum / (double) backtrack_levels.size() << std::endl << std::endl;
+
+
         for (int c = trail.size()-1; c >= trail_lim[level]; c--){
             Var      x  = var(trail[c]);
             assigns [x] = l_Undef;
@@ -371,6 +379,10 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     out_learnt.push();      // (leave room for the asserting literal)
     int index   = trail.size() - 1;
 
+
+    std::vector<Var> bumped_vars;
+    int num_bumped_clauses = 0;
+
     do{
         assert(confl != CRef_Undef); // (otherwise should be UIP)
         Clause& c = ca[confl];
@@ -378,7 +390,7 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
         if (c.learnt())
             claBumpActivity(c);
 
-        std::vector<Var> bumped_vars;
+        bool bumped = false;
         for (int j = (p == lit_Undef) ? 0 : 1; j < c.size(); j++){
             Lit q = c[j];
 
@@ -386,6 +398,7 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
                 if (custom_heuristic.getHeuristic() == "activity") {
                     varBumpActivity(var(q));
                     bumped_vars.push_back(var(q));
+                    bumped = true;
                 }
                 seen[var(q)] = 1;
                 if (custom_heuristic.getHeuristic() == "chb") {
@@ -397,9 +410,8 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
                     out_learnt.push(q);
             }
         }
-        std::cout << "Bumped Activities of " << bumped_vars.size() << " vars: ";
-        for(Var v : bumped_vars) std::cout << v << " ";
-        std::cout << std::endl;
+
+        if (bumped) ++num_bumped_clauses;
         
         // Select next clause to look at:
         while (!seen[var(trail[index--])]);
@@ -410,6 +422,16 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
 
     }while (pathC > 0);
     out_learnt[0] = ~p;
+
+    // std::cout << "Bumped Activities of " << bumped_vars.size() << " vars in " << num_bumped_clauses << " clauses: ";
+    // for(Var v : bumped_vars) std::cout << v << " ";
+    // std::cout << std::endl;
+    
+    num_vars_bumped.push_back(bumped_vars.size());
+    int sum = 0;
+    for(int n : num_vars_bumped) sum += n;
+    std::cout << "average num vars bumped so far (out of " << num_vars_bumped.size() << " times): ";
+    std::cout << (double) sum / (double) num_vars_bumped.size() << std::endl << std::endl;
 
     if (custom_heuristic.getHeuristic() == "chb") {
         custom_heuristic.conflict_analysis_push(var(p));
