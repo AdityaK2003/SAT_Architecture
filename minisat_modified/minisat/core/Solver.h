@@ -256,6 +256,13 @@ public:
     // Holds backtrack amounts
     std::vector<int> backtrack_levels;
 
+    // Dictates when to bump activity
+    // Options:
+    // - "default" -> default MiniSAT/CHB versions
+    // - "conflict_clause" -> only bumps variables' activities in original conflict clause
+    // - "learnt_clause" -> only bumps variables' activities in final learnt clause
+    std::string bump_activity = "default";
+
     // Main internal methods:
     //
     void     insertVarOrder   (Var x);                                                 // Insert a variable in the decision order priority queue.

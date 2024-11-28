@@ -256,11 +256,11 @@ bool Solver::satisfied(const Clause& c) const {
 void Solver::cancelUntil(int level) {
     if (decisionLevel() > level){
         // std::cout << "backtrack from level " << decisionLevel() << " to " << level << " (" << (decisionLevel() - level) << " levels)\n";
-        backtrack_levels.push_back(decisionLevel() - level);
-        int sum = 0;
-        for(int n : backtrack_levels) sum += n;
-        std::cout << "average so far (out of " << backtrack_levels.size() << " backtracks): ";
-        std::cout << (double) sum / (double) backtrack_levels.size() << std::endl << std::endl;
+        // backtrack_levels.push_back(decisionLevel() - level);
+        // int sum = 0;
+        // for(int n : backtrack_levels) sum += n;
+        // std::cout << "average so far (out of " << backtrack_levels.size() << " backtracks): ";
+        // std::cout << (double) sum / (double) backtrack_levels.size() << std::endl << std::endl;
 
 
         for (int c = trail.size()-1; c >= trail_lim[level]; c--){
@@ -383,6 +383,16 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     std::vector<Var> bumped_vars;
     int num_bumped_clauses = 0;
 
+    // If bumping only conflict clause variables
+    if(bump_activity == "conflict_clause" && (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "chb")) {
+        for (int j = 0; j < ca[confl].size(); j++) {
+            Var v = var(ca[confl][j]);
+            if (custom_heuristic.getHeuristic() == "activity") varBumpActivity(v);
+            else if (custom_heuristic.getHeuristic() == "chb") custom_heuristic.conflict_analysis_push(v);
+            // bumped_vars.push_back(var(q));
+        }
+    }
+
     do{
         assert(confl != CRef_Undef); // (otherwise should be UIP)
         Clause& c = ca[confl];
@@ -396,14 +406,15 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
 
             if (!seen[var(q)] && level(var(q)) > 0){
                 if (custom_heuristic.getHeuristic() == "activity") {
-                    varBumpActivity(var(q));
-                    bumped_vars.push_back(var(q));
-                    bumped = true;
+                    if(bump_activity == "default") varBumpActivity(var(q));
+                    // bumped_vars.push_back(var(q));
+                    // bumped = true;
                 }
                 seen[var(q)] = 1;
                 if (custom_heuristic.getHeuristic() == "chb") {
-                    custom_heuristic.conflict_analysis_push(var(q));
+                    if(bump_activity == "default") custom_heuristic.conflict_analysis_push(var(q));
                 }
+
                 if (level(var(q)) >= decisionLevel())
                     pathC++;
                 else
@@ -427,11 +438,11 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     // for(Var v : bumped_vars) std::cout << v << " ";
     // std::cout << std::endl;
     
-    num_vars_bumped.push_back(bumped_vars.size());
-    int sum = 0;
-    for(int n : num_vars_bumped) sum += n;
-    std::cout << "average num vars bumped so far (out of " << num_vars_bumped.size() << " times): ";
-    std::cout << (double) sum / (double) num_vars_bumped.size() << std::endl << std::endl;
+    // num_vars_bumped.push_back(bumped_vars.size());
+    // int sum = 0;
+    // for(int n : num_vars_bumped) sum += n;
+    // std::cout << "average num vars bumped so far (out of " << num_vars_bumped.size() << " times): ";
+    // std::cout << (double) sum / (double) num_vars_bumped.size() << std::endl << std::endl;
 
     if (custom_heuristic.getHeuristic() == "chb") {
         custom_heuristic.conflict_analysis_push(var(p));
@@ -486,6 +497,15 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     }
 
     for (int j = 0; j < analyze_toclear.size(); j++) seen[var(analyze_toclear[j])] = 0;    // ('seen[]' is now cleared)
+
+    // Bump activities of variables in the final learnt clause
+    if (bump_activity == "learnt_clause" && (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "chb")) {
+        for (int i = 0; i < out_learnt.size(); i++) {
+            Var v = var(out_learnt[i]);
+            if (custom_heuristic.getHeuristic() == "activity") varBumpActivity(v);
+            else if (custom_heuristic.getHeuristic() == "chb") custom_heuristic.conflict_analysis_push(v);
+        }
+    }
 }
 
 

@@ -7,7 +7,7 @@
 # 
 # ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_34_150.cnf
 # ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_64_298.cnf
-# ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_97_444.cnf
+../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_97_444.cnf
 # ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_149_738.cnf
 # ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_185_788.cnf
 # ../sat_files/nonrandom_sat_files/sat_2002_handmade_ostrowski/handmade_249_1118.cnf
