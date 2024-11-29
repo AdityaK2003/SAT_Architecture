@@ -24,8 +24,8 @@
 # ../sat_files/50Vars/uf50-01.cnf
 # 
 # SAT2017 UNSAT Problems:
-../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_abio_UNS.cnf
-../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_abix_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_abio_UNS.cnf
+# ../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_abix_UNS.cnf
 # ../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_bail_UNS.cnf
 # ../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_sinx_UNS.cnf
 # ../sat_files/SAT2017_mp1/mp1-squ_any_s09x07_c27_sinz_UNS.cnf
