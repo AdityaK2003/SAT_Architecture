@@ -389,8 +389,9 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
             Var v = var(ca[confl][j]);
             if (custom_heuristic.getHeuristic() == "activity") varBumpActivity(v);
             else if (custom_heuristic.getHeuristic() == "chb") custom_heuristic.conflict_analysis_push(v);
-            // bumped_vars.push_back(var(q));
+            bumped_vars.push_back(v);
         }
+        ++num_bumped_clauses;
     }
 
     do{
@@ -407,8 +408,8 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
             if (!seen[var(q)] && level(var(q)) > 0){
                 if (custom_heuristic.getHeuristic() == "activity") {
                     if(bump_activity == "default") varBumpActivity(var(q));
-                    // bumped_vars.push_back(var(q));
-                    // bumped = true;
+                    bumped_vars.push_back(var(q));
+                    bumped = true;
                 }
                 seen[var(q)] = 1;
                 if (custom_heuristic.getHeuristic() == "chb") {
@@ -434,15 +435,6 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     }while (pathC > 0);
     out_learnt[0] = ~p;
 
-    // std::cout << "Bumped Activities of " << bumped_vars.size() << " vars in " << num_bumped_clauses << " clauses: ";
-    // for(Var v : bumped_vars) std::cout << v << " ";
-    // std::cout << std::endl;
-    
-    // num_vars_bumped.push_back(bumped_vars.size());
-    // int sum = 0;
-    // for(int n : num_vars_bumped) sum += n;
-    // std::cout << "average num vars bumped so far (out of " << num_vars_bumped.size() << " times): ";
-    // std::cout << (double) sum / (double) num_vars_bumped.size() << std::endl << std::endl;
 
     if (custom_heuristic.getHeuristic() == "chb") {
         custom_heuristic.conflict_analysis_push(var(p));
@@ -504,8 +496,28 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
             Var v = var(out_learnt[i]);
             if (custom_heuristic.getHeuristic() == "activity") varBumpActivity(v);
             else if (custom_heuristic.getHeuristic() == "chb") custom_heuristic.conflict_analysis_push(v);
+            bumped_vars.push_back(v);
         }
+        ++num_bumped_clauses;
     }
+
+
+    // std::cout << "Bumped Activities of " << bumped_vars.size() << " vars in " << num_bumped_clauses << " clauses: ";
+    // for(Var v : bumped_vars) std::cout << v << " ";
+    // std::cout << std::endl;
+    
+    num_vars_bumped.push_back(bumped_vars.size());
+    // int sum = 0;
+    // for(int n : num_vars_bumped) sum += n;
+    // std::cout << "average num vars bumped so far (out of " << num_vars_bumped.size() << " times): ";
+    // std::cout << (double) sum / (double) num_vars_bumped.size() << std::endl << std::endl;
+
+    trail_size_to_vars_bumped[trail.size()].push_back(bumped_vars.size());
+    // int sum = 0;
+    // for(int n : trail_size_to_vars_bumped[trail.size()]) sum += n;
+    // double avg = (double) sum / (double) trail_size_to_vars_bumped[trail.size()].size();
+    // std::cout << "Trail size " << trail.size() << ", bumped " << bumped_vars.size() << " vars (new avg = " << avg << ")\n";
+
 }
 
 

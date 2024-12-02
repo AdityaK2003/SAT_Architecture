@@ -32,6 +32,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <map>
 
 
 namespace Minisat {
@@ -255,6 +256,10 @@ public:
     std::vector<int> num_vars_bumped;
     // Holds backtrack amounts
     std::vector<int> backtrack_levels;
+
+    // Track num_vars_bumped given the trail size
+    // trail_size_to_vars_bumped[i] holds list of all k's when trail size = i, given k = number of vars bumped
+    std::map<int, std::vector<int>> trail_size_to_vars_bumped;
 
     // Dictates when to bump activity
     // Options:

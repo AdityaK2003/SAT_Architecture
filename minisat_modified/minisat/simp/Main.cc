@@ -27,6 +27,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "minisat/core/Dimacs.h"
 #include "minisat/simp/SimpSolver.h"
 
+#include <vector>
+
 using namespace Minisat;
 
 //=================================================================================================
@@ -46,6 +48,43 @@ static void SIGINT_exit(int) {
         solver->printStats();
         printf("\n"); printf("*** INTERRUPTED ***\n"); }
     _exit(1); }
+
+
+
+// Keeping track of stats
+static void print_accumulated_stats(SimpSolver& S, int sections) {
+    std::vector<int> accumulated_sums(sections, 0);
+    std::vector<int> accumulated_counts(sections, 0);
+    int section_size = S.nVars() / sections;
+    for (int i = 0; i <= S.nVars(); i++) {
+        // Skip if no vars bumped
+        int num_vars_bumped = S.trail_size_to_vars_bumped[i].size();
+        if (num_vars_bumped == 0) continue;
+
+        int section_index = i / section_size;
+        if (section_index >= sections) section_index = sections - 1;
+
+        int sum = 0;
+        for(int n : S.trail_size_to_vars_bumped[i]) sum += n;
+        accumulated_sums[section_index] += sum;
+        accumulated_counts[section_index] += num_vars_bumped;
+    }
+
+    // Print cumulative averages for sections
+    printf("\nCumulative Averages by %d Sections:\n", sections);
+    for (int s = 0; s < sections; s++) {
+        double cumulative_avg = (accumulated_counts[s] > 0) 
+                                ? (double) accumulated_sums[s] / accumulated_counts[s] 
+                                : 0.0;
+        printf("Section %d (%d-%d): %.2f (Vars Bumped: %d)\n", 
+            s + 1, 
+            s * section_size, 
+            (s == sections - 1) ? S.nVars() : (s + 1) * section_size - 1,
+            cumulative_avg,
+            accumulated_counts[s]); // Print total number of variables bumped
+    }
+}
+
 
 
 //=================================================================================================
@@ -147,6 +186,26 @@ int main(int argc, char** argv)
         // printf("\nFinal Bump Count: %lld", S.order_heap.global_count);
         // printf("\nFinal Rescale Count: %lld\n", S.order_heap.rescale_count);
         // printf("\nFinal Heap Size: %d\n\n", S.order_heap.size());
+
+        // Print stats on trail size -> num vars bumped
+        printf("\nTrail Size: Average k\n");
+        for (int i = 0; i <= S.nVars(); i++) {
+            // Skip if no vars bumped
+            int num_vars_bumped = S.trail_size_to_vars_bumped[i].size();
+            if (num_vars_bumped == 0) continue;
+
+            int sum = 0;
+            for(int n : S.trail_size_to_vars_bumped[i]) sum += n;
+            double avg = (double) sum / (double) num_vars_bumped;
+            printf("%d: %.2f\n", i, avg);
+        }
+
+        // Also keep track of stats for different sections, i.e. if 100 vars then 0-33 trail size, 34-66, 67-100
+        print_accumulated_stats(S, 3);
+        print_accumulated_stats(S, 10);
+        printf("\n");
+
+
         if (ret == l_True) {
             printf("SAT\n");
             for (int i = 0; i < S.nVars(); i++)
