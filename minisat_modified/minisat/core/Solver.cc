@@ -56,6 +56,7 @@ static IntOption     opt_min_learnts_lim   (_cat, "min-learnts", "Minimum learnt
 
 static StringOption  opt_custom_heuristic  ("activity", "custom-heuristic",   "Heuristic to use [activity (default), dynamic_var_occurrences, dynamic_jeroslow_wang, dynamic_mom, random]");
 static IntOption     opt_duration_threshold_seconds     (_cat, "duration-threshold-seconds", "Duration threshold in seconds (if nonpositive, ignored)",  -1,  IntRange(-100, INT32_MAX));
+static IntOption     opt_max_iterations    (_cat, "max-iterations", "If set > 0, terminates program after max_iterations", -1, IntRange(-100, HUGE_VAL));
 
 
 //=================================================================================================
@@ -123,6 +124,12 @@ Solver::Solver() :
     duration_threshold_seconds = opt_duration_threshold_seconds;
     start_time = std::chrono::steady_clock::now();
     std::cout << "duration threshold seconds set to: " << duration_threshold_seconds << ", and start time set!!\n";
+
+    // Set max iterations
+    max_iterations = opt_max_iterations;
+    if (max_iterations > 0) {
+        std::cout << "Max Iterations set to " << max_iterations << std::endl;
+    }
 }
 
 
@@ -407,13 +414,19 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
 
             if (!seen[var(q)] && level(var(q)) > 0){
                 if (custom_heuristic.getHeuristic() == "activity") {
-                    if(bump_activity == "default") varBumpActivity(var(q));
-                    bumped_vars.push_back(var(q));
-                    bumped = true;
+                    if(bump_activity == "default") {
+                        varBumpActivity(var(q));
+                        bumped_vars.push_back(var(q));
+                        bumped = true;
+                    }
                 }
                 seen[var(q)] = 1;
                 if (custom_heuristic.getHeuristic() == "chb") {
-                    if(bump_activity == "default") custom_heuristic.conflict_analysis_push(var(q));
+                    if(bump_activity == "default") {
+                        custom_heuristic.conflict_analysis_push(var(q));
+                        bumped_vars.push_back(var(q));
+                        bumped = true;
+                    }
                 }
 
                 if (level(var(q)) >= decisionLevel())
@@ -871,7 +884,7 @@ lbool Solver::search(int nof_conflicts)
         // prop_goal += k;
 
         // // Calculate heap size
-        // iterations++;
+        iterations++;
         // total_heap_size += order_heap.size();
 
         // Check if threshold exceeded
