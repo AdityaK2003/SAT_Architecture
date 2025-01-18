@@ -83,6 +83,9 @@ static void print_accumulated_stats(SimpSolver& S, int sections) {
             cumulative_avg,
             accumulated_counts[s]); // Print total number of variables bumped
     }
+
+    // Print number of iterations taken to solve
+    printf("\nIterations taken: %d\n", S.iterations);
 }
 
 

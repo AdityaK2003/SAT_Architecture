@@ -252,8 +252,9 @@ public:
     std::chrono::steady_clock::time_point start_time;
     int duration_threshold_seconds;
 
-    // Max iterations
-    int max_iterations;
+    // Max iterations as well as current number of iterations
+    long long iterations;
+    long long max_iterations;
 
     // Number of variables at a time which are bumped
     std::vector<int> num_vars_bumped;

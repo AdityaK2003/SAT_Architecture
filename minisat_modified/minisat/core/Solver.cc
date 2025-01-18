@@ -867,7 +867,7 @@ lbool Solver::search(int nof_conflicts)
     }
 
     long long total_heap_size = 0;
-    long long iterations = 0;
+    iterations = 0;
 
 
     // Code for initial static list tracking experimentation: keeping track of assignments after every k propagations
