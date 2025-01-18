@@ -37,7 +37,7 @@ echo "Using threshold: $threshold iterations"
 
 # Extract gprof flag
 gprof=false
-if [ "$3" == "true" ]; then
+if [ "$4" == "true" ]; then
     gprof=true
 fi
 echo "Using gprof? $gprof"
