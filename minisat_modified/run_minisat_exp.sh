@@ -1,8 +1,9 @@
 ./#!/bin/bash
 
-# Run "nohup ./run_minisat_exp.sh activity -1 true &"
+# Run "nohup ./run_minisat_exp.sh activity -1 -1 true &"
 # activity -> heuristic
 # -1 -> threshold (set to positive to cap running time)
+# -1 -> threshold iterations (set to positive to cap running iterations)
 # true -> whether to use gprof or not
 
 # Input file
@@ -25,7 +26,14 @@ threshold="$2"
 if [ -z "$threshold" ]; then
   threshold="-1"
 fi
-echo "Using threshold: $threshold"
+echo "Using threshold: $threshold seconds"
+
+# Extract argument for threshold iterations
+threshold_iterations="$3"
+if [ -z "$threshold_iterations" ]; then
+  threshold_iterations="-1"
+fi
+echo "Using threshold: $threshold iterations" 
 
 # Extract gprof flag
 gprof=false
@@ -36,7 +44,7 @@ echo "Using gprof? $gprof"
 
 # Arguments for MiniSAT
 # Custom Heuristic options: activity, dynamic_var_occurrences, dynamic_jeroslow_wang, dynamic_mom, static_var_occurrences, lazy_var_occurrences, chb, random
-args="-no-luby -rinc=1.5 -phase-saving=0 -rnd-freq=0.02 -no-elim -rnd-seed=42 -verb=2 -custom-heuristic=$heuristic -duration-threshold-seconds=$threshold"
+args="-no-luby -rinc=1.5 -phase-saving=0 -rnd-freq=0.02 -no-elim -rnd-seed=42 -verb=2 -custom-heuristic=$heuristic -duration-threshold-seconds=$threshold -max-iterations=$threshold_iterations"
 
 #  ../SAT_Architecture/sat_files/SAT2017_Soowang/g2-ak128astepbg2msisc.cnf
 

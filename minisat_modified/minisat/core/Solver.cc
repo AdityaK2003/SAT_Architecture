@@ -905,6 +905,13 @@ lbool Solver::search(int nof_conflicts)
             exit(0);
         }
 
+        // Check if iterations exceeded
+        if (max_iterations > 0 && iterations > max_iterations) {
+            printStats();
+            std::cout << "\nEXITED FROM EXCEEDING ITERATION LIMIT OF " << max_iterations << "...\n";
+            exit(0);
+        }
+
 
         CRef confl = propagate();
 
