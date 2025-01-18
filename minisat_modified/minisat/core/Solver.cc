@@ -56,7 +56,7 @@ static IntOption     opt_min_learnts_lim   (_cat, "min-learnts", "Minimum learnt
 
 static StringOption  opt_custom_heuristic  ("activity", "custom-heuristic",   "Heuristic to use [activity (default), dynamic_var_occurrences, dynamic_jeroslow_wang, dynamic_mom, random]");
 static IntOption     opt_duration_threshold_seconds     (_cat, "duration-threshold-seconds", "Duration threshold in seconds (if nonpositive, ignored)",  -1,  IntRange(-100, INT32_MAX));
-static IntOption     opt_max_iterations    (_cat, "max-iterations", "If set > 0, terminates program after max_iterations", -1, IntRange(-100, HUGE_VAL));
+static IntOption     opt_max_iterations    (_cat, "max-iterations", "If set > 0, terminates program after max_iterations", -1, IntRange(-100, INT32_MAX));
 
 
 //=================================================================================================
