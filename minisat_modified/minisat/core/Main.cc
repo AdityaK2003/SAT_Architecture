@@ -147,7 +147,8 @@ int main(int argc, char** argv)
 #endif
     } catch (OutOfMemoryException&){
         printf("===============================================================================\n");
-        printf("INDETERMINATE\n");
+        printf("INDETERMINATE: OUT OF MEMORY EXCEPTION\n");
+        printf("Iterations Completed: %d", S.iterations);
         exit(0);
     }
 }
