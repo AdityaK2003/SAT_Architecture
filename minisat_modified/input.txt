@@ -59,7 +59,7 @@
 # ../sat_files/BigFiles/vlsat2_04.cnf
 # ../sat_files/BigFiles/vlsat2_08.cnf
 # ../sat_files/BigFiles/vlsat2_10.cnf
-
+#
 # SAT2017 (Soowang) Problems
 ../SAT2017Benchmark/g2-modgen-n200-m90860q08c40-3230.cnf
 ../SAT2017Benchmark/g2-modgen-n200-m90860q08c40-6967.cnf
