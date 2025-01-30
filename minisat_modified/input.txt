@@ -59,3 +59,65 @@
 # ../sat_files/BigFiles/vlsat2_04.cnf
 # ../sat_files/BigFiles/vlsat2_08.cnf
 # ../sat_files/BigFiles/vlsat2_10.cnf
+
+# SAT2017 (Soowang) Problems
+../SAT2017Benchmark/g2-modgen-n200-m90860q08c40-3230.cnf
+../SAT2017Benchmark/g2-modgen-n200-m90860q08c40-6967.cnf
+# ../SAT2017Benchmark/g2-modgen-n200-m90860q08c40-13698.cnf
+# ../SAT2017Benchmark/g2-modgen-n200-m90860q08c40-16823.cnf
+# ../SAT2017Benchmark/g2-modgen-n200-m90860q08c40-29667.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s399b02-k02.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s399b03-k02.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s179-k17.cnf
+# ../SAT2017Benchmark/g2-Sz512_15128_1.smt2-cvc4.cnf
+../SAT2017Benchmark/g2-hwmcc15deep-6s33-k33.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s33-k34.cnf
+../SAT2017Benchmark/g2-gss-28-s100.cnf
+# ../SAT2017Benchmark/g2-gss-30-s100.cnf
+../SAT2017Benchmark/g2-gss-32-s100.cnf
+# ../SAT2017Benchmark/g2-gss-34-s100.cnf
+# ../SAT2017Benchmark/g2-gss-36-s100.cnf
+# ../SAT2017Benchmark/g2-gss-38-s100.cnf
+# ../SAT2017Benchmark/g2-gss-40-s100.cnf
+../SAT2017Benchmark/g2-hwmcc15deep-6s161-k17.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s516r-k17.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s516r-k18.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-intel066-k10.cnf
+# ../SAT2017Benchmark/g2-slp-synthesis-aes-top24.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s161-k18.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s105-k35.cnf
+# ../SAT2017Benchmark/g2-slp-synthesis-aes-top25.cnf
+# ../SAT2017Benchmark/g2-slp-synthesis-aes-top26.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-beemcmbrdg7f2-k32.cnf
+# ../SAT2017Benchmark/g2-slp-synthesis-aes-top28.cnf
+# ../SAT2017Benchmark/g2-slp-synthesis-aes-top29.cnf
+../SAT2017Benchmark/g2-mizh-md5-47-5.cnf
+# ../SAT2017Benchmark/g2-mizh-md5-47-3.cnf
+# ../SAT2017Benchmark/g2-mizh-md5-48-2.cnf
+# ../SAT2017Benchmark/g2-mizh-md5-48-5.cnf
+# ../SAT2017Benchmark/g2-slp-synthesis-aes-top30.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-beemloyd3b1-k31.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s340rb63-k16.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-intel065-k11.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-bobpcihm-k30.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-beembkry8b1-k45.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-bobpcihm-k31.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-bobpcihm-k32.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s366r-k72.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-bobpcihm-k33.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s188-k44.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-bob12s02-k16.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s188-k46.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-bob12s02-k17.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s44-k38.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s44-k40.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s340rb63-k22.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-6s341r-k16.cnf
+../SAT2017Benchmark/g2-ak128diagodiagoisc.cnf
+# ../SAT2017Benchmark/g2-ak128astepbg2asisc.cnf
+# ../SAT2017Benchmark/g2-hwmcc15deep-intel032-k84.cnf
+# ../SAT2017Benchmark/g2-ak128paralparalisc.cnf
+# ../SAT2017Benchmark/g2-ak128modbtbg1asisc.cnf
+../SAT2017Benchmark/g2-hwmcc15deep-beemhanoi4b1-k32.cnf
+# ../SAT2017Benchmark/g2-ak128astepmodbtisc.cnf
+# ../SAT2017Benchmark/g2-ak128astepbg2msisc.cnf
