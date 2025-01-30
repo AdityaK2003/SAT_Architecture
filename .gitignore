@@ -53,3 +53,4 @@ tmp*.txt
 # sat_files/SAT11-Competition-SelectedBenchmarks
 # sat_files/BigFiles
 sat_files/
+SAT2017_Benchmark/

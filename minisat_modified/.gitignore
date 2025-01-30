@@ -9,3 +9,5 @@ benches/
 input_*.txt
 
 bin/minisat
+
+SAT2017_Benchmark/
