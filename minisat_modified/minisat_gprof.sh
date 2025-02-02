@@ -21,7 +21,8 @@ stripped_filename=$(basename "$1")
 # Extract arguments for minisat from next input argument
 directory="$2"
 bench="$3"
-args="$4"
+iterations="$4"
+args="$5"
 if [ -z "$bench" ]; then
   bench=1
 fi
@@ -32,11 +33,21 @@ fi
 echo "Using bench $bench"
 echo $args
 
+
 # Define the file to save the output to
-outputfile="$directory/${stripped_filename}_out.txt"
+if [ "$iterations" -lt 0 ]; then
+  outputfile="$directory/${stripped_filename}_out.txt"
+  gprof_outputfile="$directory/$stripped_filename.gprof.txt"
+else
+  outputfile="$directory/${stripped_filename}_iter${iterations}_out.txt"
+  gprof_outputfile="$directory/${stripped_filename}_iter${iterations}.gprof.txt"
+fi
+echo "Outputfile: $outputfile"
+echo "Gprof outputfile: $gprof_outputfile"
 
 # Clear output file
 > $outputfile
+
 
 # Run make (can use make noinline for C++ with no inlining)
 # make clean
@@ -49,7 +60,7 @@ MSAT="./benches/b$bench/minisat"
 
 echo "Running: minisat $filename $args 2>&1 >> $outputfile" > $outputfile
 $MSAT $filename $args 2>&1 >> $outputfile
-gprof $MSAT gmon.out > $directory/$stripped_filename.gprof.txt
+gprof $MSAT gmon.out > $gprof_outputfile
 
 # Save to output file
 # echo "$output" >> $outputfile

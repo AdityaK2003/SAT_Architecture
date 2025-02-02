@@ -77,7 +77,7 @@ while IFS= read -r filepath; do
         # Decide which script to run based on the gprof flag
         if [ "$gprof" = true ]; then
             echo "Running with gprof flag enabled"
-            ./minisat_gprof.sh "$filepath" "$directory" "$bench" "$args"
+            ./minisat_gprof.sh "$filepath" "$directory" "$bench" "$threshold_iterations" "$args"
         else
             echo "Running without gprof flag"
             ./minisat_exp.sh "$filepath" "$directory" "$args"
