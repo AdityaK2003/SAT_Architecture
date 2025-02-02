@@ -191,22 +191,22 @@ int main(int argc, char** argv)
         // printf("\nFinal Heap Size: %d\n\n", S.order_heap.size());
 
         // Print stats on trail size -> num vars bumped
-        printf("\nTrail Size: Average k\n");
-        for (int i = 0; i <= S.nVars(); i++) {
-            // Skip if no vars bumped
-            int num_vars_bumped = S.trail_size_to_vars_bumped[i].size();
-            if (num_vars_bumped == 0) continue;
+        // printf("\nTrail Size: Average k\n");
+        // for (int i = 0; i <= S.nVars(); i++) {
+        //     // Skip if no vars bumped
+        //     int num_vars_bumped = S.trail_size_to_vars_bumped[i].size();
+        //     if (num_vars_bumped == 0) continue;
 
-            int sum = 0;
-            for(int n : S.trail_size_to_vars_bumped[i]) sum += n;
-            double avg = (double) sum / (double) num_vars_bumped;
-            printf("%d: %.2f\n", i, avg);
-        }
+        //     int sum = 0;
+        //     for(int n : S.trail_size_to_vars_bumped[i]) sum += n;
+        //     double avg = (double) sum / (double) num_vars_bumped;
+        //     printf("%d: %.2f\n", i, avg);
+        // }
 
-        // Also keep track of stats for different sections, i.e. if 100 vars then 0-33 trail size, 34-66, 67-100
-        print_accumulated_stats(S, 3);
-        print_accumulated_stats(S, 10);
-        printf("\n");
+        // // Also keep track of stats for different sections, i.e. if 100 vars then 0-33 trail size, 34-66, 67-100
+        // print_accumulated_stats(S, 3);
+        // print_accumulated_stats(S, 10);
+        // printf("\n");
 
 
         if (ret == l_True) {

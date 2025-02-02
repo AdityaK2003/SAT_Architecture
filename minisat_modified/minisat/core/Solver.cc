@@ -525,7 +525,7 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     // std::cout << "average num vars bumped so far (out of " << num_vars_bumped.size() << " times): ";
     // std::cout << (double) sum / (double) num_vars_bumped.size() << std::endl << std::endl;
 
-    trail_size_to_vars_bumped[trail.size()].push_back(bumped_vars.size());
+    // trail_size_to_vars_bumped[trail.size()].push_back(bumped_vars.size());
     // int sum = 0;
     // for(int n : trail_size_to_vars_bumped[trail.size()]) sum += n;
     // double avg = (double) sum / (double) trail_size_to_vars_bumped[trail.size()].size();
