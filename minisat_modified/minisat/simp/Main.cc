@@ -186,6 +186,7 @@ int main(int argc, char** argv)
             S.printStats();
             printf("\n"); }
         printf(ret == l_True ? "SATISFIABLE\n" : ret == l_False ? "UNSATISFIABLE\n" : "INDETERMINATE\n");
+        printf("\nIterations taken: %d\n", S.iterations);
         // printf("\nFinal Bump Count: %lld", S.order_heap.global_count);
         // printf("\nFinal Rescale Count: %lld\n", S.order_heap.rescale_count);
         // printf("\nFinal Heap Size: %d\n\n", S.order_heap.size());
