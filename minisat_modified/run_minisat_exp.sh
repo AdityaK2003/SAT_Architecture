@@ -76,6 +76,11 @@ while IFS= read -r filepath; do
     
         # Decide which script to run based on the gprof flag
         if [ "$gprof" = true ]; then
+            # make cpp
+
+            # # Move the new executable
+            # mv -f "build/release/bin/minisat" "bin/"
+
             echo "Running with gprof flag enabled"
             ./minisat_gprof.sh "$filepath" "$directory" "$bench" "$threshold_iterations" "$args"
         else

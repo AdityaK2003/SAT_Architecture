@@ -51,42 +51,42 @@ static void SIGINT_exit(int) {
 
 
 
-// Keeping track of stats
-static void print_accumulated_stats(SimpSolver& S, int sections) {
-    std::vector<int> accumulated_sums(sections, 0);
-    std::vector<int> accumulated_counts(sections, 0);
-    int section_size = S.nVars() / sections;
-    for (int i = 0; i <= S.nVars(); i++) {
-        // Skip if no vars bumped
-        int num_vars_bumped = S.trail_size_to_vars_bumped[i].size();
-        if (num_vars_bumped == 0) continue;
+// // Keeping track of stats
+// static void print_accumulated_stats(SimpSolver& S, int sections) {
+//     std::vector<int> accumulated_sums(sections, 0);
+//     std::vector<int> accumulated_counts(sections, 0);
+//     int section_size = S.nVars() / sections;
+//     for (int i = 0; i <= S.nVars(); i++) {
+//         // Skip if no vars bumped
+//         int num_vars_bumped = S.trail_size_to_vars_bumped[i].size();
+//         if (num_vars_bumped == 0) continue;
 
-        int section_index = i / section_size;
-        if (section_index >= sections) section_index = sections - 1;
+//         int section_index = i / section_size;
+//         if (section_index >= sections) section_index = sections - 1;
 
-        int sum = 0;
-        for(int n : S.trail_size_to_vars_bumped[i]) sum += n;
-        accumulated_sums[section_index] += sum;
-        accumulated_counts[section_index] += num_vars_bumped;
-    }
+//         int sum = 0;
+//         for(int n : S.trail_size_to_vars_bumped[i]) sum += n;
+//         accumulated_sums[section_index] += sum;
+//         accumulated_counts[section_index] += num_vars_bumped;
+//     }
 
-    // Print cumulative averages for sections
-    printf("\nCumulative Averages by %d Sections:\n", sections);
-    for (int s = 0; s < sections; s++) {
-        double cumulative_avg = (accumulated_counts[s] > 0) 
-                                ? (double) accumulated_sums[s] / accumulated_counts[s] 
-                                : 0.0;
-        printf("Section %d (%d-%d): %.2f (Vars Bumped: %d)\n", 
-            s + 1, 
-            s * section_size, 
-            (s == sections - 1) ? S.nVars() : (s + 1) * section_size - 1,
-            cumulative_avg,
-            accumulated_counts[s]); // Print total number of variables bumped
-    }
+//     // Print cumulative averages for sections
+//     printf("\nCumulative Averages by %d Sections:\n", sections);
+//     for (int s = 0; s < sections; s++) {
+//         double cumulative_avg = (accumulated_counts[s] > 0) 
+//                                 ? (double) accumulated_sums[s] / accumulated_counts[s] 
+//                                 : 0.0;
+//         printf("Section %d (%d-%d): %.2f (Vars Bumped: %d)\n", 
+//             s + 1, 
+//             s * section_size, 
+//             (s == sections - 1) ? S.nVars() : (s + 1) * section_size - 1,
+//             cumulative_avg,
+//             accumulated_counts[s]); // Print total number of variables bumped
+//     }
 
-    // Print number of iterations taken to solve
-    printf("\nIterations taken: %d\n", S.iterations);
-}
+//     // Print number of iterations taken to solve
+//     printf("\nIterations taken: %d\n", S.iterations);
+// }
 
 
 
