@@ -72,7 +72,7 @@
 # ../SAT2017Benchmark/g2-Sz512_15128_1.smt2-cvc4.cnf
 # ../SAT2017Benchmark/g2-hwmcc15deep-6s33-k33.cnf
 # ../SAT2017Benchmark/g2-hwmcc15deep-6s33-k34.cnf
-#../SAT2017Benchmark/g2-gss-28-s100.cnf
+# ../SAT2017Benchmark/g2-gss-28-s100.cnf
 # ../SAT2017Benchmark/g2-gss-30-s100.cnf
 # ../SAT2017Benchmark/g2-gss-32-s100.cnf
 # ../SAT2017Benchmark/g2-gss-34-s100.cnf
