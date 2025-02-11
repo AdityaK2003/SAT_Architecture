@@ -103,6 +103,80 @@ def combine_same_inputs(df1, heur1, df2, heur2):
     return combined_df
 
 
+# Function to parse gprof file
+# Threshold is for the "% time" column
+def parse_gprof_file(gprof_filename, threshold=0.01):
+    parsed_data = []
+    with open(gprof_filename, 'r') as file:
+        lines = file.readlines()
+
+        # Find the start of the data section by locating the header
+        start_idx = None
+        for idx, line in enumerate(lines):
+            if line.strip().startswith('%   cumulative   self'):
+                start_idx = idx + 2  # Data starts two lines after the header
+                break
+
+        if start_idx is None:
+            print("Data section not found in the file.")
+            return parsed_data
+
+        # Process the data lines
+        for line in lines[start_idx:]:
+            parts = line.strip().split()
+
+            try:
+                percent_time = float(parts[0])
+            except ValueError:
+                continue  # Skip lines that don't start with a number
+
+            if percent_time < threshold:
+                break  # Stop parsing when the % time falls below the threshold
+
+            # Extract self_seconds if available
+            self_seconds = float(parts[2]) if len(parts) > 2 else 0.0
+
+            # Extract function name starting from the first alphabetical character
+            function_name_start = next((i for i, c in enumerate(line) if c.isalpha()), None)
+            function_name = line[function_name_start:].strip() if function_name_start is not None else "Unknown"
+
+            # Append the data
+            parsed_data.append({
+                'percent': percent_time,
+                'time': self_seconds,
+                'function': function_name
+            })
+
+    return parsed_data
+
+
+# Function to remove heuristic-related time, adding this new time to the df
+def remove_heuristic_time(df, heuristic):
+    new_column_name = f"{heuristic}_cpu_time_no_heur"
+    cpu_time_column = f"{heuristic}_cpu_time"
+
+    # Initialize the new column with zeros
+    df[new_column_name] = 0.0
+
+    for idx, row in df.iterrows():
+        gprof_filename = row[f'{heuristic}_gprof_filename']
+        gprof_filepath = f'outputs_{heuristic}/{gprof_filename}'
+        parsed_data = parse_gprof_file(gprof_filepath)
+
+        # Sum up times for functions related to heuristics
+        # Heuristic-related functions are "pickBranchLit()" or any CustomHeuristic function
+        heuristic_time = sum(item['time'] for item in parsed_data if 'CustomHeuristic' in item['function'] or 'pickBranchLit' in item['function'])
+        # print(f'heuristic time for {gprof_filepath}: {heuristic_time} s')
+
+        # Subtract heuristic time from the original CPU time
+        adjusted_time = row[cpu_time_column] - heuristic_time
+
+        # Update the new column in the dataframe
+        df.at[idx, new_column_name] = adjusted_time
+
+    return df
+
+
 def main():
     # Parse results for each heuristic
     HEURISTICS_TO_USE = ['activity', 'chb']
@@ -131,9 +205,18 @@ def main():
     activity_faster_count = (combined_df['activity_cpu_time'] < combined_df['chb_cpu_time']).sum()
     print(f'Occurrences of activity_cpu_time < chb_cpu_time: {activity_faster_count}')
     print(f'Occurrences of chb_cpu_time < activity_cpu_time: {len(combined_df) - activity_faster_count}')
-    print()
 
-    print(combined_df.columns)
+    removal_heuristic = 'chb'
+    combined_df = remove_heuristic_time(combined_df, removal_heuristic)
+    print(f'\nRemoved heuristic time from {removal_heuristic} runs.\n')
+
+    activity_faster_count = (combined_df['activity_cpu_time'] < combined_df['chb_cpu_time_no_heur']).sum()
+    print(f'Occurrences of activity_cpu_time < chb_cpu_time_no_heur: {activity_faster_count}')
+    print(f'Occurrences of chb_cpu_time_no_heur < activity_cpu_time: {len(combined_df) - activity_faster_count}')
+
+    output_filename = 'heuristic_benchmarking.csv'
+    combined_df.to_csv(output_filename, index=True)
+    print(f'\n\nSaved results to {output_filename}')
 
 
 if __name__ == '__main__':
