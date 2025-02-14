@@ -22,7 +22,8 @@ stripped_filename=$(basename "$1")
 directory="$2"
 bench="$3"
 iterations="$4"
-args="$5"
+threshold_seconds="$5"
+args="$6"
 if [ -z "$bench" ]; then
   bench=1
 fi
@@ -35,9 +36,12 @@ echo $args
 
 
 # Define the file to save the output to
-if [ "$iterations" -lt 0 ]; then
+if [ "$iterations" -le 0 ] && [ "$threshold_seconds" -le 0 ]; then
   outputfile="$directory/${stripped_filename}_out.txt"
   gprof_outputfile="$directory/$stripped_filename.gprof.txt"
+elif [ "$threshold_seconds" -gt 0 ]; then
+  outputfile="$directory/${stripped_filename}_${threshold_seconds}seconds_out.txt"
+  gprof_outputfile="$directory/${stripped_filename}_${threshold_seconds}seconds.gprof.txt"
 else
   outputfile="$directory/${stripped_filename}_iter${iterations}_out.txt"
   gprof_outputfile="$directory/${stripped_filename}_iter${iterations}.gprof.txt"

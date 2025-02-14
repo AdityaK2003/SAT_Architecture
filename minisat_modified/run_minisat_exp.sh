@@ -82,7 +82,7 @@ while IFS= read -r filepath; do
             # mv -f "build/release/bin/minisat" "bin/"
 
             echo "Running with gprof flag enabled"
-            ./minisat_gprof.sh "$filepath" "$directory" "$bench" "$threshold_iterations" "$args"
+            ./minisat_gprof.sh "$filepath" "$directory" "$bench" "$threshold_iterations" "$threshold" "$args"
         else
             echo "Running without gprof flag"
             ./minisat_exp.sh "$filepath" "$directory" "$args"
