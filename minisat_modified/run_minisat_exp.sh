@@ -33,7 +33,7 @@ threshold_iterations="$3"
 if [ -z "$threshold_iterations" ]; then
   threshold_iterations="-1"
 fi
-echo "Using threshold: $threshold iterations" 
+echo "Using threshold: $threshold_iterations iterations" 
 
 # Extract gprof flag
 gprof=false
