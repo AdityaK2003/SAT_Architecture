@@ -130,6 +130,11 @@ Solver::Solver() :
     if (max_iterations > 0) {
         std::cout << "Max Iterations set to " << max_iterations << std::endl;
     }
+
+    // Set the "activate every" for pickBranchLit
+    // Ex: for random_var_freq = 0.2, this would result in 50
+    activate_rand_branch_every = static_cast<int>(1.0 / random_var_freq);
+    pick_branch_lit_counter = 0;
 }
 
 
@@ -274,6 +279,12 @@ void Solver::cancelUntil(int level) {
             Var      x  = var(trail[c]);
             assigns [x] = l_Undef;
             // std::cout << "@@@ variable " << x+1 << " becomes unassigned" << std::endl;
+
+            // Variable becomes unassigned: insert it to heap (notification system)
+            if (custom_heuristic.getHeuristic() == "activity_hw") {
+                insertVarOrder(x);
+            }
+
             if (phase_saving > 1 || (phase_saving == 1 && c > trail_lim.last()))
                 polarity[x] = sign(trail[c]);
             insertVarOrder(x); }
@@ -292,8 +303,27 @@ Lit Solver::pickBranchLit()
     Var next = var_Undef;
 
     // Random decision:
-    if (drand(random_seed) < random_var_freq && !order_heap.empty()){
-        next = order_heap[irand(random_seed,order_heap.size())];
+    bool random_decision = drand(random_seed) < random_var_freq;
+
+    if (custom_heuristic.getHeuristic() == "activity_hw") {
+        pick_branch_lit_counter = (pick_branch_lit_counter + 1) % activate_rand_branch_every;
+
+        // Every nth iteration it is random, where n = activate_rand_branch_every
+        if (pick_branch_lit_counter == 0) random_decision = true;
+        else random_decision = false;
+    }
+
+
+    if (random_decision && !order_heap.empty()){
+        // Random index
+        int random_index = irand(random_seed,order_heap.size());
+
+        if (custom_heuristic.getHeuristic() == "activity_hw") {
+            // Pick last element in heap
+            random_index = order_heap.size() - 1;
+        }
+
+        next = order_heap[random_index];
         if (value(next) == l_Undef && decision[next]) {
             // std::cout << "@@@ Random decision " << next+1 << " worked\n";
             rnd_decisions++; 
@@ -305,7 +335,9 @@ Lit Solver::pickBranchLit()
     int i = 0;
 
     // Activity based decision:
+    int pick_branch_lit_iterations = 0;
     while (next == var_Undef || value(next) != l_Undef || !decision[next]) {
+        ++pick_branch_lit_iterations;
         if (order_heap.empty()){
             next = var_Undef;
             break;
@@ -317,7 +349,7 @@ Lit Solver::pickBranchLit()
         }
         else {
             // If default activity heuristic used, or chb
-            if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "chb") {
+            if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "chb") {
                 next = order_heap.removeMin();
             } else {
                 // Cycle through heuristic vector
@@ -337,6 +369,9 @@ Lit Solver::pickBranchLit()
         }
     }
 
+    // if (pick_branch_lit_iterations > 1) {
+    //     std::cout << "PBL iterations: " << pick_branch_lit_iterations << std::endl;
+    // }
 
     // Choose polarity based on different polarity modes (global or per-variable):
     Lit lit;
@@ -348,6 +383,12 @@ Lit Solver::pickBranchLit()
         lit = mkLit(next, drand(random_seed) < 0.5);
     else
         lit = mkLit(next, polarity[next]);
+
+    // if (next != var_Undef) {
+    //     printf("Decision: variable %d picked with polarity %s\n", 
+    //         next + 1, 
+    //         sign(lit) ? "false" : "true");
+    // }
 
     if (custom_heuristic.getHeuristic() == "chb" && next != var_Undef) {
         custom_heuristic.add_to_plays(next);
@@ -391,10 +432,10 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     int num_bumped_clauses = 0;
 
     // If bumping only conflict clause variables
-    if(bump_activity == "conflict_clause" && (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "chb")) {
+    if(bump_activity == "conflict_clause" && (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "chb")) {
         for (int j = 0; j < ca[confl].size(); j++) {
             Var v = var(ca[confl][j]);
-            if (custom_heuristic.getHeuristic() == "activity") varBumpActivity(v);
+            if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw") varBumpActivity(v);
             else if (custom_heuristic.getHeuristic() == "chb") custom_heuristic.conflict_analysis_push(v);
             bumped_vars.push_back(v);
         }
@@ -413,7 +454,7 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
             Lit q = c[j];
 
             if (!seen[var(q)] && level(var(q)) > 0){
-                if (custom_heuristic.getHeuristic() == "activity") {
+                if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw") {
                     if(bump_activity == "default") {
                         varBumpActivity(var(q));
                         bumped_vars.push_back(var(q));
@@ -504,10 +545,10 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     for (int j = 0; j < analyze_toclear.size(); j++) seen[var(analyze_toclear[j])] = 0;    // ('seen[]' is now cleared)
 
     // Bump activities of variables in the final learnt clause
-    if (bump_activity == "learnt_clause" && (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "chb")) {
+    if (bump_activity == "learnt_clause" && (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "chb")) {
         for (int i = 0; i < out_learnt.size(); i++) {
             Var v = var(out_learnt[i]);
-            if (custom_heuristic.getHeuristic() == "activity") varBumpActivity(v);
+            if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw") varBumpActivity(v);
             else if (custom_heuristic.getHeuristic() == "chb") custom_heuristic.conflict_analysis_push(v);
             bumped_vars.push_back(v);
         }
@@ -640,6 +681,14 @@ void Solver::uncheckedEnqueue(Lit p, CRef from)
     vardata[var(p)] = mkVarData(from, decisionLevel());
     trail.push_(p);
     // std::cout << "@@@ enqueued " << (sign(p) ? "-" : "") << var(p)+1 << "\n";
+
+    // Variable assignment made so notify to remove from heap (notification system)
+    if (custom_heuristic.getHeuristic() == "activity_hw") {
+        Var v = var(p);
+        if (order_heap.inHeap(v)) {
+            order_heap.remove(v);
+        }
+    }
 }
 
 
@@ -887,6 +936,15 @@ lbool Solver::search(int nof_conflicts)
         iterations++;
         // total_heap_size += order_heap.size();
 
+        if (iterations % 10 == 0 && custom_heuristic.getHeuristic() == "activity_hw") {
+            std::cout << iterations << " iterations:" << std::endl;
+            for (int i = 0; i < order_heap.size(); ++i) {
+                std::cout << "\theap[" << i << "] = " << order_heap[i] << "   (activity = " << activity[order_heap[i]] << ")\n";
+            }
+            std::cout << "\n\n";
+
+        }
+
         // Check if threshold exceeded
         bool duration_exceeded = false;
         std::chrono::seconds elapsed_seconds(0);
@@ -948,7 +1006,7 @@ lbool Solver::search(int nof_conflicts)
                 uncheckedEnqueue(learnt_clause[0], cr);
             }
 
-            if (custom_heuristic.getHeuristic() == "activity") {
+            if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw") {
                 varDecayActivity();
             } else if (custom_heuristic.getHeuristic() == "chb") {
                 custom_heuristic.chb_update_last_conflicts(conflicts);
@@ -1073,6 +1131,7 @@ static double luby(double y, int x){
 // NOTE: assumptions passed in member-variable 'assumptions'.
 lbool Solver::solve_()
 {
+
     model.clear();
     conflict.clear();
     if (!ok) return l_False;

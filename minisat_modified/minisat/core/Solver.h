@@ -272,6 +272,11 @@ public:
     // - "learnt_clause" -> only bumps variables' activities in final learnt clause
     std::string bump_activity = "default";
 
+
+    // pick branch lit: activates random decision every n iterations
+    int activate_rand_branch_every;
+    int pick_branch_lit_counter;
+
     // Main internal methods:
     //
     void     insertVarOrder   (Var x);                                                 // Insert a variable in the decision order priority queue.
@@ -340,24 +345,41 @@ inline CRef Solver::reason(Var x) const { return vardata[x].reason; }
 inline int  Solver::level (Var x) const { return vardata[x].level; }
 
 inline void Solver::insertVarOrder(Var x) {
-    if (!order_heap.inHeap(x) && decision[x]) order_heap.insert(x); }
+    if (!order_heap.inHeap(x) && decision[x]) {
+        order_heap.insert(x);
+        // std::cout << "Inserted var " << x <<  " (activity " << activity[x] << " into heap, and it is decision level " << decisionLevel() << std::endl;
+    }
+}
 
-inline void Solver::varDecayActivity() { var_inc *= (1 / var_decay); }
+inline void Solver::varDecayActivity() { 
+    if (custom_heuristic.getHeuristic() == "activity_hw") {
+        // var_inc = var_inc * 1.03125
+        var_inc += (var_inc >> 5);
+    }
+    else {
+        var_inc *= (1 / var_decay);
+    } 
+}
 inline void Solver::varBumpActivity(Var v) { varBumpActivity(v, var_inc); }
 inline void Solver::varBumpActivity(Var v, double inc) {
-    // order_heap.global_count++;
-    if ( (activity[v] += inc) > 1e100 ) {
-        // Rescale:
-        for (int i = 0; i < nVars(); i++) {
-            activity[i] *= 1e-100;
+
+    if (custom_heuristic.getHeuristic() == "activity_hw") {
+        if ( (activity[v] += inc) > (1 << 30) ) {
+            // Rescale:
+            for (int i = 0; i < nVars(); i++) {
+                activity[i] = (activity[i] >> 10); // divie by 1024
+            }
+            var_inc = var_inc >> 10; // divide by 1024 
         }
-        var_inc *= 1e-100; 
-        // order_heap.rescale_count++;
-        // if(order_heap.rescale_count % 100 == 0) {
-            // std::cout << "Global Count: " << order_heap.global_count << std::endl;
-            // std::cout << "Rescale Count: " << order_heap.rescale_count << std::endl;
-            // std::cout << "Heap Size: " << order_heap.size() << std::endl << std::endl;
-        // }
+    }
+    else {
+        if ( (activity[v] += inc) > 1e100 ) {
+            // Rescale:
+            for (int i = 0; i < nVars(); i++) {
+                activity[i] *= 1e-100;
+            }
+            var_inc *= 1e-100; 
+        }
     }
 
     // Update order_heap with respect to new activity:

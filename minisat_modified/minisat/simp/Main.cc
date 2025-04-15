@@ -174,6 +174,14 @@ int main(int argc, char** argv)
         lbool ret = l_Undef;
 
         if (solve){
+            if (S.custom_heuristic.getHeuristic() == "activity_hw") {
+                std::cout << "\nInitialized heap: " << std::endl;
+                for (int i = 0; i < S.order_heap.size(); ++i) {
+                    std::cout << "\theap[" << i << "] = " << S.order_heap[i] << "   (activity = " << S.activity[S.order_heap[i]] << ")\n";
+                }
+                std::cout << "\n\n";
+            }
+
             vec<Lit> dummy;
             ret = S.solveLimited(dummy);
         }else if (S.verbosity > 0)

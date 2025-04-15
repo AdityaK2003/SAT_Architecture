@@ -21,6 +21,8 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #ifndef Minisat_Heap_h
 #define Minisat_Heap_h
 
+#include <iostream>
+
 #include "minisat/mtl/Vec.h"
 #include "minisat/mtl/IntMap.h"
 
@@ -108,6 +110,15 @@ public:
         indices[k] = heap.size();
         heap.push(k);
         percolateUp(indices[k]);
+    }
+
+    void printHeap()
+    {
+        printf("Heap contents:\n");
+        for (int i = 0; i < heap.size(); i++) {
+            printf("  heap[%d] = %d\n", i, heap[i]);
+        }
+        std::cout << std::endl << std::endl;
     }
 
 

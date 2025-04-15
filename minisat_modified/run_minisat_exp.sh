@@ -63,6 +63,8 @@ elif [ "$heuristic" == "static_var_occurrences" ]; then
     bench=5
 elif [ "$heuristic" == "random" ]; then
     bench=6
+elif [ "$heuristic" == "activity_hw" ]; then
+    bench=8
 else
     bench=7
 fi

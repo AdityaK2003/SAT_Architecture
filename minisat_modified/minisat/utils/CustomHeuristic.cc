@@ -9,7 +9,7 @@
 using namespace Minisat;
 
 // Returns vector of variables in order based on the heuristic
-// - activity / random: custom heuristic class not used
+// - activity / random / activity_hw: custom heuristic class not used
 // - dynamic_var_occurrences: recomputes each time the number of total occurrences
 // - dynamic_jeroslow_wang: recomputes each time the jeroslow-wang heuristic (exponential weightage of shorter clause occurrences)
 // - dynamic_mom: maximum occurrences of clauses of minimum size formula, and recomputes each time
@@ -17,7 +17,7 @@ using namespace Minisat;
 // - chb: this function is not used
 std::vector<Var> CustomHeuristic::findHeuristicVector(Solver& solver) {
     // Do nothing if this function is called with "activity" or "random", since already taken care of
-    if (heuristic_ == "activity" || heuristic_ == "random") {
+    if (heuristic_ == "activity" || heuristic_ == "random" || heuristic_ == "activity_hw") {
         return std::vector<Minisat::Var>();
     }
 
