@@ -8,14 +8,14 @@ benches/
 # input_0.txt, input_1.txt, etc. all ignored
 input_*.txt
 
-**/sat_files/
+**/sat_files/*
 
-heuristic_benchmarking_results/
+heuristic_benchmarking_results/*
 
 *.ttf
 
-**/__pycache__/
+**/__pycache__/*
 
-**/bin/
+**/bin/*
 
-**/SAT2017_Benchmark/
+**/SAT2017_Benchmark/*
