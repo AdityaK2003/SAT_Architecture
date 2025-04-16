@@ -936,14 +936,14 @@ lbool Solver::search(int nof_conflicts)
         iterations++;
         // total_heap_size += order_heap.size();
 
-        if (iterations % 10 == 0 && custom_heuristic.getHeuristic() == "activity_hw") {
-            std::cout << iterations << " iterations:" << std::endl;
-            for (int i = 0; i < order_heap.size(); ++i) {
-                std::cout << "\theap[" << i << "] = " << order_heap[i] << "   (activity = " << activity[order_heap[i]] << ")\n";
-            }
-            std::cout << "\n\n";
+        // if (iterations % 10 == 0 && custom_heuristic.getHeuristic() == "activity_hw") {
+        //     std::cout << iterations << " iterations:" << std::endl;
+        //     for (int i = 0; i < order_heap.size(); ++i) {
+        //         std::cout << "\theap[" << i << "] = " << order_heap[i] << "   (activity = " << activity[order_heap[i]] << ")\n";
+        //     }
+        //     std::cout << "\n\n";
 
-        }
+        // }
 
         // Check if threshold exceeded
         bool duration_exceeded = false;

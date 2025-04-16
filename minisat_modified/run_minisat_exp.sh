@@ -17,7 +17,7 @@ heuristic="$1"
 if [ -z "$heuristic" ]; then
   heuristic="activity"
 else
-  directory="outputs_$heuristic"
+  directory="./outputs_$heuristic"
 fi
 echo "Using heuristic: $heuristic and directory: $directory"
 

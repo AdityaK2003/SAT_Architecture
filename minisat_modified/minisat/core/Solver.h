@@ -354,7 +354,7 @@ inline void Solver::insertVarOrder(Var x) {
 inline void Solver::varDecayActivity() { 
     if (custom_heuristic.getHeuristic() == "activity_hw") {
         // var_inc = var_inc * 1.03125
-        var_inc += (var_inc >> 5);
+        var_inc *= 1.03125;
     }
     else {
         var_inc *= (1 / var_decay);
@@ -367,9 +367,9 @@ inline void Solver::varBumpActivity(Var v, double inc) {
         if ( (activity[v] += inc) > (1 << 30) ) {
             // Rescale:
             for (int i = 0; i < nVars(); i++) {
-                activity[i] = (activity[i] >> 10); // divie by 1024
+                activity[i] *= (1.0 / 1024.0); // divide by 1024
             }
-            var_inc = var_inc >> 10; // divide by 1024 
+            var_inc *= (1.0 / 1024.0); // divide by 1024 
         }
     }
     else {
