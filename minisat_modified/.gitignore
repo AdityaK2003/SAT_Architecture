@@ -8,6 +8,15 @@ benches/
 # input_0.txt, input_1.txt, etc. all ignored
 input_*.txt
 
+sat_files/
+
+heuristic_benchmarking_results/
+
+*.ttf
+
+**/__pycache__/
+
 bin/minisat
+bin/
 
 SAT2017_Benchmark/
