@@ -29,13 +29,15 @@ public:
     // Percolate up helper function
     void percolateUp(int i) {
         int v = heap[i];
-        int p = parent(i);
+        int p_i = parent(i);
+        int p = heap[p_i];
 
         while (i != 0 && activity[v] > activity[p]) {
-            heap[i] = heap[p];
-            indices[heap[p]] = i;
-            i = p;
-            p = parent(p);
+            heap[i] = p;
+            indices[p] = i;
+            i = p_i;
+            p_i = parent(p_i);
+            p = heap[p_i];
         }
 
         heap[i] = v;
