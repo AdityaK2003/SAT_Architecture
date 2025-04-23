@@ -25,19 +25,11 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "minisat/mtl/Heap.h"
 #include "minisat/mtl/Alg.h"
 #include "minisat/mtl/IntMap.h"
-#include "minisat/utils/CustomHeuristic.h"
 #include "minisat/utils/Options.h"
 #include "minisat/core/SolverTypes.h"
 
-#include <iostream>
-#include <chrono>
-#include <thread>
-#include <map>
-
 
 namespace Minisat {
-
-class CustomHeuristic;
 
 //=================================================================================================
 // Solver -- the main class:
@@ -244,41 +236,6 @@ public:
     int64_t             propagation_budget; // -1 means no budget.
     bool                asynch_interrupt;
 
-    // Custom Heuristic
-    CustomHeuristic     custom_heuristic;
-    friend class CustomHeuristic;
-
-    // Start time threshold
-    std::chrono::steady_clock::time_point start_time;
-    int duration_threshold_seconds;
-
-    // Max iterations as well as current number of iterations
-    long long iterations;
-    long long max_iterations;
-
-    // Number of variables at a time which are bumped
-    std::vector<int> num_vars_bumped;
-    // Holds backtrack amounts
-    std::vector<int> backtrack_levels;
-
-    // Track num_vars_bumped given the trail size
-    // trail_size_to_vars_bumped[i] holds list of all k's when trail size = i, given k = number of vars bumped
-    // std::map<int, std::vector<int>> trail_size_to_vars_bumped;
-
-    // Dictates when to bump activity
-    // Options:
-    // - "default" -> default MiniSAT/CHB versions
-    // - "conflict_clause" -> only bumps variables' activities in original conflict clause
-    // - "learnt_clause" -> only bumps variables' activities in final learnt clause
-    std::string bump_activity = "default";
-
-
-    // pick branch lit: activates random decision every n iterations
-    int activate_rand_branch_every;
-    int pick_branch_lit_counter;
-
-    bool verification_logs = true;
-
     // Main internal methods:
     //
     void     insertVarOrder   (Var x);                                                 // Insert a variable in the decision order priority queue.
@@ -337,6 +294,35 @@ public:
     // Returns a random integer 0 <= x < size. Seed must never be 0.
     static inline int irand(double& seed, int size) {
         return (int)(drand(seed) * size); }
+
+    
+    int iterations;
+
+    // ADDED - main component
+    lbool main_component();
+    lbool main_search();
+    void main_cancelUntil(int level);
+
+    // ADDED - BCP component
+    CRef bcp_propagate();
+    void bcp_uncheckedEnqueue(Lit p, CRef from = CRef_Undef);
+
+
+    // ADDED - CDCL component
+    void cdcl_analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel);
+    bool cdcl_litRedundant(Lit p);
+
+
+    // ADDED - Heuristic component
+    void heur_varBumpActivity(Var v);
+    void heur_varDecayActivity();
+    Lit heur_pickBranchLit();
+
+
+    int activate_rand_branch_every;
+    int pick_branch_lit_counter;
+
+    bool verification_logs = true;
 };
 
 
@@ -347,42 +333,16 @@ inline CRef Solver::reason(Var x) const { return vardata[x].reason; }
 inline int  Solver::level (Var x) const { return vardata[x].level; }
 
 inline void Solver::insertVarOrder(Var x) {
-    if (!order_heap.inHeap(x) && decision[x]) {
-        order_heap.insert(x);
-        // std::cout << "Inserted var " << x <<  " (activity " << activity[x] << " into heap, and it is decision level " << decisionLevel() << std::endl;
-    }
-}
+    if (!order_heap.inHeap(x) && decision[x]) order_heap.insert(x); }
 
-inline void Solver::varDecayActivity() { 
-    if (custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random") {
-        // var_inc = var_inc * 1.03125
-        var_inc *= 1.03125;
-    }
-    else {
-        var_inc *= (1 / var_decay);
-    } 
-}
+inline void Solver::varDecayActivity() { var_inc *= (1 / var_decay); }
 inline void Solver::varBumpActivity(Var v) { varBumpActivity(v, var_inc); }
 inline void Solver::varBumpActivity(Var v, double inc) {
-
-    if (custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random") {
-        if ( (activity[v] += inc) > (1 << 30) ) {
-            // Rescale:
-            for (int i = 0; i < nVars(); i++) {
-                activity[i] *= (1.0 / 1024.0); // divide by 1024
-            }
-            var_inc *= (1.0 / 1024.0); // divide by 1024 
-        }
-    }
-    else {
-        if ( (activity[v] += inc) > 1e100 ) {
-            // Rescale:
-            for (int i = 0; i < nVars(); i++) {
-                activity[i] *= 1e-100;
-            }
-            var_inc *= 1e-100; 
-        }
-    }
+    if ( (activity[v] += inc) > 1e100 ) {
+        // Rescale:
+        for (int i = 0; i < nVars(); i++)
+            activity[i] *= 1e-100;
+        var_inc *= 1e-100; }
 
     // Update order_heap with respect to new activity:
     if (order_heap.inHeap(v))

@@ -19,19 +19,12 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 **************************************************************************************************/
 
 #include <math.h>
-#include <chrono>
-#include <thread>
-#include <iostream>
-#include <unordered_map>
-#include <queue>
-#include <cstdlib>
 
 #include "minisat/mtl/Alg.h"
 #include "minisat/mtl/Sort.h"
 #include "minisat/utils/System.h"
 #include "minisat/core/Solver.h"
-#include "minisat/mtl/Vec.h"
-#include "minisat/utils/CustomHeuristic.h"
+#include "minisat/core/SolverTypes.h"
 
 using namespace Minisat;
 
@@ -53,10 +46,6 @@ static IntOption     opt_restart_first     (_cat, "rfirst",      "The base resta
 static DoubleOption  opt_restart_inc       (_cat, "rinc",        "Restart interval increase factor", 2, DoubleRange(1, false, HUGE_VAL, false));
 static DoubleOption  opt_garbage_frac      (_cat, "gc-frac",     "The fraction of wasted memory allowed before a garbage collection is triggered",  0.20, DoubleRange(0, false, HUGE_VAL, false));
 static IntOption     opt_min_learnts_lim   (_cat, "min-learnts", "Minimum learnt clause limit",  0, IntRange(0, INT32_MAX));
-
-static StringOption  opt_custom_heuristic  ("activity", "custom-heuristic",   "Heuristic to use [activity (default), dynamic_var_occurrences, dynamic_jeroslow_wang, dynamic_mom, random]");
-static IntOption     opt_duration_threshold_seconds     (_cat, "duration-threshold-seconds", "Duration threshold in seconds (if nonpositive, ignored)",  -1,  IntRange(-100, INT32_MAX));
-static IntOption     opt_max_iterations    (_cat, "max-iterations", "If set > 0, terminates program after max_iterations", -1, IntRange(-100, INT32_MAX));
 
 
 //=================================================================================================
@@ -113,33 +102,14 @@ Solver::Solver() :
   , conflict_budget    (-1)
   , propagation_budget (-1)
   , asynch_interrupt   (false)
-
-{
-    // Custom heuristic
-    if (opt_custom_heuristic) {
-        custom_heuristic.heuristic_ = std::string((const char*)opt_custom_heuristic);
-    }
-
-    // Set the start time for the threshold
-    duration_threshold_seconds = opt_duration_threshold_seconds;
-    start_time = std::chrono::steady_clock::now();
-    std::cout << "duration threshold seconds set to: " << duration_threshold_seconds << ", and start time set!!\n";
-
-    // Set max iterations
-    max_iterations = opt_max_iterations;
-    if (max_iterations > 0) {
-        std::cout << "Max Iterations set to " << max_iterations << std::endl;
-    }
-
-    // Set the "activate every" for pickBranchLit
-    // Ex: for random_var_freq = 0.2, this would result in 50
-    activate_rand_branch_every = static_cast<int>(1.0 / random_var_freq);
-    pick_branch_lit_counter = 0;
-}
+{}
 
 
 Solver::~Solver()
-{}
+{
+    activate_rand_branch_every = static_cast<int>(1.0 / random_var_freq);
+    pick_branch_lit_counter = 0;
+}
 
 
 //=================================================================================================
@@ -169,10 +139,6 @@ Var Solver::newVar(lbool upol, bool dvar)
     decision .reserve(v);
     trail    .capacity(v+1);
     setDecisionVar(v, dvar);
-
-    if (custom_heuristic.getHeuristic() == "chb") {
-        custom_heuristic.chb_new_var();
-    }
     return v;
 }
 
@@ -267,24 +233,9 @@ bool Solver::satisfied(const Clause& c) const {
 //
 void Solver::cancelUntil(int level) {
     if (decisionLevel() > level){
-        // std::cout << "backtrack from level " << decisionLevel() << " to " << level << " (" << (decisionLevel() - level) << " levels)\n";
-        // backtrack_levels.push_back(decisionLevel() - level);
-        // int sum = 0;
-        // for(int n : backtrack_levels) sum += n;
-        // std::cout << "average so far (out of " << backtrack_levels.size() << " backtracks): ";
-        // std::cout << (double) sum / (double) backtrack_levels.size() << std::endl << std::endl;
-
-
         for (int c = trail.size()-1; c >= trail_lim[level]; c--){
             Var      x  = var(trail[c]);
             assigns [x] = l_Undef;
-            // std::cout << "@@@ variable " << x+1 << " becomes unassigned" << std::endl;
-
-            // Variable becomes unassigned: insert it to heap (notification system)
-            if (custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random") {
-                insertVarOrder(x);
-            }
-
             if (phase_saving > 1 || (phase_saving == 1 && c > trail_lim.last()))
                 polarity[x] = sign(trail[c]);
             insertVarOrder(x); }
@@ -303,104 +254,28 @@ Lit Solver::pickBranchLit()
     Var next = var_Undef;
 
     // Random decision:
-
-    // for "activity_hw_random", random decision is made
-    bool random_decision = drand(random_seed) < random_var_freq;
-
-    if (custom_heuristic.getHeuristic() == "activity_hw") {
-        pick_branch_lit_counter = (pick_branch_lit_counter + 1) % activate_rand_branch_every;
-
-        // Every nth iteration it is random, where n = activate_rand_branch_every
-        if (pick_branch_lit_counter == 0) random_decision = true;
-        else random_decision = false;
-    }
-
-
-    if (random_decision && !order_heap.empty()){
-        // Random index
-
-        // for activity_hw_random, random index chosen
-        int random_index = irand(random_seed,order_heap.size());
-
-        if (custom_heuristic.getHeuristic() == "activity_hw") {
-            // Pick last element in heap
-            random_index = order_heap.size() - 1;
-        }
-
-        next = order_heap[random_index];
-        if (value(next) == l_Undef && decision[next]) {
-            // std::cout << "@@@ Random decision " << next+1 << " worked\n";
-            rnd_decisions++; 
-        }
-    }
-
-    // Use custom heuristic
-    std::vector<Var> heuristic_vector = custom_heuristic.findHeuristicVector(*this);
-    int i = 0;
+    if (drand(random_seed) < random_var_freq && !order_heap.empty()){
+        next = order_heap[irand(random_seed,order_heap.size())];
+        if (value(next) == l_Undef && decision[next])
+            rnd_decisions++; }
 
     // Activity based decision:
-    int pick_branch_lit_iterations = 0;
-    while (next == var_Undef || value(next) != l_Undef || !decision[next]) {
-        ++pick_branch_lit_iterations;
+    while (next == var_Undef || value(next) != l_Undef || !decision[next])
         if (order_heap.empty()){
             next = var_Undef;
             break;
-        }
-        // If random frequency set to 1 or heuristic set to random
-        else if (random_var_freq == 1 || custom_heuristic.getHeuristic() == "random") {
-            next = order_heap[irand(random_seed,order_heap.size())];
-            order_heap.remove(next);
-        }
-        else {
-            // If default activity heuristic used, or chb
-            if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random" || custom_heuristic.getHeuristic() == "chb") {
-                next = order_heap.removeMin();
-            } else {
-                // Cycle through heuristic vector
-                if (i >= heuristic_vector.size()) {
-                    next = var_Undef;
-                    break;
-                }
-                // Consider the next variable rated as most desirable by heuristic
-                next = heuristic_vector[i];
-                i++;
-                if (value(next) == l_Undef && decision[next]) {
-                    // Pick this if viable
-                    order_heap.remove(next);
-                    break;
-                }
-            }
-        }
-    }
-
-    // if (pick_branch_lit_iterations > 1) {
-    //     std::cout << "PBL iterations: " << pick_branch_lit_iterations << std::endl;
-    // }
+        }else
+            next = order_heap.removeMin();
 
     // Choose polarity based on different polarity modes (global or per-variable):
-    Lit lit;
     if (next == var_Undef)
-        lit = lit_Undef;
+        return lit_Undef;
     else if (user_pol[next] != l_Undef)
-        lit = mkLit(next, user_pol[next] == l_True);
+        return mkLit(next, user_pol[next] == l_True);
     else if (rnd_pol)
-        lit = mkLit(next, drand(random_seed) < 0.5);
+        return mkLit(next, drand(random_seed) < 0.5);
     else
-        lit = mkLit(next, polarity[next]);
-
-    // if (next != var_Undef) {
-    //     printf("Decision: variable %d picked with polarity %s\n", 
-    //         next + 1, 
-    //         sign(lit) ? "false" : "true");
-    // }
-
-    if (custom_heuristic.getHeuristic() == "chb" && next != var_Undef) {
-        custom_heuristic.add_to_plays(next);
-    }
-    
-
-    // std::cout << "@@@ picked " << (sign(lit) ? "-" : "") << var(lit)+1 << "\n";
-    return lit;
+        return mkLit(next, polarity[next]);
 }
 
 
@@ -431,21 +306,6 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     out_learnt.push();      // (leave room for the asserting literal)
     int index   = trail.size() - 1;
 
-
-    std::vector<Var> bumped_vars;
-    int num_bumped_clauses = 0;
-
-    // If bumping only conflict clause variables
-    if(bump_activity == "conflict_clause" && (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random" || custom_heuristic.getHeuristic() == "chb")) {
-        for (int j = 0; j < ca[confl].size(); j++) {
-            Var v = var(ca[confl][j]);
-            if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random") varBumpActivity(v);
-            else if (custom_heuristic.getHeuristic() == "chb") custom_heuristic.conflict_analysis_push(v);
-            bumped_vars.push_back(v);
-        }
-        ++num_bumped_clauses;
-    }
-
     do{
         assert(confl != CRef_Undef); // (otherwise should be UIP)
         Clause& c = ca[confl];
@@ -453,35 +313,18 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
         if (c.learnt())
             claBumpActivity(c);
 
-        bool bumped = false;
         for (int j = (p == lit_Undef) ? 0 : 1; j < c.size(); j++){
             Lit q = c[j];
 
             if (!seen[var(q)] && level(var(q)) > 0){
-                if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random") {
-                    if(bump_activity == "default") {
-                        varBumpActivity(var(q));
-                        bumped_vars.push_back(var(q));
-                        bumped = true;
-                    }
-                }
+                varBumpActivity(var(q));
                 seen[var(q)] = 1;
-                if (custom_heuristic.getHeuristic() == "chb") {
-                    if(bump_activity == "default") {
-                        custom_heuristic.conflict_analysis_push(var(q));
-                        bumped_vars.push_back(var(q));
-                        bumped = true;
-                    }
-                }
-
                 if (level(var(q)) >= decisionLevel())
                     pathC++;
                 else
                     out_learnt.push(q);
             }
         }
-
-        if (bumped) ++num_bumped_clauses;
         
         // Select next clause to look at:
         while (!seen[var(trail[index--])]);
@@ -492,12 +335,6 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
 
     }while (pathC > 0);
     out_learnt[0] = ~p;
-
-
-    if (custom_heuristic.getHeuristic() == "chb") {
-        custom_heuristic.conflict_analysis_push(var(p));
-        custom_heuristic.add_to_plays(var(p));
-    }
 
     // Simplify conflict clause:
     //
@@ -547,35 +384,6 @@ void Solver::analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
     }
 
     for (int j = 0; j < analyze_toclear.size(); j++) seen[var(analyze_toclear[j])] = 0;    // ('seen[]' is now cleared)
-
-    // Bump activities of variables in the final learnt clause
-    if (bump_activity == "learnt_clause" && (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random" || custom_heuristic.getHeuristic() == "chb")) {
-        for (int i = 0; i < out_learnt.size(); i++) {
-            Var v = var(out_learnt[i]);
-            if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random") varBumpActivity(v);
-            else if (custom_heuristic.getHeuristic() == "chb") custom_heuristic.conflict_analysis_push(v);
-            bumped_vars.push_back(v);
-        }
-        ++num_bumped_clauses;
-    }
-
-
-    // std::cout << "Bumped Activities of " << bumped_vars.size() << " vars in " << num_bumped_clauses << " clauses: ";
-    // for(Var v : bumped_vars) std::cout << v << " ";
-    // std::cout << std::endl;
-    
-    num_vars_bumped.push_back(bumped_vars.size());
-    // int sum = 0;
-    // for(int n : num_vars_bumped) sum += n;
-    // std::cout << "average num vars bumped so far (out of " << num_vars_bumped.size() << " times): ";
-    // std::cout << (double) sum / (double) num_vars_bumped.size() << std::endl << std::endl;
-
-    // trail_size_to_vars_bumped[trail.size()].push_back(bumped_vars.size());
-    // int sum = 0;
-    // for(int n : trail_size_to_vars_bumped[trail.size()]) sum += n;
-    // double avg = (double) sum / (double) trail_size_to_vars_bumped[trail.size()].size();
-    // std::cout << "Trail size " << trail.size() << ", bumped " << bumped_vars.size() << " vars (new avg = " << avg << ")\n";
-
 }
 
 
@@ -680,21 +488,10 @@ void Solver::analyzeFinal(Lit p, LSet& out_conflict)
 
 void Solver::uncheckedEnqueue(Lit p, CRef from)
 {
-    if(verification_logs) std::cout << "@@@ variable " << var(p)+1 << " becomes assigned" << std::endl;
-
     assert(value(p) == l_Undef);
     assigns[var(p)] = lbool(!sign(p));
     vardata[var(p)] = mkVarData(from, decisionLevel());
     trail.push_(p);
-    // std::cout << "@@@ enqueued " << (sign(p) ? "-" : "") << var(p)+1 << "\n";
-
-    // Variable assignment made so notify to remove from heap (notification system)
-    if (custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random") {
-        Var v = var(p);
-        if (order_heap.inHeap(v)) {
-            order_heap.remove(v);
-        }
-    }
 }
 
 
@@ -716,10 +513,6 @@ CRef Solver::propagate()
 
     while (qhead < trail.size()){
         Lit            p   = trail[qhead++];     // 'p' is enqueued fact to propagate.
-        if (custom_heuristic.getHeuristic() == "chb") {
-            custom_heuristic.add_to_plays(var(p));
-        }
-        // std::cout << "@@@ about to propagate: " << (sign(p) ? "-" : "") << var(p)+1 << "\n";
         vec<Watcher>&  ws  = watches.lookup(p);
         Watcher        *i, *j, *end;
         num_props++;
@@ -917,86 +710,12 @@ lbool Solver::search(int nof_conflicts)
     vec<Lit>    learnt_clause;
     starts++;
 
-    if (custom_heuristic.getHeuristic() == "chb") {
-        custom_heuristic.chb_reinitialize();
-    }
-
-    long long total_heap_size = 0;
-    iterations = 0;
-
-
-    // Code for initial static list tracking experimentation: keeping track of assignments after every k propagations
-    // int k = 1;
-    // unsigned int prop_goal = propagations + k;
-    // int counter = 1;
-    // printf("Starting Propagations: %d\n", propagations);
     for (;;){
-        // printf("Propagations: %d\n", propagations);
-        // for (int i = 0; i < trail.size(); i++) {
-        //     printf("%s%d ", sign(trail[i]) ? "-" : "", var(trail[i]) + 1);
-        // }
-        // printf("\n\n");
-        // prop_goal += k;
-
-        // // Calculate heap size
-        iterations++;
-        // total_heap_size += order_heap.size();
-
-        // if (iterations % 10 == 0 && custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random") {
-        //     std::cout << iterations << " iterations:" << std::endl;
-        //     for (int i = 0; i < order_heap.size(); ++i) {
-        //         std::cout << "\theap[" << i << "] = " << order_heap[i] << "   (activity = " << activity[order_heap[i]] << ")\n";
-        //     }
-        //     std::cout << "\n\n";
-
-        // }
-
-        // Check if threshold exceeded
-        bool duration_exceeded = false;
-        std::chrono::seconds elapsed_seconds(0);
-        if( duration_threshold_seconds > 0 ) {
-            auto now = std::chrono::steady_clock::now();
-            elapsed_seconds = std::chrono::duration_cast<std::chrono::seconds>(now - start_time);
-            if (elapsed_seconds.count() >= duration_threshold_seconds) {
-                duration_exceeded = true;
-            }
-        }
-        if (duration_exceeded) {
-            // Instantly quit after printing stats
-            printStats();
-            std::cout << "\nEXITED FROM EXCEEDING TIME LIMIT...\n";
-            std::cout << "\tDuration of " << duration_threshold_seconds << " seconds exceeded (" << elapsed_seconds.count() << "s elapsed)\n";
-            exit(0);
-        }
-
-        // Check if iterations exceeded
-        if (max_iterations > 0 && iterations > max_iterations) {
-            printStats();
-            std::cout << "\nEXITED FROM EXCEEDING ITERATION LIMIT OF " << max_iterations << "...\n";
-            exit(0);
-        }
-
-
         CRef confl = propagate();
-
-        // Choose chb multiplier value, and set rewards
-        if (custom_heuristic.getHeuristic() == "chb") {
-            bool was_conflict = (confl != CRef_Undef);
-            custom_heuristic.chb_update(activity, conflicts, was_conflict);
-        }
-
         if (confl != CRef_Undef){
             // CONFLICT
             conflicts++; conflictC++;
-            if (decisionLevel() == 0) {
-                // double avg_size = (total_heap_size * 1.0) / (iterations * 1.0);
-                // std::cout << "AVERAGE HEAP SIZE: " << avg_size << std::endl << std::endl;
-                return l_False;
-            }
-
-            if (custom_heuristic.getHeuristic() == "chb") {
-                custom_heuristic.chb_encountered_conflict();
-            }
+            if (decisionLevel() == 0) return l_False;
 
             learnt_clause.clear();
             analyze(confl, learnt_clause, backtrack_level);
@@ -1012,12 +731,7 @@ lbool Solver::search(int nof_conflicts)
                 uncheckedEnqueue(learnt_clause[0], cr);
             }
 
-            if (custom_heuristic.getHeuristic() == "activity" || custom_heuristic.getHeuristic() == "activity_hw" || custom_heuristic.getHeuristic() == "activity_hw_random") {
-                varDecayActivity();
-            } else if (custom_heuristic.getHeuristic() == "chb") {
-                custom_heuristic.chb_update_last_conflicts(conflicts);
-                custom_heuristic.add_to_plays(var(learnt_clause[0]));
-            }
+            varDecayActivity();
             claDecayActivity();
 
             if (--learntsize_adjust_cnt == 0){
@@ -1038,16 +752,11 @@ lbool Solver::search(int nof_conflicts)
                 // Reached bound on number of conflicts:
                 progress_estimate = progressEstimate();
                 cancelUntil(0);
-                // double avg_size = (total_heap_size * 1.0) / (iterations * 1.0);
-                // std::cout << "AVERAGE HEAP SIZE: " << avg_size << std::endl << std::endl;
                 return l_Undef; }
 
             // Simplify the set of problem clauses:
-            if (decisionLevel() == 0 && !simplify()) {
-                // double avg_size = (total_heap_size * 1.0) / (iterations * 1.0);
-                // std::cout << "AVERAGE HEAP SIZE: " << avg_size << std::endl << std::endl;
+            if (decisionLevel() == 0 && !simplify())
                 return l_False;
-            }
 
             if (learnts.size()-nAssigns() >= max_learnts)
                 // Reduce the set of learnt clauses:
@@ -1062,8 +771,6 @@ lbool Solver::search(int nof_conflicts)
                     newDecisionLevel();
                 }else if (value(p) == l_False){
                     analyzeFinal(~p, conflict);
-                    // double avg_size = (total_heap_size * 1.0) / (iterations * 1.0);
-                    // std::cout << "AVERAGE HEAP SIZE: " << avg_size << std::endl << std::endl;
                     return l_False;
                 }else{
                     next = p;
@@ -1076,12 +783,9 @@ lbool Solver::search(int nof_conflicts)
                 decisions++;
                 next = pickBranchLit();
 
-                if (next == lit_Undef) {
+                if (next == lit_Undef)
                     // Model found:
-                    // double avg_size = (total_heap_size * 1.0) / (iterations * 1.0);
-                    // std::cout << "AVERAGE HEAP SIZE: " << avg_size << std::endl << std::endl;
                     return l_True;
-                }
             }
 
             // Increase decision level and enqueue 'next'
@@ -1137,7 +841,6 @@ static double luby(double y, int x){
 // NOTE: assumptions passed in member-variable 'assumptions'.
 lbool Solver::solve_()
 {
-
     model.clear();
     conflict.clear();
     if (!ok) return l_False;
@@ -1164,10 +867,7 @@ lbool Solver::solve_()
     while (status == l_Undef){
         double rest_base = luby_restart ? luby(restart_inc, curr_restarts) : pow(restart_inc, curr_restarts);
         status = search(rest_base * restart_first);
-        if (!withinBudget()) {
-            printf("Not within budget. Breaking...\n");
-            break;
-        }
+        if (!withinBudget()) break;
         curr_restarts++;
     }
 
@@ -1362,8 +1062,439 @@ void Solver::garbageCollect()
     ClauseAllocator to(ca.size() - ca.wasted()); 
 
     relocAll(to);
-    // if (verbosity >= 2)
-    //     printf("|  Garbage collection:   %12d bytes => %12d bytes             |\n", 
-    //            ca.size()*ClauseAllocator::Unit_Size, to.size()*ClauseAllocator::Unit_Size);
+    if (verbosity >= 2)
+        printf("|  Garbage collection:   %12d bytes => %12d bytes             |\n", 
+               ca.size()*ClauseAllocator::Unit_Size, to.size()*ClauseAllocator::Unit_Size);
     to.moveTo(ca);
 }
+
+
+
+
+
+
+// ADDED - main component
+lbool Solver::main_component() {
+    std::cout << "---------- STARTING MAIN COMPONENT ----------" << std::endl << std::endl;
+    std::cout << "Number of variables: " << nVars() << std::endl;
+    std::cout << "Number of clauses: " << nClauses() << std::endl;
+
+
+
+    // Search function: one "restart"
+    return main_search();
+}
+
+
+lbool Solver::main_search() {
+    int backtrack_level;
+    int conflictC = 0;
+    vec<Lit> learnt_clause;
+    iterations = 0;
+
+    while(true) {
+        iterations++;
+
+        CRef confl = bcp_propagate();
+
+        // If there is a conflict
+        if (confl != CRef_Undef) {
+            conflictC++;
+            conflicts++;
+
+            if (decisionLevel() == 0) {
+                return l_False;
+            }
+
+            learnt_clause.clear();
+            cdcl_analyze(confl, learnt_clause, backtrack_level);
+
+            cancelUntil(backtrack_level);
+
+            if (learnt_clause.size() == 1){
+                bcp_uncheckedEnqueue(learnt_clause[0]);
+            }else{
+                CRef cr = ca.alloc(learnt_clause, true);
+                learnts.push(cr);
+                attachClause(cr);
+                // claBumpActivity(ca[cr]);
+                bcp_uncheckedEnqueue(learnt_clause[0], cr);
+            }
+
+            heur_varDecayActivity();
+
+
+        }
+
+        // No conflict
+        else {
+            if (decisionLevel() == 0 && !simplify()) {
+                return l_False;
+            }
+
+            Lit next = lit_Undef;
+            while (decisionLevel() < assumptions.size()){
+                // Perform user provided assumption:
+                Lit p = assumptions[decisionLevel()];
+                if (value(p) == l_True){
+                    // Dummy decision level:
+                    newDecisionLevel();
+                }else if (value(p) == l_False){
+                    analyzeFinal(~p, conflict);
+                    // double avg_size = (total_heap_size * 1.0) / (iterations * 1.0);
+                    // std::cout << "AVERAGE HEAP SIZE: " << avg_size << std::endl << std::endl;
+                    return l_False;
+                }else{
+                    next = p;
+                    break;
+                }
+            }
+
+            if (next == lit_Undef){
+                // New variable decision:
+                decisions++;
+                next = heur_pickBranchLit();
+
+                if (next == lit_Undef) {
+                    // Model found:
+                    // double avg_size = (total_heap_size * 1.0) / (iterations * 1.0);
+                    // std::cout << "AVERAGE HEAP SIZE: " << avg_size << std::endl << std::endl;
+                    return l_True;
+                }
+            }
+
+            // Increase decision level and enqueue 'next'
+            newDecisionLevel();
+            bcp_uncheckedEnqueue(next);
+
+        }
+
+    }
+}
+
+void Solver::main_cancelUntil(int level) {
+    if (decisionLevel() > level){
+
+        for (int c = trail.size()-1; c >= trail_lim[level]; c--){
+            Var      x  = var(trail[c]);
+            assigns [x] = l_Undef;
+            // std::cout << "@@@ variable " << x+1 << " becomes unassigned" << std::endl;
+
+            // Notify heuristic
+            insertVarOrder(x);
+        }
+
+        qhead = trail_lim[level];
+        trail.shrink(trail.size() - trail_lim[level]);
+        trail_lim.shrink(trail_lim.size() - level);
+    }
+}
+
+
+
+
+
+
+
+// BCP functions
+CRef Solver::bcp_propagate() {
+    CRef    confl     = CRef_Undef;
+    int     num_props = 0;
+
+    while (qhead < trail.size()){
+        Lit            p   = trail[qhead++];     // 'p' is enqueued fact to propagate.
+        vec<Watcher>&  ws  = watches.lookup(p);
+        Watcher        *i, *j, *end;
+        num_props++;
+
+        for (i = j = (Watcher*)ws, end = i + ws.size();  i != end;){
+            // Try to avoid inspecting the clause:
+            Lit blocker = i->blocker;
+            if (value(blocker) == l_True){
+                *j++ = *i++; continue; }
+
+            // Make sure the false literal is data[1]:
+            CRef     cr        = i->cref;
+            Clause&  c         = ca[cr];
+            Lit      false_lit = ~p;
+            if (c[0] == false_lit)
+                c[0] = c[1], c[1] = false_lit;
+            assert(c[1] == false_lit);
+            i++;
+
+            // If 0th watch is true, then clause is already satisfied.
+            Lit     first = c[0];
+            Watcher w     = Watcher(cr, first);
+            if (first != blocker && value(first) == l_True){
+                *j++ = w; continue; }
+
+            // Look for new watch:
+            for (int k = 2; k < c.size(); k++)
+                if (value(c[k]) != l_False){
+                    c[1] = c[k]; c[k] = false_lit;
+                    watches[~c[1]].push(w);
+                    goto NextClause; }
+
+            // Did not find watch -- clause is unit under assignment:
+            *j++ = w;
+            if (value(first) == l_False){
+                confl = cr;
+                qhead = trail.size();
+                // Copy the remaining watches:
+                while (i < end)
+                    *j++ = *i++;
+            }else
+                bcp_uncheckedEnqueue(first, cr);
+
+        NextClause:;
+        }
+        ws.shrink(i - j);
+    }
+    propagations += num_props;
+    simpDB_props -= num_props;
+
+    return confl;
+}
+
+void Solver::bcp_uncheckedEnqueue(Lit p, CRef from)
+{
+    if(verification_logs) std::cout << "@@@ variable " << var(p)+1 << " becomes assigned" << std::endl;
+    assert(value(p) == l_Undef);
+    assigns[var(p)] = lbool(!sign(p));
+    vardata[var(p)] = mkVarData(from, decisionLevel());
+    trail.push_(p);
+
+    // Notify heuristic 
+    Var v = var(p);
+    if (order_heap.inHeap(v)) {
+        order_heap.remove(v);
+    }
+}
+
+
+void Solver::cdcl_analyze(CRef confl, vec<Lit>& out_learnt, int& out_btlevel)
+{
+    int pathC = 0;
+    Lit p     = lit_Undef;
+
+    // Generate conflict clause:
+    //
+    out_learnt.push();      // (leave room for the asserting literal)
+    int index   = trail.size() - 1;
+
+    do{
+        assert(confl != CRef_Undef); // (otherwise should be UIP)
+        Clause& c = ca[confl];
+
+        //if (c.learnt())
+        //    claBumpActivity(c);
+
+        for (int j = (p == lit_Undef) ? 0 : 1; j < c.size(); j++){
+            Lit q = c[j];
+
+            if (!seen[var(q)] && level(var(q)) > 0){
+                heur_varBumpActivity(var(q));
+                seen[var(q)] = 1;
+                if (level(var(q)) >= decisionLevel())
+                    pathC++;
+                else
+                    out_learnt.push(q);
+            }
+        }
+        
+        // Select next clause to look at:
+        while (!seen[var(trail[index--])]);
+        p     = trail[index+1];
+        confl = reason(var(p));
+        seen[var(p)] = 0;
+        pathC--;
+
+    }while (pathC > 0);
+    out_learnt[0] = ~p;
+
+    // Simplify conflict clause:
+    //
+    int i, j;
+    out_learnt.copyTo(analyze_toclear);
+    if (ccmin_mode == 2){
+        for (i = j = 1; i < out_learnt.size(); i++)
+            if (reason(var(out_learnt[i])) == CRef_Undef || !cdcl_litRedundant(out_learnt[i]))
+                out_learnt[j++] = out_learnt[i];
+        
+    }else if (ccmin_mode == 1){
+        for (i = j = 1; i < out_learnt.size(); i++){
+            Var x = var(out_learnt[i]);
+
+            if (reason(x) == CRef_Undef)
+                out_learnt[j++] = out_learnt[i];
+            else{
+                Clause& c = ca[reason(var(out_learnt[i]))];
+                for (int k = 1; k < c.size(); k++)
+                    if (!seen[var(c[k])] && level(var(c[k])) > 0){
+                        out_learnt[j++] = out_learnt[i];
+                        break; }
+            }
+        }
+    }else
+        i = j = out_learnt.size();
+
+    max_literals += out_learnt.size();
+    out_learnt.shrink(i - j);
+    tot_literals += out_learnt.size();
+
+    // Find correct backtrack level:
+    //
+    if (out_learnt.size() == 1)
+        out_btlevel = 0;
+    else{
+        int max_i = 1;
+        // Find the first literal assigned at the next-highest level:
+        for (int i = 2; i < out_learnt.size(); i++)
+            if (level(var(out_learnt[i])) > level(var(out_learnt[max_i])))
+                max_i = i;
+        // Swap-in this literal at index 1:
+        Lit p             = out_learnt[max_i];
+        out_learnt[max_i] = out_learnt[1];
+        out_learnt[1]     = p;
+        out_btlevel       = level(var(p));
+    }
+
+    for (int j = 0; j < analyze_toclear.size(); j++) seen[var(analyze_toclear[j])] = 0;    // ('seen[]' is now cleared)
+}
+
+// Check if 'p' can be removed from a conflict clause.
+bool Solver::cdcl_litRedundant(Lit p)
+{
+    enum { seen_undef = 0, seen_source = 1, seen_removable = 2, seen_failed = 3 };
+    assert(seen[var(p)] == seen_undef || seen[var(p)] == seen_source);
+    assert(reason(var(p)) != CRef_Undef);
+
+    Clause*               c     = &ca[reason(var(p))];
+    vec<ShrinkStackElem>& stack = analyze_stack;
+    stack.clear();
+
+    for (uint32_t i = 1; ; i++){
+        if (i < (uint32_t)c->size()){
+            // Checking 'p'-parents 'l':
+            Lit l = (*c)[i];
+            
+            // Variable at level 0 or previously removable:
+            if (level(var(l)) == 0 || seen[var(l)] == seen_source || seen[var(l)] == seen_removable){
+                continue; }
+            
+            // Check variable can not be removed for some local reason:
+            if (reason(var(l)) == CRef_Undef || seen[var(l)] == seen_failed){
+                stack.push(ShrinkStackElem(0, p));
+                for (int i = 0; i < stack.size(); i++)
+                    if (seen[var(stack[i].l)] == seen_undef){
+                        seen[var(stack[i].l)] = seen_failed;
+                        analyze_toclear.push(stack[i].l);
+                    }
+                    
+                return false;
+            }
+
+            // Recursively check 'l':
+            stack.push(ShrinkStackElem(i, p));
+            i  = 0;
+            p  = l;
+            c  = &ca[reason(var(p))];
+        }else{
+            // Finished with current element 'p' and reason 'c':
+            if (seen[var(p)] == seen_undef){
+                seen[var(p)] = seen_removable;
+                analyze_toclear.push(p);
+            }
+
+            // Terminate with success if stack is empty:
+            if (stack.size() == 0) break;
+            
+            // Continue with top element on stack:
+            i  = stack.last().i;
+            p  = stack.last().l;
+            c  = &ca[reason(var(p))];
+
+            stack.pop();
+        }
+    }
+
+    return true;
+}
+
+
+
+
+
+
+void Solver::heur_varBumpActivity(Var v) {
+    if ( (activity[v] += var_inc) > (1 << 30) ) {
+        // Rescale:
+        for (int i = 0; i < nVars(); i++) {
+            activity[i] *= (1.0 / 1024.0); // divide by 1024
+        }
+        var_inc *= (1.0 / 1024.0); // divide by 1024 
+    }
+
+    // Update order_heap with respect to new activity:
+    if (order_heap.inHeap(v))
+        order_heap.decrease(v);
+}
+
+void Solver::heur_varDecayActivity() { 
+    var_inc *= 1.03125;
+}
+
+Lit Solver::heur_pickBranchLit()
+{
+    Var next = var_Undef;
+
+    pick_branch_lit_counter = (pick_branch_lit_counter + 1) % activate_rand_branch_every;
+
+    // Every nth iteration it is random, where n = activate_rand_branch_every
+    bool random_decision = false;
+    if (pick_branch_lit_counter == 0) random_decision = true;
+
+
+    if (random_decision && !order_heap.empty()){
+        // Random index
+        int random_index = order_heap.size() - 1;
+
+        next = order_heap[random_index];
+        if (value(next) == l_Undef && decision[next]) {
+            rnd_decisions++; 
+        }
+    }
+
+    // Activity based decision:
+    int pick_branch_lit_iterations = 0;
+    while (next == var_Undef || value(next) != l_Undef || !decision[next]) {
+        ++pick_branch_lit_iterations;
+        if (order_heap.empty()){
+            next = var_Undef;
+            break;
+        }
+        else {
+            next = order_heap.removeMin();
+        }
+    }
+
+    // if (pick_branch_lit_iterations > 1) {
+    //     std::cout << "PBL iterations: " << pick_branch_lit_iterations << std::endl;
+    // }
+
+    // Choose polarity based on different polarity modes (global or per-variable):
+    Lit lit;
+    if (next == var_Undef)
+        lit = lit_Undef;
+    else if (user_pol[next] != l_Undef)
+        lit = mkLit(next, user_pol[next] == l_True);
+    else if (rnd_pol)
+        lit = mkLit(next, drand(random_seed) < 0.5);
+    else
+        lit = mkLit(next, polarity[next]);
+
+    // std::cout << "@@@ picked " << (sign(lit) ? "-" : "") << var(lit)+1 << "\n";
+    return lit;
+}
+
+
